@@ -1,0 +1,5 @@
+bittrex:
+  resources:
+    baseUrl: https://bittrex.com/api/v1.1
+    currenciesUrl: ${bittrex.resources.baseUrl}/public/getcurrencies
+    marketsUrl: ${bittrex.resources.baseUrl}/public/getmarkets

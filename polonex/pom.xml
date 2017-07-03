@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>trade-parent</artifactId>
+        <groupId>com.crypto.trade</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>polonex</artifactId>
+
+    <properties>
+        <jawampa.version>0.5.0</jawampa.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>ws.wamp.jawampa</groupId>
+            <artifactId>jawampa-parent</artifactId>
+            <version>${jawampa.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ws.wamp.jawampa</groupId>
+            <artifactId>jawampa-core</artifactId>
+            <version>${jawampa.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ws.wamp.jawampa</groupId>
+            <artifactId>jawampa-netty</artifactId>
+            <version>${jawampa.version}</version>
+        </dependency>
+    </dependencies>
+
+</project>

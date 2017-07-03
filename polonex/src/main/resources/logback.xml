@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds">
+
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <property name="logging.path" value="${logging.path:-./logs}"/>
+    <property name="logging.file" value="${logging.file:-polonex}"/>
+    <property name="rolling.date.pattern" value="%d{yyyy-MM-dd}"/>
+    <property name="rolling.log.pattern" value="${rolling.date.pattern}.log.%i"/>
+    <property name="rolling.err.pattern" value="${rolling.date.pattern}.err.%i"/>
+    <property name="rolling.file.size" value="100MB"/>
+
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+
+    <appender name="polonex" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${logging.path}/${logging.file}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${logging.path}/${logging.file}.${rolling.log.pattern}</fileNamePattern>
+            <maxFileSize>${rolling.file.size}</maxFileSize>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+
+    <appender name="polonex-err" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <file>${logging.path}/${logging.file}.err</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${logging.path}/${logging.file}.${rolling.err.pattern}</fileNamePattern>
+            <maxFileSize>${rolling.file.size}</maxFileSize>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+
+    <logger name="com.crypto.trade.polonex" level="DEBUG"/>
+    <logger name="org.springframework" level="INFO"/>
+
+    <root level="INFO">
+        <appender-ref ref="console"/>
+        <appender-ref ref="polonex"/>
+        <appender-ref ref="polonex-err"/>
+    </root>
+
+</configuration>

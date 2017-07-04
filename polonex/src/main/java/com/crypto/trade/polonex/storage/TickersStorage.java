@@ -1,22 +1,49 @@
 package com.crypto.trade.polonex.storage;
 
-import com.crypto.trade.polonex.dto.Ticker;
+import com.crypto.trade.polonex.dto.PolonexTick;
+import eu.verdelhan.ta4j.Decimal;
+import eu.verdelhan.ta4j.Tick;
+import eu.verdelhan.ta4j.TimeSeries;
 import lombok.Getter;
 
-import java.util.Set;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class TickersStorage {
 
-    @Getter
-    private ConcurrentMap<String, Set<Ticker>> tickers = new ConcurrentHashMap<>();
+    private ReentrantLock lock = new ReentrantLock();
 
-    public void addTicker(Ticker ticker) {
-        String key = ticker.getCurrencyPair();
-        Set<Ticker> ccyTickers = tickers.getOrDefault(ticker.getCurrencyPair(), new ConcurrentSkipListSet<>());
-        ccyTickers.add(ticker);
-        tickers.put(key, ccyTickers);
+    @Getter
+    private ConcurrentMap<String, Set<PolonexTick>> tickers = new ConcurrentHashMap<>();
+
+    public void addTicker(PolonexTick polonexTick) {
+        String key = polonexTick.getCurrencyPair();
+        lock.lock();
+        try {
+            tickers.computeIfAbsent(key, s -> new ConcurrentSkipListSet<>());
+        } finally {
+            lock.unlock();
+        }
+        Set<PolonexTick> polonexTicks = tickers.get(polonexTick.getCurrencyPair());
+        polonexTicks.add(polonexTick);
+    }
+
+    public TimeSeries generateMinuteCandles(String currencyPair) {
+        Set<PolonexTick> polonexTicks = new LinkedHashSet<>(tickers.getOrDefault(currencyPair, Collections.emptySet()));
+        Duration duration = Duration.ofMinutes(1);
+        List<Tick> ticks = new ArrayList<>();
+        for (PolonexTick polonexTick : polonexTicks) {
+            if (ticks.isEmpty() || !ticks.get(ticks.size() - 1).inPeriod(polonexTick.getTime())) {
+                ticks.add(new Tick(duration, polonexTick.getTime().truncatedTo(ChronoUnit.MINUTES).plusMinutes(1)));
+            }
+            Tick tick = ticks.get(ticks.size() - 1);
+            tick.addTrade(Decimal.valueOf(polonexTick.getQuoteVolume()), Decimal.valueOf(polonexTick.getLast()));
+        }
+        return new TimeSeries(currencyPair, ticks);
     }
 }

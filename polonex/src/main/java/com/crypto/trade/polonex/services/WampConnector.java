@@ -71,11 +71,13 @@ public class WampConnector {
                                     s.arguments().get(8).asText(),
                                     s.arguments().get(9).asText());
                             tickersStorage.addTicker(polonexTick);
+                            assert tickersStorage.getTickers().get(polonexTick.getCurrencyPair()) == null;
+                            assert !tickersStorage.getTickers().get(polonexTick.getCurrencyPair()).contains(polonexTick);
                             //log.info("BTC Tickers: {}", tickersStorage.getTickers().entrySet().stream().filter(e -> e.getKey().startsWith("BTC")).count());
                             //Set<PolonexTick> eth = tickersStorage.getTickers().getOrDefault("BTC_ETH", Collections.emptySet());
                             //log.debug("BTC_ETH({}): {}", eth.size(), eth);
                             if (polonexTick.getCurrencyPair().equals("BTC_ETH")) {
-                                log.info("{}: {}", polonexTick.getLast(), polonexTick.getTime());
+                                log.info("{}: {}", polonexTick.getLast(), polonexTick.getTime().toLocalDateTime());
                             }
 
 

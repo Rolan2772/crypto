@@ -8,7 +8,7 @@ import java.time.ZonedDateTime;
 
 @Data
 @AllArgsConstructor
-@EqualsAndHashCode(of = "time")
+@EqualsAndHashCode
 public class PolonexTick implements Comparable<PolonexTick> {
 
     private ZonedDateTime time;

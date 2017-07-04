@@ -19,7 +19,7 @@ import java.time.format.DateTimeFormatter;
 @Service
 public class CsvExportDataService implements ExportDataService {
 
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm");
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Autowired
     private TickersStorage tickersStorage;

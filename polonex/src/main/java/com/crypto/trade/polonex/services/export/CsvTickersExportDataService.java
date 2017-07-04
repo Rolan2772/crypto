@@ -18,7 +18,7 @@ import java.time.format.DateTimeFormatter;
 @Service
 public class CsvTickersExportDataService implements ExportDataService {
 
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm");
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Autowired
     private TickersStorage tickersStorage;
@@ -33,8 +33,8 @@ public class CsvTickersExportDataService implements ExportDataService {
         for (int i = 0; i < nbTicks; i++) {
             Tick tick = ethSeries.getTick(i);
             sb.append(tick.getTimePeriod()).append(',')
-                    .append(tick.getBeginTime().toLocalDate()).append(',')
-                    .append(tick.getEndTime().toLocalDate()).append(',')
+                    .append(tick.getBeginTime().toLocalDateTime()).append(',')
+                    .append(tick.getEndTime().toLocalDateTime()).append(',')
                     .append(tick.getOpenPrice()).append(',')
                     .append(tick.getClosePrice()).append(',')
                     .append(tick.getMaxPrice()).append(',')

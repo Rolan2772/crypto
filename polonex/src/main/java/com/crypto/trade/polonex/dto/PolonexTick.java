@@ -9,7 +9,7 @@ import java.time.ZonedDateTime;
 @Data
 @AllArgsConstructor
 @EqualsAndHashCode
-public class PolonexTick implements Comparable<PolonexTick> {
+public class PolonexTick {
 
     private ZonedDateTime time;
     private String currencyPair;
@@ -23,8 +23,4 @@ public class PolonexTick implements Comparable<PolonexTick> {
     private String dayHigh;
     private String dayLow;
 
-    @Override
-    public int compareTo(PolonexTick other) {
-        return this.time.compareTo(other.time);
-    }
 }

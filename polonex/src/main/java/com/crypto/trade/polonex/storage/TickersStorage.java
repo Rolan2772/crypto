@@ -21,18 +21,19 @@ public class TickersStorage {
     private ReentrantLock lock = new ReentrantLock();
 
     @Getter
+    // @TODO: choose correct collection for Ticks storage
     private ConcurrentMap<String, Set<PolonexTick>> tickers = new ConcurrentHashMap<>();
 
     public void addTicker(PolonexTick polonexTick) {
         String key = polonexTick.getCurrencyPair();
         lock.lock();
         try {
-            tickers.computeIfAbsent(key, s -> new ConcurrentSkipListSet<>());
+            tickers.computeIfAbsent(key, s -> new LinkedHashSet<PolonexTick>());
+            Set<PolonexTick> polonexTicks = tickers.get(polonexTick.getCurrencyPair());
+            polonexTicks.add(polonexTick);
         } finally {
             lock.unlock();
         }
-        Set<PolonexTick> polonexTicks = tickers.get(polonexTick.getCurrencyPair());
-        polonexTicks.add(polonexTick);
     }
 
     public TimeSeries generateMinuteCandles(String currencyPair) {

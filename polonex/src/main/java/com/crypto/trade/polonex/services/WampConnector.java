@@ -57,9 +57,12 @@ public class WampConnector {
 
             if (t1 instanceof WampClient.ConnectedState) {
 
-                eventSubscription = client.makeSubscription("ticker")
+                eventSubscription = client.makeSubscription("BTC_ETH")
                         .subscribe(s -> {
-                            PolonexTick polonexTick = new PolonexTick(ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault()),
+                            if (s.arguments().has(0)) {
+                                log.info("Message: " + s.arguments().get(0).get("type"));
+                            }
+                            /*PolonexTick polonexTick = new PolonexTick(ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault()),
                                     s.arguments().get(0).asText(),
                                     s.arguments().get(1).asText(),
                                     s.arguments().get(2).asText(),
@@ -78,7 +81,7 @@ public class WampConnector {
                             //log.debug("BTC_ETH({}): {}", eth.size(), eth);
                             if (polonexTick.getCurrencyPair().equals("BTC_ETH")) {
                                 log.info("{}: {}", polonexTick.getLast(), polonexTick.getTime().toLocalDateTime());
-                            }
+                            }*/
 
 
                         }, th -> log.error("Failed to subscribe on 'ticker' " + th));

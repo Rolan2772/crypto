@@ -30,10 +30,10 @@ nbdist/
 **/*.err
 **/*.log.*
 **/*.err.*
+**/*.csv
 **/build.bat
 **/build*.bat
 **/build*.cmd
 
 **/*install/
-**/target
 **/*.versionsBackup

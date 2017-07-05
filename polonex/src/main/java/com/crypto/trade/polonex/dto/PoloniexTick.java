@@ -9,7 +9,7 @@ import java.time.ZonedDateTime;
 @Data
 @AllArgsConstructor
 @EqualsAndHashCode
-public class PolonexTick {
+public class PoloniexTick {
 
     private ZonedDateTime time;
     private String currencyPair;

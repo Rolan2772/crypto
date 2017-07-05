@@ -4,7 +4,7 @@
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
     <property name="logging.path" value="${logging.path:-./logs}"/>
-    <property name="logging.file" value="${logging.file:-polonex}"/>
+    <property name="logging.file" value="${logging.file:-poloniex}"/>
     <property name="rolling.date.pattern" value="%d{yyyy-MM-dd}"/>
     <property name="rolling.log.pattern" value="${rolling.date.pattern}.log.%i"/>
     <property name="rolling.err.pattern" value="${rolling.date.pattern}.err.%i"/>
@@ -17,7 +17,7 @@
         </encoder>
     </appender>
 
-    <appender name="polonex" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="poloniex" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${logging.path}/${logging.file}.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>${logging.path}/${logging.file}.${rolling.log.pattern}</fileNamePattern>
@@ -29,7 +29,7 @@
         </encoder>
     </appender>
 
-    <appender name="polonex-err" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="poloniex-err" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>ERROR</level>
         </filter>
@@ -44,13 +44,13 @@
         </encoder>
     </appender>
 
-    <logger name="com.crypto.trade.polonex" level="DEBUG"/>
+    <logger name="com.crypto.trade.poloniex" level="DEBUG"/>
     <logger name="org.springframework" level="INFO"/>
 
     <root level="INFO">
         <appender-ref ref="console"/>
-        <appender-ref ref="polonex"/>
-        <appender-ref ref="polonex-err"/>
+        <appender-ref ref="poloniex"/>
+        <appender-ref ref="poloniex-err"/>
     </root>
 
 </configuration>

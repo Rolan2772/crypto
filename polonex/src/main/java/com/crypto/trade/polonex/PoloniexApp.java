@@ -4,9 +4,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class PolonexApp {
+public class PoloniexApp {
 
     public static void main(String[] args) {
-        SpringApplication.run(PolonexApp.class, args);
+        SpringApplication.run(PoloniexApp.class, args);
     }
 }

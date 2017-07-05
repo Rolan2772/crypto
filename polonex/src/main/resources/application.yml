@@ -1,2 +1,6 @@
 server:
   port: 8089
+
+poloniex:
+  apiResources:
+    wsUrl: wss://api.poloniex.com

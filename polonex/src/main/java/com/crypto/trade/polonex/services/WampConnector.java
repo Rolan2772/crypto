@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
 public class WampConnector {
@@ -31,6 +32,7 @@ public class WampConnector {
 
     static final int eventInterval = 2000;
     int lastEventValue = 0;
+    private AtomicLong counter = new AtomicLong(0);
 
 
     @PostConstruct
@@ -57,13 +59,16 @@ public class WampConnector {
 
             if (t1 instanceof WampClient.ConnectedState) {
 
-                eventSubscription = client.makeSubscription("BTC_ETH")
+                eventSubscription = client.makeSubscription("ticker")
                         .subscribe(s -> {
-                            if (s.arguments().has(0)) {
-                                log.info("Message: " + s.arguments().get(0).get("type"));
+                            //Thread th = new Thread(() -> {
+                            ZonedDateTime time = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
+                            String pair = s.arguments().get(0).asText();
+                            if (pair.equals("BTC_ETH")) {
+                                log.info("BTC_ETH ({}): {} args {}", counter.addAndGet(1), time.toLocalTime(), s.arguments().toString());
                             }
-                            /*PolonexTick polonexTick = new PolonexTick(ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault()),
-                                    s.arguments().get(0).asText(),
+                            PolonexTick polonexTick = new PolonexTick(time,
+                                    pair,
                                     s.arguments().get(1).asText(),
                                     s.arguments().get(2).asText(),
                                     s.arguments().get(3).asText(),
@@ -79,12 +84,19 @@ public class WampConnector {
                             //log.info("BTC Tickers: {}", tickersStorage.getTickers().entrySet().stream().filter(e -> e.getKey().startsWith("BTC")).count());
                             //Set<PolonexTick> eth = tickersStorage.getTickers().getOrDefault("BTC_ETH", Collections.emptySet());
                             //log.debug("BTC_ETH({}): {}", eth.size(), eth);
-                            if (polonexTick.getCurrencyPair().equals("BTC_ETH")) {
-                                log.info("{}: {}", polonexTick.getLast(), polonexTick.getTime().toLocalDateTime());
-                            }*/
+//                            if (polonexTick.getCurrencyPair().equals("BTC_ETH")) {
+//                                log.info("BTC_ETH ({}): args {}", counter.addAndGet(1), s.arguments().toString());
+//                            }
+                            //log.info("args: {}", s.arguments().toString());
+                            //});
+                            //th.start();
 
+                        }, th -> log.error("Failed to subscribe on 'ticker' ", th));
 
-                        }, th -> log.error("Failed to subscribe on 'ticker' " + th));
+                Subscription eventSubscription1 = client.makeSubscription("BTC_ETH")
+                        .subscribe(s -> {
+                            //log.info("BTC_ETH keyword: {}, args: {}", s.keywordArguments(), s.arguments().toString());
+                        }, th -> log.error("Failed to subscribe on BTC_ETH ", th));
             }
         }, t -> System.out.println("Session ended with error " + t), () -> System.out.println("Session ended normally"));
         client.open();

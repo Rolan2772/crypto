@@ -24,7 +24,7 @@ public class CsvExportDataService implements ExportDataService {
     @Autowired
     private TickersStorage tickersStorage;
 
-    @Scheduled(initialDelay = 60000, fixedDelay = 1000)
+    @Scheduled(initialDelay = 60000, fixedDelay = 5000)
     public void exportData() {
         TimeSeries ethSeries = tickersStorage.generateMinuteCandles("BTC_ETH");
         ClosePriceIndicator closePrice = new ClosePriceIndicator(ethSeries);

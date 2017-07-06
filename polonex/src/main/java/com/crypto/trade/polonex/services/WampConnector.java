@@ -15,8 +15,7 @@ import ws.wamp.jawampa.transport.netty.NettyWampClientConnectorProvider;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -66,7 +65,7 @@ public class WampConnector {
                 eventSubscription = client.makeSubscription("ticker")
                         .subscribe(s -> {
                             //Thread th = new Thread(() -> {
-                            ZonedDateTime time = ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault());
+                            ZonedDateTime time = ZonedDateTime.now(ZoneOffset.UTC);
                             ticksExecutor.submit(() -> {
                                 String pair = s.arguments().get(0).asText();
                                 if (pair.equals("BTC_ETH")) {

@@ -53,7 +53,7 @@ public class AnalyticsExportService implements ExportDataService {
         StringBuilder sb = new StringBuilder("timestamp,close,rsi\n");
         final int nbTicks = timeSeries.getTickCount();
         for (int i = 0; i < nbTicks; i++) {
-            sb.append(timeSeries.getTick(i).getEndTime().toLocalTime()).append(',')
+            sb.append(timeSeries.getTick(i).getEndTime().toLocalDateTime()).append(',')
                     .append(closePriceIndicator.getValue(i)).append(',')
                     .append(rsiIndicator.getValue(i)).append(',')
                     .append('\n');

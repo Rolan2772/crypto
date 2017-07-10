@@ -11,12 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import rx.Subscription;
+import ws.wamp.jawampa.SubscriptionFlags;
 import ws.wamp.jawampa.WampClient;
 import ws.wamp.jawampa.WampClientBuilder;
 import ws.wamp.jawampa.connection.IWampConnectorProvider;
 import ws.wamp.jawampa.transport.netty.NettyWampClientConnectorProvider;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -40,7 +40,7 @@ public class WampConnector {
     private AtomicLong counter = new AtomicLong(0);
 
 
-    @PostConstruct
+    //@PostConstruct
     public void postConstruct() {
         IWampConnectorProvider connectorProvider = new NettyWampClientConnectorProvider();
         WampClientBuilder builder = new WampClientBuilder();
@@ -49,7 +49,7 @@ public class WampConnector {
         final WampClient client;
         try {
             builder.withConnectorProvider(connectorProvider)
-                    .withUri(poloniexProperties.getApiResources().getWsUrl())
+                    .withUri(poloniexProperties.getApiResources().getWsApi())
                     .withRealm("realm1")
                     .withInfiniteReconnects()
                     .withReconnectInterval(5, TimeUnit.SECONDS);
@@ -64,13 +64,14 @@ public class WampConnector {
 
                     if (t1 instanceof WampClient.ConnectedState) {
 
-                        eventSubscription = client.makeSubscription("BTC_ETH")
+                        eventSubscription = client.makeSubscription("BTC_ETH", SubscriptionFlags.Exact)
                                 .subscribe(s -> {
                                     ticksExecutor.submit(() -> {
+                                        log.info("Trade ({}): keyword: {}, args: {}", counter.addAndGet(1), s.keywordArguments(), s.arguments());
                                         for (int index = 0; s.arguments() != null && index < s.arguments().size(); index++) {
                                             JsonNode node = s.arguments().get(index);
                                             if ("newTrade".equals(node.get("type").asText())) {
-                                                log.info("Trade ({}): keyword: {}, args: {}", counter.addAndGet(1), s.keywordArguments(), node);
+                                                //log.info("Trade ({}): keyword: {}, args: {}", counter.addAndGet(1), s.keywordArguments(), node);
                                                 try {
                                                     PoloniexTrade trade = objectMapper.treeToValue(node.get("data"), PoloniexTrade.class);
                                                     tickersStorage.addTrade("BTC_ETH", trade);

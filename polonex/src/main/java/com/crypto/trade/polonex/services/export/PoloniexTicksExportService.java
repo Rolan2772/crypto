@@ -31,7 +31,7 @@ public class PoloniexTicksExportService implements ExportDataService {
         StringBuilder sb = new StringBuilder("time,timestamp,price,amount\n");
 
         for (PoloniexTrade poloniexTrade : poloniexTicks) {
-            sb.append(poloniexTrade.getTradeTime().toLocalTime()).append(',')
+            sb.append(poloniexTrade.getTradeTime().toLocalDateTime()).append(',')
                     .append(poloniexTrade.getTradeTime().toInstant().toEpochMilli() / 1000).append(',')
                     .append(poloniexTrade.getRate()).append(',')
                     .append(poloniexTrade.getTotal()).append(',')

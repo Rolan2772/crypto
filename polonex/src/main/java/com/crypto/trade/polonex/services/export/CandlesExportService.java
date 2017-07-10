@@ -48,8 +48,8 @@ public class CandlesExportService implements ExportDataService {
         for (int i = 0; i < nbTicks; i++) {
             Tick tick = timeSeries.getTick(i);
             sb.append(tick.getTimePeriod()).append(',')
-                    .append(tick.getBeginTime().toLocalTime()).append(',')
-                    .append(tick.getEndTime().toLocalTime()).append(',')
+                    .append(tick.getBeginTime().toLocalDateTime()).append(',')
+                    .append(tick.getEndTime().toLocalDateTime()).append(',')
                     .append(tick.getOpenPrice()).append(',')
                     .append(tick.getClosePrice()).append(',')
                     .append(tick.getMaxPrice()).append(',')

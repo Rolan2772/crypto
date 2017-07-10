@@ -1,7 +1,7 @@
 package com.crypto.trade.polonex.config;
 
 import com.crypto.trade.polonex.config.properties.PoloniexProperties;
-import com.crypto.trade.polonex.services.WampConnector;
+import com.crypto.trade.polonex.services.PoloniexConnectionHandler;
 import com.crypto.trade.polonex.storage.TickersStorage;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -18,5 +18,10 @@ public class PoloniexAppConfig {
     @Bean
     public TickersStorage tickersStorage() {
         return new TickersStorage();
+    }
+
+    @Bean
+    public PoloniexConnectionHandler poloniexConnectionHandler() {
+        return new PoloniexConnectionHandler();
     }
 }

@@ -3,4 +3,5 @@ server:
 
 poloniex:
   apiResources:
-    wsUrl: wss://api.poloniex.com
+    wsApi: wss://api.poloniex.com
+    wsApi2: wss://api2.poloniex.com

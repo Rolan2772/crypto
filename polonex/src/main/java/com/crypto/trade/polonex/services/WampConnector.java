@@ -1,8 +1,11 @@
 package com.crypto.trade.polonex.services;
 
 import com.crypto.trade.polonex.config.properties.PoloniexProperties;
-import com.crypto.trade.polonex.dto.PoloniexTick;
+import com.crypto.trade.polonex.dto.PoloniexTrade;
 import com.crypto.trade.polonex.storage.TickersStorage;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -15,8 +18,6 @@ import ws.wamp.jawampa.transport.netty.NettyWampClientConnectorProvider;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -24,15 +25,16 @@ import java.util.concurrent.atomic.AtomicLong;
 @Service
 public class WampConnector {
 
+    static final int eventInterval = 2000;
+    int lastEventValue = 0;
     @Autowired
     private PoloniexProperties poloniexProperties;
+    @Autowired
+    private ObjectMapper objectMapper;
     @Autowired
     private ThreadPoolTaskExecutor ticksExecutor;
     @Autowired
     private TickersStorage tickersStorage;
-
-    static final int eventInterval = 2000;
-    int lastEventValue = 0;
     private Subscription eventPublication;
     private Subscription eventSubscription;
     private AtomicLong counter = new AtomicLong(0);
@@ -58,51 +60,31 @@ public class WampConnector {
 
 
         client.statusChanged().subscribe(t1 -> {
-            System.out.println("Session status changed to " + t1);
+                    System.out.println("Session status changed to " + t1);
 
-            if (t1 instanceof WampClient.ConnectedState) {
+                    if (t1 instanceof WampClient.ConnectedState) {
 
-                eventSubscription = client.makeSubscription("ticker")
-                        .subscribe(s -> {
-                            //Thread th = new Thread(() -> {
-                            ZonedDateTime time = ZonedDateTime.now(ZoneOffset.UTC);
-                            ticksExecutor.submit(() -> {
-                                String pair = s.arguments().get(0).asText();
-                                if (pair.equals("BTC_ETH")) {
-                                    log.info("BTC_ETH ({}): {} args {}", counter.addAndGet(1), time.toLocalTime(), s.arguments().toString());
-                                }
-                                PoloniexTick poloniexTick = new PoloniexTick(time,
-                                        pair,
-                                        s.arguments().get(1).asText(),
-                                        s.arguments().get(2).asText(),
-                                        s.arguments().get(3).asText(),
-                                        s.arguments().get(4).asText(),
-                                        s.arguments().get(5).asText(),
-                                        s.arguments().get(6).asText(),
-                                        s.arguments().get(7).asBoolean(),
-                                        s.arguments().get(8).asText(),
-                                        s.arguments().get(9).asText());
-                                tickersStorage.addTicker(poloniexTick);
-                                assert tickersStorage.getTicks().get(poloniexTick.getCurrencyPair()) == null;
-                                assert !tickersStorage.getTicks().get(poloniexTick.getCurrencyPair()).contains(poloniexTick);
-                                //log.info("BTC Tickers: {}", tickersStorage.getTicks().entrySet().stream().filter(e -> e.getKey().startsWith("BTC")).count());
-                                //Set<PoloniexTick> eth = tickersStorage.getTicks().getOrDefault("BTC_ETH", Collections.emptySet());
-                                //log.debug("BTC_ETH({}): {}", eth.size(), eth);
-//                            if (poloniexTick.getCurrencyPair().equals("BTC_ETH")) {
-//                                log.info("BTC_ETH ({}): args {}", counter.addAndGet(1), s.arguments().toString());
-//                            }
-                                //log.info("args: {}", s.arguments().toString());
-                                //});
-                                //th.start();
-                            });
-                        }, th -> log.error("Failed to subscribe on 'ticker' ", th));
+                        eventSubscription = client.makeSubscription("BTC_ETH")
+                                .subscribe(s -> {
+                                    ticksExecutor.submit(() -> {
+                                        for (int index = 0; s.arguments() != null && index < s.arguments().size(); index++) {
+                                            JsonNode node = s.arguments().get(index);
+                                            if ("newTrade".equals(node.get("type").asText())) {
+                                                log.info("Trade ({}): keyword: {}, args: {}", counter.addAndGet(1), s.keywordArguments(), node);
+                                                try {
+                                                    PoloniexTrade trade = objectMapper.treeToValue(node.get("data"), PoloniexTrade.class);
+                                                    tickersStorage.addTrade("BTC_ETH", trade);
+                                                } catch (JsonProcessingException e) {
+                                                    log.error("Failed to convert node '" + node + "' to trade.", e);
+                                                }
+                                            }
+                                        }
+                                    });
+                                }, th -> log.error("Failed to subscribe on 'ticker' ", th));
 
-                Subscription eventSubscription1 = client.makeSubscription("BTC_ETH")
-                        .subscribe(s -> {
-                            //log.info("BTC_ETH keyword: {}, args: {}", s.keywordArguments(), s.arguments().toString());
-                        }, th -> log.error("Failed to subscribe on BTC_ETH ", th));
-            }
-        }, t -> System.out.println("Session ended with error " + t), () -> System.out.println("Session ended normally"));
+                    }
+                },
+                t -> System.out.println("Session ended with error " + t), () -> System.out.println("Session ended normally"));
         client.open();
 
         // Publish an event regularly

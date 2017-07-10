@@ -8,7 +8,6 @@ import java.time.ZonedDateTime;
 
 @Data
 @AllArgsConstructor
-@EqualsAndHashCode
 public class PoloniexTick {
 
     private ZonedDateTime time;

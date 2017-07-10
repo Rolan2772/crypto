@@ -1,6 +1,6 @@
 package com.crypto.trade.polonex.services.export;
 
-import com.crypto.trade.polonex.dto.PoloniexTick;
+import com.crypto.trade.polonex.dto.PoloniexTrade;
 import com.crypto.trade.polonex.storage.TickersStorage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,21 +20,21 @@ public class PoloniexTicksExportService implements ExportDataService {
     private TickersStorage tickersStorage;
 
     @Override
-    @Scheduled(initialDelay = 60000, fixedDelay = 60000)
+    @Scheduled(initialDelay = 60000, fixedDelay = 1000)
     public void exportData() {
-        List<PoloniexTick> poloniexTicks = tickersStorage.getTicks().getOrDefault("BTC_ETH", Collections.emptyList());
+        List<PoloniexTrade> poloniexTicks = tickersStorage.getTrades().getOrDefault("BTC_ETH", Collections.emptyList());
         StringBuilder sb = convert(poloniexTicks);
         csvFileWriter.write("poloniex_ticks", sb);
     }
 
-    private StringBuilder convert(List<PoloniexTick> poloniexTicks) {
+    private StringBuilder convert(List<PoloniexTrade> poloniexTicks) {
         StringBuilder sb = new StringBuilder("time,timestamp,price,amount\n");
 
-        for (PoloniexTick poloniexTick : poloniexTicks) {
-            sb.append(poloniexTick.getTime().toLocalTime()).append(',')
-                    .append(poloniexTick.getTime().toInstant().toEpochMilli() / 1000).append(',')
-                    .append(poloniexTick.getLast()).append(',')
-                    .append(poloniexTick.getQuoteVolume()).append(',')
+        for (PoloniexTrade poloniexTrade : poloniexTicks) {
+            sb.append(poloniexTrade.getTradeTime().toLocalTime()).append(',')
+                    .append(poloniexTrade.getTradeTime().toInstant().toEpochMilli() / 1000).append(',')
+                    .append(poloniexTrade.getRate()).append(',')
+                    .append(poloniexTrade.getTotal()).append(',')
                     .append('\n');
         }
         return sb;

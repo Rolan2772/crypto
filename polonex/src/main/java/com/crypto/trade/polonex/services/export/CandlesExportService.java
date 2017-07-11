@@ -1,5 +1,6 @@
 package com.crypto.trade.polonex.services.export;
 
+import com.crypto.trade.polonex.services.analytics.TimeFrame;
 import com.crypto.trade.polonex.storage.TickersStorage;
 import eu.verdelhan.ta4j.Tick;
 import eu.verdelhan.ta4j.TimeSeries;
@@ -7,9 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
-import java.time.temporal.ChronoField;
-import java.time.temporal.ChronoUnit;
 
 @Slf4j
 @Service
@@ -23,23 +21,10 @@ public class CandlesExportService implements ExportDataService {
     @Override
     @Scheduled(initialDelay = 60000, fixedDelay = 60000)
     public void exportData() {
-        TimeSeries ethSeries1 = tickersStorage.generateCandles("BTC_ETH",
-                1L,
-                ChronoUnit.MINUTES,
-                ChronoField.MINUTE_OF_HOUR);
-        csvFileWriter.write("candles(1m)", convert(ethSeries1));
-
-        TimeSeries ethSeries5 = tickersStorage.generateCandles("BTC_ETH",
-                5L,
-                ChronoUnit.MINUTES,
-                ChronoField.MINUTE_OF_HOUR);
-        csvFileWriter.write("candles(5m)", convert(ethSeries5));
-
-        TimeSeries ethSeries15 = tickersStorage.generateCandles("BTC_ETH",
-                15L,
-                ChronoUnit.MINUTES,
-                ChronoField.MINUTE_OF_HOUR);
-        csvFileWriter.write("candles(15m)", convert(ethSeries15));
+        for (TimeFrame timeFrame : TimeFrame.values()) {
+            TimeSeries ethSeries = tickersStorage.generateCandles("BTC_ETH", timeFrame);
+            csvFileWriter.write("candles(" + timeFrame.getDisplayName() + ")", convert(ethSeries));
+        }
     }
 
     private StringBuilder convert(TimeSeries timeSeries) {

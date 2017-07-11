@@ -25,7 +25,6 @@ public class AnalyticsExportService implements ExportDataService {
     @Override
     @Scheduled(initialDelay = 60000, fixedDelay = 60000)
     public void exportData() {
-
         for (TimeFrame timeFrame : TimeFrame.values()) {
             TimeSeries ethSeries = tickersStorage.generateCandles("BTC_ETH", timeFrame);
             ClosePriceIndicator closePrice1 = new ClosePriceIndicator(ethSeries);

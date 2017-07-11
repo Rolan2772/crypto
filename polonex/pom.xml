@@ -14,15 +14,10 @@
     <properties>
         <jawampa.version>0.5.0</jawampa.version>
         <ta4j.version>0.9-SNAPSHOT</ta4j.version>
+        <opencsv.version>3.9</opencsv.version>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>ws.wamp.jawampa</groupId>
-            <artifactId>jawampa-parent</artifactId>
-            <version>${jawampa.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>ws.wamp.jawampa</groupId>
             <artifactId>jawampa-core</artifactId>
@@ -40,13 +35,20 @@
             <artifactId>ta4j</artifactId>
             <version>${ta4j.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>${opencsv.version}</version>
+        </dependency>
     </dependencies>
 
     <repositories>
+        <!-- ta4j lib snapshots repo -->
         <repository>
             <id>sonatype snapshots</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </repository>
     </repositories>
-    
+
 </project>

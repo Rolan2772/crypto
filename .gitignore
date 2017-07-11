@@ -31,6 +31,7 @@ nbdist/
 **/*.log.*
 **/*.err.*
 **/*.csv
+!**/resources/**/*.csv
 **/build.bat
 **/build*.bat
 **/build*.cmd

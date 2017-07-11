@@ -9,8 +9,7 @@ import eu.verdelhan.ta4j.indicators.oscillators.StochasticOscillatorDIndicator;
 import eu.verdelhan.ta4j.indicators.oscillators.StochasticOscillatorKIndicator;
 import eu.verdelhan.ta4j.indicators.simple.ClosePriceIndicator;
 import eu.verdelhan.ta4j.indicators.trackers.RSIIndicator;
-import eu.verdelhan.ta4j.trading.rules.CrossedDownIndicatorRule;
-import eu.verdelhan.ta4j.trading.rules.StopLossRule;
+import eu.verdelhan.ta4j.trading.rules.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,12 +38,12 @@ public class StrategiesBuilder {
         CrossIndicator kdCross = new CrossIndicator(stochK, stochD);
 
         // Entry rule
-        Rule entryRule = new CrossedDownIndicatorRule(rsi, Decimal.valueOf(30)) // RSI < 30
-                .and(new CrossedDownIndicatorRule(stochK, Decimal.valueOf(20))) // StochasticK < 20
-                /*.and(new BooleanIndicatorRule(kdCross))*/; // K intersects D ???
+        Rule entryRule = new UnderIndicatorRule(rsi, Decimal.valueOf(20)) // RSI < 20
+                .and(new UnderIndicatorRule(stochK, Decimal.valueOf(20))) // StochasticK < 20
+                .and(new CrossedUpIndicatorRule(stochK, stochD)); // K intersects D from the bottom
 
         // Exit rule
-        Rule exitRule = new StopLossRule(closePrice, Decimal.valueOf(1));
+        Rule exitRule = new StopGainRule(closePrice, Decimal.valueOf(2.5));
         Strategy strategy = new Strategy(entryRule, exitRule);
         strategy.setUnstablePeriod(14);
         return strategy;

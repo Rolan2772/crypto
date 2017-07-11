@@ -2,13 +2,11 @@ package com.crypto.trade.polonex.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.time.ZonedDateTime;
 
 @Data
 @AllArgsConstructor
-@EqualsAndHashCode
 public class PoloniexTick {
 
     private ZonedDateTime time;

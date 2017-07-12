@@ -13,6 +13,7 @@ import eu.verdelhan.ta4j.indicators.trackers.RSIIndicator;
 import eu.verdelhan.ta4j.trading.rules.CrossedUpIndicatorRule;
 import eu.verdelhan.ta4j.trading.rules.StopGainRule;
 import eu.verdelhan.ta4j.trading.rules.UnderIndicatorRule;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@Slf4j
 public class StrategiesBuilder {
 
     /**
@@ -33,22 +35,23 @@ public class StrategiesBuilder {
      * Sell +2.5%
      */
     public Strategy buildShortBuyStrategy(TimeSeries timeSeries) {
+        int analyzePeriod = 14;
 
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-        RSIIndicator rsi = new RSIIndicator(closePrice, 14);
-        StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, 14);
+        RSIIndicator rsi = new RSIIndicator(closePrice, analyzePeriod);
+        StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, analyzePeriod);
         StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
         CrossIndicator kdCross = new CrossIndicator(stochK, stochD);
 
         // Entry rule
         Rule entryRule = new UnderIndicatorRule(rsi, Decimal.valueOf(20)) // RSI < 20
                 .and(new UnderIndicatorRule(stochK, Decimal.valueOf(20))) // StochasticK < 20
-                .and(new CrossedUpIndicatorRule(stochK, stochD)); // K intersects D from the bottom
+                .and(new CrossedUpIndicatorRule(stochK, stochD)); // K cross D from the bottom
 
         // Exit rule
         Rule exitRule = new StopGainRule(closePrice, Decimal.valueOf(2.5));
         Strategy strategy = new Strategy(entryRule, exitRule);
-        strategy.setUnstablePeriod(14);
+        strategy.setUnstablePeriod(analyzePeriod);
         return strategy;
     }
 
@@ -71,23 +74,20 @@ public class StrategiesBuilder {
             Tick newTick = oneMinuteSeries.getTick(i);
             if (shortBuyStrategy.shouldEnter(endIndex)) {
                 // Our strategy should enter
-                System.out.println("Strategy should ENTER on " + endIndex);
+                log.debug("Strategy should ENTER on {}", endIndex);
                 boolean entered = tradingRecord.enter(endIndex, newTick.getClosePrice(), Decimal.TEN);
                 if (entered) {
                     Order entry = tradingRecord.getLastEntry();
-                    System.out.println("Entered on " + entry.getIndex()
-                            + " (price=" + entry.getPrice().toDouble()
-                            + ", amount=" + entry.getAmount().toDouble() + ")");
+                    log.debug("Entered on {} (price={}, amount={})", entry.getIndex(), entry.getPrice().toDouble(), entry.getAmount().toDouble());
                 }
             } else if (shortBuyStrategy.shouldExit(endIndex, tradingRecord)) {
                 // Our strategy should exit
-                System.out.println("Strategy should EXIT on " + endIndex);
+                log.debug("Strategy should EXIT on {}", endIndex);
                 boolean exited = tradingRecord.exit(endIndex, newTick.getClosePrice(), Decimal.TEN);
                 if (exited) {
                     Order exit = tradingRecord.getLastExit();
-                    System.out.println("Exited on " + exit.getIndex()
-                            + " (price=" + exit.getPrice().toDouble()
-                            + ", amount=" + exit.getAmount().toDouble() + ")");
+                    log.debug("Exited on {} (price={}, amount={})", exit.getIndex(), exit.getPrice().toDouble(), exit.getAmount().toDouble());
+
                 }
             }
         }

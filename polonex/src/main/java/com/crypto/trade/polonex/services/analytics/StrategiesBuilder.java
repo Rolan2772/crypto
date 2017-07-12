@@ -4,12 +4,15 @@ import com.crypto.trade.polonex.dto.PoloniexTick;
 import com.crypto.trade.polonex.storage.TickersStorage;
 import com.opencsv.CSVReader;
 import eu.verdelhan.ta4j.*;
+import eu.verdelhan.ta4j.analysis.criteria.TotalProfitCriterion;
 import eu.verdelhan.ta4j.indicators.helpers.CrossIndicator;
 import eu.verdelhan.ta4j.indicators.oscillators.StochasticOscillatorDIndicator;
 import eu.verdelhan.ta4j.indicators.oscillators.StochasticOscillatorKIndicator;
 import eu.verdelhan.ta4j.indicators.simple.ClosePriceIndicator;
 import eu.verdelhan.ta4j.indicators.trackers.RSIIndicator;
-import eu.verdelhan.ta4j.trading.rules.*;
+import eu.verdelhan.ta4j.trading.rules.CrossedUpIndicatorRule;
+import eu.verdelhan.ta4j.trading.rules.StopGainRule;
+import eu.verdelhan.ta4j.trading.rules.UnderIndicatorRule;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -89,16 +92,16 @@ public class StrategiesBuilder {
             }
         }
 
-        /*// Running the strategy
-        TradingRecord tradingRecord = oneMinuteSeries.run(shortBuyStrategy, Order.OrderType.BUY, Decimal.ONE);
+        // Running the strategy
+        /*TradingRecord tradingRecord = oneMinuteSeries.run(shortBuyStrategy, Order.OrderType.BUY, Decimal.ONE);*/
         System.out.println("Number of trades for the strategy: " + tradingRecord.getTradeCount());
 
         // Analysis
-        System.out.println("Total profit for the strategy: " + new TotalProfitCriterion().calculate(oneMinuteSeries, tradingRecord));*/
+        System.out.println("Total profit for the strategy: " + new TotalProfitCriterion().calculate(oneMinuteSeries, tradingRecord));
     }
 
     private static void loadTicks(TickersStorage tickersStorage) {
-        InputStream stream = StrategiesBuilder.class.getClassLoader().getResourceAsStream("ticks/poloniex_ticks_2017-07-11.csv");
+        InputStream stream = StrategiesBuilder.class.getClassLoader().getResourceAsStream("ticks/poloniex_ticks_2017-07-12.csv");
         CSVReader csvReader = null;
         List<String[]> lines = null;
         try {

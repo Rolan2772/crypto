@@ -23,6 +23,8 @@ dist/
 nbdist/
 .nb-gradle/
 
+**/~*.*
+**/.*.*
 **/*.*~
 **/*.swp
 **/lib
@@ -31,7 +33,6 @@ nbdist/
 **/*.log.*
 **/*.err.*
 **/*.csv
-!**/resources/**/*.csv
 **/build.bat
 **/build*.bat
 **/build*.cmd

@@ -1,4 +1,4 @@
-package com.crypto.trade.polonex.services.export;
+package com.crypto.trade.poloniex.services.export;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

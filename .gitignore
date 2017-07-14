@@ -23,6 +23,8 @@ dist/
 nbdist/
 .nb-gradle/
 
+**/~*.*
+**/.*.*
 **/*.*~
 **/*.swp
 **/lib

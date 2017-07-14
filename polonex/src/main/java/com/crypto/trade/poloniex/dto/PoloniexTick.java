@@ -1,8 +1,7 @@
-package com.crypto.trade.polonex.dto;
+package com.crypto.trade.poloniex.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.time.ZonedDateTime;
 
@@ -10,6 +9,7 @@ import java.time.ZonedDateTime;
 @AllArgsConstructor
 public class PoloniexTick {
 
+    private Long tradeId;
     private ZonedDateTime time;
     private String currencyPair;
     private String last;

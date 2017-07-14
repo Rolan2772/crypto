@@ -1,4 +1,4 @@
-package com.crypto.trade.polonex.config;
+package com.crypto.trade.poloniex.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

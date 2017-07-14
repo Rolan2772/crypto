@@ -1,4 +1,4 @@
-package com.crypto.trade.polonex.config.properties;
+package com.crypto.trade.poloniex.config.properties;
 
 import lombok.Data;
 
@@ -7,4 +7,5 @@ public class ApiResources {
 
     private String wsApi;
     private String wsApi2;
+    private String tradeHistoryResource;
 }

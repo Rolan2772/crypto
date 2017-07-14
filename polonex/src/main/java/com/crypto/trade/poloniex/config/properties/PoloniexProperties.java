@@ -1,8 +1,7 @@
-package com.crypto.trade.polonex.config.properties;
+package com.crypto.trade.poloniex.config.properties;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 
 @Data
 @ConfigurationProperties(prefix = "poloniex")

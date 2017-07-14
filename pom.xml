@@ -8,7 +8,7 @@
 	<version>0.0.1-SNAPSHOT</version>
     <modules>
         <module>bittrex</module>
-		<module>polonex</module>
+		<module>poloniex</module>
 	</modules>
     <packaging>pom</packaging>
 

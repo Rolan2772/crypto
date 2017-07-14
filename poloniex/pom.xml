@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>polonex</artifactId>
+    <artifactId>poloniex</artifactId>
 
     <properties>
         <jawampa.version>0.5.0</jawampa.version>

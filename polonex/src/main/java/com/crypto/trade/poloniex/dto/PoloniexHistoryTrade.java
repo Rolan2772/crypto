@@ -7,11 +7,11 @@ import lombok.Data;
 import java.time.ZonedDateTime;
 
 @Data
-public class PolonexTradeHistoryItem {
+public class PoloniexHistoryTrade {
 
     @JsonProperty("globalTradeID")
     private Long globalTradeId;
-    @JsonProperty("tradeID")
+    @JsonProperty("tradeId")
     private Long tradeId;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+0")
     private ZonedDateTime date;

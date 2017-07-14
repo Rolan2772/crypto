@@ -1,6 +1,6 @@
 package com.crypto.trade.poloniex.services.analytics;
 
-import com.crypto.trade.poloniex.dto.PoloniexTick;
+import com.crypto.trade.poloniex.dto.PoloniexTrade;
 import com.crypto.trade.poloniex.storage.TickersStorage;
 import com.opencsv.CSVReader;
 import eu.verdelhan.ta4j.*;
@@ -62,7 +62,7 @@ public class StrategiesBuilder {
 
         loadTicks(tickersStorage);
 
-        TimeSeries oneMinuteSeries = tickersStorage.getCandles("BTC_ETH", TimeFrame.ONE_MINUTE);
+        TimeSeries oneMinuteSeries = tickersStorage.getCandles(CurrencyPair.BTC_ETH, TimeFrame.ONE_MINUTE);
         Strategy shortBuyStrategy = strategiesBuilder.buildShortBuyStrategy(oneMinuteSeries);
 
         // Initializing the trading history
@@ -122,8 +122,8 @@ public class StrategiesBuilder {
         if ((lines != null) && !lines.isEmpty()) {
             for (String[] tradeLine : lines) {
                 ZonedDateTime time = ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(tradeLine[1]) * 1000), ZoneId.of("GMT+0"));
-                PoloniexTick tick = new PoloniexTick(0L, time, "BTC_ETH", tradeLine[2], "", "", "", "", "", false, "", "");
-                tickersStorage.addTick(tick);
+                PoloniexTrade trade = new PoloniexTrade(0L, time, tradeLine[2], "", "", "");
+                tickersStorage.addTrade(CurrencyPair.BTC_ETH, trade);
             }
         }
     }

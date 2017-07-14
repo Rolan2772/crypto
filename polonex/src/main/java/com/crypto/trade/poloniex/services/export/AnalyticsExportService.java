@@ -1,6 +1,7 @@
 package com.crypto.trade.poloniex.services.export;
 
 import com.crypto.trade.poloniex.services.analytics.AnalyticsService;
+import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import com.crypto.trade.poloniex.services.analytics.StrategiesBuilder;
 import com.crypto.trade.poloniex.services.analytics.TimeFrame;
 import com.crypto.trade.poloniex.storage.TickersStorage;
@@ -38,7 +39,7 @@ public class AnalyticsExportService implements ExportDataService {
         int period = 14;
 
         for (TimeFrame timeFrame : TimeFrame.values()) {
-            TimeSeries ethSeries = tickersStorage.getCandles("BTC_ETH", timeFrame);
+            TimeSeries ethSeries = tickersStorage.getCandles(CurrencyPair.BTC_ETH, timeFrame);
             ClosePriceIndicator closePrice = new ClosePriceIndicator(ethSeries);
             RSIIndicator rsi = new RSIIndicator(closePrice, period);
             StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(ethSeries, period);

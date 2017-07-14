@@ -11,15 +11,15 @@ import javax.annotation.PreDestroy;
 public class SimpleTradingBot {
 
     @Autowired
-    private WsConnector wampWsConnector;
+    private WsConnector plainWsConnector;
 
     @PostConstruct
     public void postConstruct() {
-        wampWsConnector.connect();
+        plainWsConnector.connect();
     }
 
     @PreDestroy
     public void preDestroy() {
-        wampWsConnector.closeConnection();
+        plainWsConnector.closeConnection();
     }
 }

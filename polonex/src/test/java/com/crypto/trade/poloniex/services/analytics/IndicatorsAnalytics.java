@@ -1,6 +1,6 @@
 package com.crypto.trade.poloniex.services.analytics;
 
-import com.crypto.trade.poloniex.dto.PoloniexTick;
+import com.crypto.trade.poloniex.dto.PoloniexTrade;
 import com.crypto.trade.poloniex.services.export.AnalyticsExportService;
 import com.crypto.trade.poloniex.services.export.CsvFileWriter;
 import com.crypto.trade.poloniex.storage.TickersStorage;
@@ -53,8 +53,8 @@ public class IndicatorsAnalytics {
         if ((lines != null) && !lines.isEmpty()) {
             for (String[] tradeLine : lines) {
                 ZonedDateTime time = ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(tradeLine[1]) * 1000), ZoneId.of("GMT+0"));
-                PoloniexTick tick = new PoloniexTick(0L, time, "BTC_ETH", tradeLine[2], "", "", "", "", "", false, "", "");
-                tickersStorage.addTick(tick);
+                PoloniexTrade trade = new PoloniexTrade(0L, time, tradeLine[2], "", "", "");
+                tickersStorage.addTrade(CurrencyPair.BTC_ETH, trade);
             }
         }
     }
@@ -81,8 +81,8 @@ public class IndicatorsAnalytics {
         ZonedDateTime tickTime = ZonedDateTime.now(ZoneId.of("GMT+0"));
         if ((lines != null) && !lines.isEmpty()) {
             for (String[] tradeLine : lines) {
-                PoloniexTick tick = new PoloniexTick(0L, tickTime, "BTC_ETH", tradeLine[0], "", "", "", "", "", false, "", "");
-                tickersStorage.addTick(tick);
+                PoloniexTrade trade = new PoloniexTrade(0L, tickTime, tradeLine[0], "", "", "");
+                tickersStorage.addTrade(CurrencyPair.BTC_ETH, trade);
                 tickTime = tickTime.plusMinutes(1);
             }
         }

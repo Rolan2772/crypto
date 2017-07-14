@@ -2,6 +2,7 @@ package com.crypto.trade.poloniex.config;
 
 import com.crypto.trade.poloniex.config.properties.PoloniexProperties;
 import com.crypto.trade.poloniex.services.analytics.StrategiesBuilder;
+import com.crypto.trade.poloniex.services.connection.WsConnectionHandler;
 import com.crypto.trade.poloniex.storage.HistoryStorage;
 import com.crypto.trade.poloniex.storage.TickersStorage;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -35,5 +36,11 @@ public class PoloniexAppConfig {
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
+    }
+
+
+    @Bean
+    public WsConnectionHandler wsConnectionHandler() {
+        return new WsConnectionHandler();
     }
 }

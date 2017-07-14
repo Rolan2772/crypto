@@ -1,6 +1,7 @@
 package com.crypto.trade.poloniex.services.export;
 
 import com.crypto.trade.poloniex.services.analytics.AnalyticsService;
+import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import com.crypto.trade.poloniex.services.analytics.StrategiesBuilder;
 import com.crypto.trade.poloniex.services.analytics.TimeFrame;
 import com.crypto.trade.poloniex.storage.TickersStorage;
@@ -30,7 +31,7 @@ public class CandlesExportService implements ExportDataService {
     //@Scheduled(initialDelay = 60000, fixedDelay = 60000)
     public void exportData() {
         for (TimeFrame timeFrame : TimeFrame.values()) {
-            TimeSeries ethSeries = tickersStorage.getCandles("BTC_ETH", timeFrame);
+            TimeSeries ethSeries = tickersStorage.getCandles(CurrencyPair.BTC_ETH, timeFrame);
             Strategy strategy = strategiesBuilder.buildShortBuyStrategy(ethSeries);
             csvFileWriter.write("candles(" + timeFrame.getDisplayName() + ")", convert(ethSeries, strategy));
         }

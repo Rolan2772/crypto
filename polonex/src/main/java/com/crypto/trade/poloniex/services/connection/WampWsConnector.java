@@ -1,16 +1,13 @@
 package com.crypto.trade.poloniex.services.connection;
 
 import com.crypto.trade.poloniex.config.properties.PoloniexProperties;
-import com.crypto.trade.poloniex.dto.PolonexTradeHistoryItem;
-import com.crypto.trade.poloniex.dto.PoloniexTick;
+import com.crypto.trade.poloniex.dto.PoloniexTrade;
 import com.crypto.trade.poloniex.services.analytics.AnalyticsService;
+import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import com.crypto.trade.poloniex.services.analytics.StrategiesBuilder;
 import com.crypto.trade.poloniex.storage.TickersStorage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -20,14 +17,8 @@ import ws.wamp.jawampa.WampClientBuilder;
 import ws.wamp.jawampa.connection.IWampConnectorProvider;
 import ws.wamp.jawampa.transport.netty.NettyWampClientConnectorProvider;
 
-import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -60,7 +51,7 @@ public class WampWsConnector implements WsConnector {
         final WampClient client;
         try {
             builder.withConnectorProvider(connectorProvider)
-                    .withUri(poloniexProperties.getApiResources().getWsUrl())
+                    .withUri(poloniexProperties.getApiResources().getWsApi())
                     .withRealm("realm1")
                     .withInfiniteReconnects()
                     .withReconnectInterval(5, TimeUnit.SECONDS);
@@ -78,26 +69,19 @@ public class WampWsConnector implements WsConnector {
                 eventSubscription = client.makeSubscription("ticker")
                         .subscribe(s -> {
                             ZonedDateTime time = ZonedDateTime.now(ZoneOffset.UTC);
-                            if (s.arguments().get(0).asText().equals("BTC_ETH")) {
+                            if (s.arguments().get(0).asText().equals(CurrencyPair.BTC_ETH.name())) {
                                 ticksExecutor.submit(() -> {
                                     try {
                                         String pair = s.arguments().get(0).asText();
-                                        if (pair.equals("BTC_ETH")) {
+                                        if (pair.equals(CurrencyPair.BTC_ETH.name())) {
                                             log.debug("BTC_ETH ({}): {} args {}", counter.addAndGet(1), time.toLocalTime(), s.arguments().toString());
                                         }
-                                        PoloniexTick poloniexTick = new PoloniexTick(0L,
+                                        PoloniexTrade trade = new PoloniexTrade(0L,
                                                 time,
                                                 pair,
                                                 s.arguments().get(1).asText(),
-                                                s.arguments().get(2).asText(),
-                                                s.arguments().get(3).asText(),
-                                                s.arguments().get(4).asText(),
-                                                s.arguments().get(5).asText(),
-                                                s.arguments().get(6).asText(),
-                                                s.arguments().get(7).asBoolean(),
-                                                s.arguments().get(8).asText(),
-                                                s.arguments().get(9).asText());
-                                        tickersStorage.addTick(poloniexTick);
+                                                "", "");
+                                        tickersStorage.addTrade(CurrencyPair.BTC_ETH, trade);
                                     } catch (RuntimeException ex) {
                                         log.error("fsdfs", ex);
                                     }
@@ -105,27 +89,7 @@ public class WampWsConnector implements WsConnector {
                             }
                         }, th -> log.error("Failed to subscribe on 'ticker' ", th));
 
-                List<PolonexTradeHistoryItem> items = new ArrayList<>();
-
-                int count = 72;
-                int inc = 6;
-                for (int i = count; i > inc; i -= inc) {
-                    Map<String, Object> parameters = new HashMap<>();
-                    parameters.put("currencyPair", "BTC_ETH");
-                    Instant from = Instant.now().minus(i, ChronoUnit.HOURS);
-                    parameters.put("startTime", from.getEpochSecond());
-                    Instant to = Instant.now().minus(i - inc, ChronoUnit.HOURS);
-                    parameters.put("endTime", to.getEpochSecond());
-                    log.info("Requesting time: {} - {}", from, to);
-                    ResponseEntity<List<PolonexTradeHistoryItem>> response = restTemplate.exchange(poloniexProperties.getApiResources().getTradeHistoryUrl(),
-                            HttpMethod.GET, null, new ParameterizedTypeReference<List<PolonexTradeHistoryItem>>() {
-                            }, parameters);
-                    items.addAll(response.getBody());
-
-                }
-               tickersStorage.addTradesHistory("BTC_ETH", items);
-
-                client.makeSubscription("BTC_ETH")
+                client.makeSubscription(CurrencyPair.BTC_ETH.name())
                         .subscribe(s -> {
                             //log.info("BTC_ETH keyword: {}, args: {}", s.keywordArguments(), s.arguments().toString());
                         }, th -> log.error("Failed to subscribe on BTC_ETH ", th));

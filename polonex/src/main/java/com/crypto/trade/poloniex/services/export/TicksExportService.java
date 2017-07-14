@@ -1,6 +1,7 @@
 package com.crypto.trade.poloniex.services.export;
 
-import com.crypto.trade.poloniex.dto.PoloniexTick;
+import com.crypto.trade.poloniex.dto.PoloniexTrade;
+import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import com.crypto.trade.poloniex.storage.TickersStorage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class PoloniexTicksExportService implements ExportDataService {
+public class TicksExportService implements ExportDataService {
 
     @Autowired
     private CsvFileWriter csvFileWriter;
@@ -21,19 +22,19 @@ public class PoloniexTicksExportService implements ExportDataService {
     @Override
     //@Scheduled(initialDelay = 60000, fixedDelay = 60000)
     public void exportData() {
-        List<PoloniexTick> poloniexTicks = tickersStorage.getTicks().getOrDefault("BTC_ETH", Collections.emptyList());
+        List<PoloniexTrade> poloniexTicks = tickersStorage.getTrades().getOrDefault(CurrencyPair.BTC_ETH, Collections.emptyList());
         StringBuilder sb = convert(poloniexTicks);
         csvFileWriter.write("poloniex_ticks", sb);
     }
 
-    private StringBuilder convert(List<PoloniexTick> poloniexTicks) {
+    private StringBuilder convert(List<PoloniexTrade> poloniexTrades) {
         StringBuilder sb = new StringBuilder("time,timestamp,price,amount\n");
 
-        for (PoloniexTick poloniexTick : poloniexTicks) {
-            sb.append(poloniexTick.getTime().toLocalDateTime()).append(',')
-                    .append(poloniexTick.getTime().toInstant().toEpochMilli() / 1000).append(',')
-                    .append(poloniexTick.getLast()).append(',')
-                    .append(poloniexTick.getQuoteVolume()).append(',')
+        for (PoloniexTrade poloniexTrade : poloniexTrades) {
+            sb.append(poloniexTrade.getTradeTime().toLocalDateTime()).append(',')
+                    .append(poloniexTrade.getTradeTime().toInstant().toEpochMilli() / 1000).append(',')
+                    .append(poloniexTrade.getRate()).append(',')
+                    .append(poloniexTrade.getAmount()).append(',')
                     .append('\n');
         }
         return sb;

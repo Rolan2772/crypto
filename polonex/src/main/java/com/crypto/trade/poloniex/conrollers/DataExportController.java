@@ -2,7 +2,7 @@ package com.crypto.trade.poloniex.conrollers;
 
 import com.crypto.trade.poloniex.services.export.AnalyticsExportService;
 import com.crypto.trade.poloniex.services.export.CandlesExportService;
-import com.crypto.trade.poloniex.services.export.PoloniexTicksExportService;
+import com.crypto.trade.poloniex.services.export.TicksExportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class DataExportController {
 
     @Autowired
-    private PoloniexTicksExportService poloniexTicksExportService;
+    private TicksExportService poloniexTicksExportService;
     @Autowired
     private CandlesExportService candlesExportService;
     @Autowired

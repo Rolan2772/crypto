@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class ApiResources {
 
-    private String wsUrl;
-    private String tradeHistoryUrl;
+    private String wsApi;
+    private String wsApi2;
+    private String tradeHistoryResource;
 }

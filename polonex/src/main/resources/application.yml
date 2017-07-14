@@ -4,3 +4,4 @@ server:
 poloniex:
   apiResources:
     wsUrl: wss://api.poloniex.com
+    tradeHistoryUrl: https://poloniex.com/public?command=returnTradeHistory&currencyPair={currencyPair}&start={startTime}&end={endTime}

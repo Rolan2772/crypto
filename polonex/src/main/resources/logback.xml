@@ -46,7 +46,8 @@
 
     <logger name="com.crypto.trade.poloniex" level="DEBUG"/>
     <logger name="org.springframework" level="INFO"/>
-    <logger name="eu.verdelhan.ta4j" level="INFO"/>
+    <logger name="eu.verdelhan.ta4j" level="TRACE"/>
+    <logger name="org.springframework.web" level="DEBUG"/>
 
     <root level="INFO">
         <appender-ref ref="console"/>

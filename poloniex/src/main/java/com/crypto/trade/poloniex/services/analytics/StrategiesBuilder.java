@@ -29,32 +29,6 @@ import java.util.logging.Logger;
 @Slf4j
 public class StrategiesBuilder {
 
-    /**
-     * RSI 14, StochasticK 14, StochasticD 3
-     * Buy on RSI < 30, K intersects D, K < 20
-     * Sell +2.5%
-     */
-    public Strategy buildShortBuyStrategy(TimeSeries timeSeries) {
-        int analyzePeriod = 14;
-
-        ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-        RSIIndicator rsi = new RSIIndicator(closePrice, analyzePeriod);
-        StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, analyzePeriod);
-        StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
-        CrossIndicator kdCross = new CrossIndicator(stochK, stochD);
-
-        // Entry rule
-        Rule entryRule = new UnderIndicatorRule(rsi, Decimal.valueOf(20)) // RSI < 20
-                .and(new UnderIndicatorRule(stochK, Decimal.valueOf(20))) // StochasticK < 20
-                .and(new CrossedUpIndicatorRule(stochK, stochD)); // K cross D from the bottom
-
-        // Exit rule
-        Rule exitRule = new StopGainRule(closePrice, Decimal.valueOf(1));
-        Strategy strategy = new Strategy(entryRule, exitRule);
-        //strategy.setUnstablePeriod(analyzePeriod);
-        return strategy;
-    }
-
     public static void main(String[] args) {
         StrategiesBuilder strategiesBuilder = new StrategiesBuilder();
         TickersStorage tickersStorage = new TickersStorage();
@@ -126,5 +100,33 @@ public class StrategiesBuilder {
                 tickersStorage.addTrade(CurrencyPair.BTC_ETH, trade);
             }
         }
+    }
+
+    /**
+     * RSI 14, StochasticK 14, StochasticD 3
+     * Buy on RSI < 30, K intersects D, K < 20
+     * Sell +2.5%
+     */
+    public Strategy buildShortBuyStrategy(TimeSeries timeSeries) {
+        int analyzePeriod = 14;
+
+        ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
+        RSIIndicator rsi = new RSIIndicator(closePrice, analyzePeriod);
+        StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, analyzePeriod);
+        StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
+        CrossIndicator kdCross = new CrossIndicator(stochK, stochD);
+
+        // Entry rule
+        Rule entryRule = /*new UnderIndicatorRule(rsi, Decimal.valueOf(50));*/
+                new UnderIndicatorRule(rsi, Decimal.valueOf(20)) // RSI < 20
+                        .and(new UnderIndicatorRule(stochK, Decimal.valueOf(20))) // StochasticK < 20
+                        .and(new CrossedUpIndicatorRule(stochK, stochD)); // K cross D from the bottom
+
+        // Exit rule
+        Rule exitRule = /*new StopGainRule(closePrice, Decimal.valueOf(0.0001));*/
+                new StopGainRule(closePrice, Decimal.valueOf(1));
+        Strategy strategy = new Strategy(entryRule, exitRule);
+        //strategy.setUnstablePeriod(analyzePeriod);
+        return strategy;
     }
 }

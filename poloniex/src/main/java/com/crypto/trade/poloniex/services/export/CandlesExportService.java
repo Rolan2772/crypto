@@ -38,7 +38,7 @@ public class CandlesExportService implements ExportDataService {
     }
 
     private StringBuilder convert(TimeSeries timeSeries, Strategy strategy) {
-        StringBuilder sb = new StringBuilder("timePeriod,beginTime,endTime,openPrice,closePrice,maxPrice,minPrice,a1,a2,amount,volume\n");
+        StringBuilder sb = new StringBuilder("timePeriod,beginTime,endTime,openPrice,closePrice,maxPrice,minPrice,action,amount,volume\n");
         final int nbTicks = timeSeries.getTickCount();
         TradingRecord tradingRecord = new TradingRecord();
         for (int i = 0; i < nbTicks; i++) {

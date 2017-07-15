@@ -1,4 +1,4 @@
-package com.crypto.trade.poloniex.services.connection;
+package com.crypto.trade.poloniex.services.integration;
 
 public interface WsConnector {
 

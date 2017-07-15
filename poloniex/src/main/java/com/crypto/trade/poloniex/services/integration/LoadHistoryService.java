@@ -1,4 +1,4 @@
-package com.crypto.trade.poloniex.services.connection;
+package com.crypto.trade.poloniex.services.integration;
 
 import com.crypto.trade.poloniex.config.properties.PoloniexProperties;
 import com.crypto.trade.poloniex.dto.PoloniexHistoryTrade;
@@ -38,7 +38,7 @@ public class LoadHistoryService {
             Instant to = Instant.now().minus(i - inc, ChronoUnit.HOURS);
             parameters.put("endTime", to.getEpochSecond());
             log.info("Requesting time: {} - {}", from, to);
-            ResponseEntity<List<PoloniexHistoryTrade>> response = restTemplate.exchange(poloniexProperties.getApiResources().getTradeHistoryResource(),
+            ResponseEntity<List<PoloniexHistoryTrade>> response = restTemplate.exchange(poloniexProperties.getApiResources().getTradeHistoryUrl(),
                     HttpMethod.GET, null, new ParameterizedTypeReference<List<PoloniexHistoryTrade>>() {
                     }, parameters);
             trades.addAll(response.getBody());

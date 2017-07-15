@@ -7,5 +7,6 @@ public class ApiResources {
 
     private String wsApi;
     private String wsApi2;
-    private String tradeHistoryResource;
+    private String tradeHistoryUrl;
+    private String tradingApi;
 }

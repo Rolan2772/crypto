@@ -1,6 +1,6 @@
 package com.crypto.trade.poloniex.services.bots;
 
-import com.crypto.trade.poloniex.services.connection.WsConnector;
+import com.crypto.trade.poloniex.services.integration.WsConnector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

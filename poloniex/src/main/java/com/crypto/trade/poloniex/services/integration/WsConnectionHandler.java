@@ -1,4 +1,4 @@
-package com.crypto.trade.poloniex.services.connection;
+package com.crypto.trade.poloniex.services.integration;
 
 import com.crypto.trade.poloniex.dto.PoloniexTrade;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;

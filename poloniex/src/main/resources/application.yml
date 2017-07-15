@@ -1,8 +1,9 @@
 server:
-  port: 8089
+  port: 8090
 
 poloniex:
   apiResources:
     wsApi: wss://api.poloniex.com
     wsApi2: wss://api2.poloniex.com
-    tradeHistoryResource: https://poloniex.com/public?command=returnTradeHistory&currencyPair={currencyPair}&start={startTime}&end={endTime}
+    tradeHistoryUrl: https://poloniex.com/public?command=returnTradeHistory&currencyPair={currencyPair}&start={startTime}&end={endTime}
+    tradingApi: https://poloniex.com/tradingApi

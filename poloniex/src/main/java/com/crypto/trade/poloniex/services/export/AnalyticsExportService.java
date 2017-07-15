@@ -56,12 +56,23 @@ public class AnalyticsExportService implements ExportDataService {
                     sma,
                     ema32,
                     ema128);
-            csvFileWriter.write("analytics(" + timeFrame.getDisplayName() + ")", convert(ethSeries, indicators, strategy));
+
+
+            StringBuilder sb = convert(ethSeries, indicators, strategy);
+            TradingRecord real = tickersStorage.getTradingRecords().get(timeFrame);
+            sb.append('\n');
+            sb.append("Real trades: ");
+            sb.append("Trades: ").append(real.getTradeCount());
+            sb.append('\n');
+            sb.append("Profit: ").append(new TotalProfitCriterion().calculate(ethSeries, real));
+            sb.append('\n');
+
+            csvFileWriter.write("analytics(" + timeFrame.getDisplayName() + ")", sb);
         }
     }
 
     private StringBuilder convert(TimeSeries timeSeries, List<Indicator<?>> indicators, Strategy strategy) {
-        StringBuilder sb = new StringBuilder("timestamp,a1,a2,close,rsi,stochK,stochD,sma,ema32,ema128\n");
+        StringBuilder sb = new StringBuilder("timestamp,action,close,rsi,stochK,stochD,sma,ema32,ema128\n");
         TradingRecord tradingRecord = new TradingRecord();
         final int nbTicks = timeSeries.getTickCount();
         for (int i = 0; i < nbTicks; i++) {
@@ -75,6 +86,7 @@ public class AnalyticsExportService implements ExportDataService {
         }
 
         sb.append('\n');
+        sb.append("Analytics: ");
         sb.append("Trades: ").append(tradingRecord.getTradeCount());
         sb.append('\n');
         sb.append("Profit: ").append(new TotalProfitCriterion().calculate(timeSeries, tradingRecord));

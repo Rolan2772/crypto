@@ -10,5 +10,5 @@ public interface AnalyticsService {
 
     void analyzeAll(List<Strategy> strategies);
 
-    String analyzeTick(Strategy strategy, Tick newTick, int index, TradingRecord tradingRecord);
+    TradingAction analyzeTick(Strategy strategy, Tick newTick, int index, TradingRecord tradingRecord);
 }

@@ -2,17 +2,19 @@ package com.crypto.trade.poloniex.services.export;
 
 import com.crypto.trade.poloniex.dto.PoloniexTrade;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
+import com.crypto.trade.poloniex.services.utils.CsvFileWriter;
 import com.crypto.trade.poloniex.storage.TickersStorage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PreDestroy;
 import java.util.Collections;
 import java.util.List;
 
 @Slf4j
 @Service
-public class TicksExportService implements ExportDataService {
+public class TradesExportService implements ExportDataService {
 
     @Autowired
     private CsvFileWriter csvFileWriter;
@@ -20,11 +22,10 @@ public class TicksExportService implements ExportDataService {
     private TickersStorage tickersStorage;
 
     @Override
-    //@Scheduled(initialDelay = 60000, fixedDelay = 60000)
     public void exportData() {
         List<PoloniexTrade> poloniexTicks = tickersStorage.getTrades().getOrDefault(CurrencyPair.BTC_ETH, Collections.emptyList());
         StringBuilder sb = convert(poloniexTicks);
-        csvFileWriter.write("poloniex_ticks", sb);
+        csvFileWriter.write("poloniex_trades", sb);
     }
 
     private StringBuilder convert(List<PoloniexTrade> poloniexTrades) {
@@ -38,5 +39,10 @@ public class TicksExportService implements ExportDataService {
                     .append('\n');
         }
         return sb;
+    }
+
+    @PreDestroy
+    public void preDestroy() {
+        exportData();
     }
 }

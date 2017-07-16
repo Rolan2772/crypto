@@ -4,6 +4,7 @@ import com.crypto.trade.poloniex.services.analytics.AnalyticsService;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import com.crypto.trade.poloniex.services.analytics.StrategiesBuilder;
 import com.crypto.trade.poloniex.services.analytics.TimeFrame;
+import com.crypto.trade.poloniex.services.utils.CsvFileWriter;
 import com.crypto.trade.poloniex.storage.TickersStorage;
 import eu.verdelhan.ta4j.*;
 import eu.verdelhan.ta4j.analysis.criteria.TotalProfitCriterion;
@@ -17,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PreDestroy;
 import java.util.Arrays;
 import java.util.List;
 
@@ -29,25 +31,24 @@ public class AnalyticsExportService implements ExportDataService {
     @Autowired
     private TickersStorage tickersStorage;
     @Autowired
-    private AnalyticsService analyticsService;
+    private AnalyticsService historyAnalyticsService;
     @Autowired
     private StrategiesBuilder strategiesBuilder;
 
     @Override
-    //@Scheduled(initialDelay = 60000, fixedDelay = 60000)
     public void exportData() {
-        int period = 14;
+        int indicatorTimeFrame = StrategiesBuilder.DEFAULT_TIME_FRAME;
 
         for (TimeFrame timeFrame : TimeFrame.values()) {
             TimeSeries ethSeries = tickersStorage.getCandles(CurrencyPair.BTC_ETH, timeFrame);
             ClosePriceIndicator closePrice = new ClosePriceIndicator(ethSeries);
-            RSIIndicator rsi = new RSIIndicator(closePrice, period);
-            StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(ethSeries, period);
+            RSIIndicator rsi = new RSIIndicator(closePrice, indicatorTimeFrame);
+            StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(ethSeries, indicatorTimeFrame);
             StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
-            SMAIndicator sma = new SMAIndicator(stochK, period);
+            SMAIndicator sma = new SMAIndicator(stochK, indicatorTimeFrame);
             EMAIndicator ema32 = new EMAIndicator(closePrice, 32);
             EMAIndicator ema128 = new EMAIndicator(closePrice, 128);
-            Strategy strategy = strategiesBuilder.buildShortBuyStrategy(ethSeries);
+            Strategy strategy = strategiesBuilder.buildShortBuyStrategy(ethSeries, indicatorTimeFrame);
 
             List<Indicator<?>> indicators = Arrays.asList(closePrice,
                     rsi,
@@ -57,8 +58,8 @@ public class AnalyticsExportService implements ExportDataService {
                     ema32,
                     ema128);
 
-
             StringBuilder sb = convert(ethSeries, indicators, strategy);
+
             TradingRecord real = tickersStorage.getTradingRecords().get(timeFrame);
             sb.append('\n');
             sb.append("Real trades: ");
@@ -78,7 +79,7 @@ public class AnalyticsExportService implements ExportDataService {
         for (int i = 0; i < nbTicks; i++) {
             Tick tick = timeSeries.getTick(i);
             sb.append(timeSeries.getTick(i).getEndTime().toLocalDateTime()).append(',');
-            sb.append(analyticsService.analyzeTick(strategy, tick, i, tradingRecord)).append(',');
+            sb.append(historyAnalyticsService.analyzeTick(strategy, tick, i, tradingRecord)).append(',');
             for (Indicator<?> indicator : indicators) {
                 sb.append(indicator.getValue(i)).append(',');
             }
@@ -91,5 +92,10 @@ public class AnalyticsExportService implements ExportDataService {
         sb.append('\n');
         sb.append("Profit: ").append(new TotalProfitCriterion().calculate(timeSeries, tradingRecord));
         return sb;
+    }
+
+    @PreDestroy
+    public void preDestroy() {
+        exportData();
     }
 }

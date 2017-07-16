@@ -5,6 +5,6 @@ public enum TradingAction {
     NO_ACTION, ENTERED, SHOULD_ENTER, EXITED, SHOULD_EXIT;
 
     public static boolean shouldPlaceOrder(TradingAction action) {
-        return action == ENTERED || action == EXITED;
+        return action == SHOULD_ENTER || action == SHOULD_EXIT;
     }
 }

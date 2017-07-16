@@ -8,7 +8,5 @@ import java.util.List;
 
 public interface AnalyticsService {
 
-    void analyzeAll(List<Strategy> strategies);
-
     TradingAction analyzeTick(Strategy strategy, Tick newTick, int index, TradingRecord tradingRecord);
 }

@@ -38,7 +38,7 @@ public class LoadHistoryService {
             Instant to = Instant.now().minus(i - inc, ChronoUnit.HOURS);
             parameters.put("endTime", to.getEpochSecond());
             log.info("Requesting time: {} - {}", from, to);
-            ResponseEntity<List<PoloniexHistoryTrade>> response = restTemplate.exchange(poloniexProperties.getApiResources().getTradeHistoryUrl(),
+            ResponseEntity<List<PoloniexHistoryTrade>> response = restTemplate.exchange(poloniexProperties.getApi().getTradeHistoryUrl(),
                     HttpMethod.GET, null, new ParameterizedTypeReference<List<PoloniexHistoryTrade>>() {
                     }, parameters);
             trades.addAll(response.getBody());

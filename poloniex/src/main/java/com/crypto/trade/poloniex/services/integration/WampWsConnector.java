@@ -32,12 +32,6 @@ public class WampWsConnector implements WsConnector {
     private ThreadPoolTaskExecutor ticksExecutor;
     @Autowired
     private TickersStorage tickersStorage;
-    @Autowired
-    private RestTemplate restTemplate;
-    @Autowired
-    private AnalyticsService analyticsService;
-    @Autowired
-    private StrategiesBuilder strategiesBuilder;
 
     private Subscription eventSubscription;
     private AtomicLong counter = new AtomicLong(0);
@@ -51,7 +45,7 @@ public class WampWsConnector implements WsConnector {
         final WampClient client;
         try {
             builder.withConnectorProvider(connectorProvider)
-                    .withUri(poloniexProperties.getApiResources().getWsApi())
+                    .withUri(poloniexProperties.getApi().getWsApi())
                     .withRealm("realm1")
                     .withInfiniteReconnects()
                     .withReconnectInterval(5, TimeUnit.SECONDS);
@@ -91,7 +85,7 @@ public class WampWsConnector implements WsConnector {
 
                 client.makeSubscription(CurrencyPair.BTC_ETH.name())
                         .subscribe(s -> {
-                            //log.info("BTC_ETH keyword: {}, args: {}", s.keywordArguments(), s.arguments().toString());
+                            log.info("BTC_ETH keyword: {}, args: {}", s.keywordArguments(), s.arguments().toString());
                         }, th -> log.error("Failed to subscribe on BTC_ETH ", th));
             }
         }, t -> System.out.println("Session ended with error " + t), () -> System.out.println("Session ended normally"));

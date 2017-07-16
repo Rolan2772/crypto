@@ -76,7 +76,7 @@ public class WsConnectionHandler implements WebSocketHandler {
         return new BigDecimal(trade[3].split("\"")[1]).setScale(8, BigDecimal.ROUND_HALF_UP);
     }
 
-    @Scheduled(fixedDelay = 300000)
+    @Scheduled(initialDelay = 60000, fixedDelay = 300000)
     public void keepAlive() throws IOException {
         if (session != null) {
             session.sendMessage(new TextMessage("."));

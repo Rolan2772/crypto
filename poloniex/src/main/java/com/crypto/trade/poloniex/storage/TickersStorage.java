@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class TickersStorage {
 
     @Autowired
-    private AnalyticsService analyticsService;
+    private AnalyticsService realTimeAnalyticsService;
     @Autowired
     private StrategiesBuilder strategiesBuilder;
     @Autowired
@@ -86,12 +86,15 @@ public class TickersStorage {
         if (ticks.isEmpty() || !ticks.get(ticks.size() - 1).inPeriod(time)) {
             if (!ticks.isEmpty()) {
                 TimeSeries timeSeries = new TimeSeries("BTC_ETH", ticks);
-                Strategy strategy = strategiesBuilder.buildShortBuyStrategy(timeSeries);
+//                Strategy strategy = strategiesBuilder.buildShortBuyStrategy(timeSeries, StrategiesBuilder.DEFAULT_TIME_FRAME);
+                Strategy strategy = strategiesBuilder.buildTestStrategy(timeSeries, 1);
                 int index = ticks.size() - 1;
                 TradingRecord tradingRecord = tradingRecords.get(timeFrame);
-                TradingAction action = analyticsService.analyzeTick(strategy, ticks.get(index), index, tradingRecord);
+                Tick lastTick = ticks.get(index);
+                log.info("Analyzing lats tick {} for {} candles.", lastTick, timeFrame);
+                TradingAction action = realTimeAnalyticsService.analyzeTick(strategy, lastTick, index, tradingRecord);
                 if (TradingAction.shouldPlaceOrder(action)) {
-                    Optional<PoloniexOrder> poloniexOrder = tradingService.placeOrder(tradingRecord, action, true);
+                    Optional<PoloniexOrder> poloniexOrder = tradingService.placeOrder(tradingRecord, index, action, false);
                     poloniexOrder.ifPresent(order -> orders.get(timeFrame).add(order));
                 }
             }

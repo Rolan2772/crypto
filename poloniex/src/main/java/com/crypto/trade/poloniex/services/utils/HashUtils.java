@@ -7,7 +7,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
 
-public class EncodeUtils {
+public class HashUtils {
 
     private static final String DEFAULT_ENCODING = "UTF-8";
     private static final String HMAC_SHA512 = "HmacSHA512";

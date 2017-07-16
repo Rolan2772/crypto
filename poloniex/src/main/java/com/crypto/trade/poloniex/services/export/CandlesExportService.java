@@ -4,6 +4,7 @@ import com.crypto.trade.poloniex.services.analytics.AnalyticsService;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import com.crypto.trade.poloniex.services.analytics.StrategiesBuilder;
 import com.crypto.trade.poloniex.services.analytics.TimeFrame;
+import com.crypto.trade.poloniex.services.utils.CsvFileWriter;
 import com.crypto.trade.poloniex.storage.TickersStorage;
 import eu.verdelhan.ta4j.Strategy;
 import eu.verdelhan.ta4j.Tick;
@@ -14,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PreDestroy;
+
 @Slf4j
 @Service
 public class CandlesExportService implements ExportDataService {
@@ -23,17 +26,27 @@ public class CandlesExportService implements ExportDataService {
     @Autowired
     private TickersStorage tickersStorage;
     @Autowired
-    private AnalyticsService analyticsService;
+    private AnalyticsService historyAnalyticsService;
     @Autowired
     private StrategiesBuilder strategiesBuilder;
 
     @Override
-    //@Scheduled(initialDelay = 60000, fixedDelay = 60000)
     public void exportData() {
         for (TimeFrame timeFrame : TimeFrame.values()) {
             TimeSeries ethSeries = tickersStorage.getCandles(CurrencyPair.BTC_ETH, timeFrame);
-            Strategy strategy = strategiesBuilder.buildShortBuyStrategy(ethSeries);
-            csvFileWriter.write("candles(" + timeFrame.getDisplayName() + ")", convert(ethSeries, strategy));
+            Strategy strategy = strategiesBuilder.buildShortBuyStrategy(ethSeries, StrategiesBuilder.DEFAULT_TIME_FRAME);
+
+            StringBuilder sb = convert(ethSeries, strategy);
+
+            TradingRecord real = tickersStorage.getTradingRecords().get(timeFrame);
+            sb.append('\n');
+            sb.append("Real trades: ");
+            sb.append("Trades: ").append(real.getTradeCount());
+            sb.append('\n');
+            sb.append("Profit: ").append(new TotalProfitCriterion().calculate(ethSeries, real));
+            sb.append('\n');
+
+            csvFileWriter.write("candles(" + timeFrame.getDisplayName() + ")", sb);
         }
     }
 
@@ -50,7 +63,7 @@ public class CandlesExportService implements ExportDataService {
                     .append(tick.getClosePrice()).append(',')
                     .append(tick.getMaxPrice()).append(',')
                     .append(tick.getMinPrice()).append(',')
-                    .append(analyticsService.analyzeTick(strategy, tick, i, tradingRecord)).append(',')
+                    .append(historyAnalyticsService.analyzeTick(strategy, tick, i, tradingRecord)).append(',')
                     .append(tick.getAmount()).append(',')
                     .append(tick.getVolume()).append(',')
                     .append('\n');
@@ -61,5 +74,10 @@ public class CandlesExportService implements ExportDataService {
         sb.append('\n');
         sb.append("Profit: ").append(new TotalProfitCriterion().calculate(timeSeries, tradingRecord));
         return sb;
+    }
+
+    @PreDestroy
+    public void preDestroy() {
+        exportData();
     }
 }

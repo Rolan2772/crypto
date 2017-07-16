@@ -7,5 +7,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "poloniex")
 public class PoloniexProperties {
 
-    private ApiResources apiResources;
+    private ApiResources api;
+    private ApiSecretProperties secret;
 }

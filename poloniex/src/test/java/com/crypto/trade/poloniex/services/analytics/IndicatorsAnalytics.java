@@ -2,7 +2,7 @@ package com.crypto.trade.poloniex.services.analytics;
 
 import com.crypto.trade.poloniex.dto.PoloniexTrade;
 import com.crypto.trade.poloniex.services.export.AnalyticsExportService;
-import com.crypto.trade.poloniex.services.export.CsvFileWriter;
+import com.crypto.trade.poloniex.services.utils.CsvFileWriter;
 import com.crypto.trade.poloniex.storage.TickersStorage;
 import com.opencsv.CSVReader;
 import org.springframework.test.util.ReflectionTestUtils;

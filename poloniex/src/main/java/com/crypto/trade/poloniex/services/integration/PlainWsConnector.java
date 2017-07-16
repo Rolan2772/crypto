@@ -23,8 +23,9 @@ public class PlainWsConnector implements WsConnector {
 
     public void connect() {
         StandardWebSocketClient client = new StandardWebSocketClient();
-        connectionManager = new WebSocketConnectionManager(client, wsConnectionHandler, poloniexProperties.getApiResources().getWsApi2());
+        connectionManager = new WebSocketConnectionManager(client, wsConnectionHandler, poloniexProperties.getApi().getWsApi2());
         connectionManager.setAutoStartup(true);
+
         connectionManager.start();
     }
 

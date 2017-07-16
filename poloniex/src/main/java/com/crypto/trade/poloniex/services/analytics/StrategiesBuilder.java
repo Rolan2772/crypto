@@ -5,11 +5,11 @@ import com.crypto.trade.poloniex.storage.TickersStorage;
 import com.opencsv.CSVReader;
 import eu.verdelhan.ta4j.*;
 import eu.verdelhan.ta4j.analysis.criteria.TotalProfitCriterion;
-import eu.verdelhan.ta4j.indicators.helpers.CrossIndicator;
 import eu.verdelhan.ta4j.indicators.oscillators.StochasticOscillatorDIndicator;
 import eu.verdelhan.ta4j.indicators.oscillators.StochasticOscillatorKIndicator;
 import eu.verdelhan.ta4j.indicators.simple.ClosePriceIndicator;
 import eu.verdelhan.ta4j.indicators.trackers.RSIIndicator;
+import eu.verdelhan.ta4j.trading.rules.BooleanRule;
 import eu.verdelhan.ta4j.trading.rules.CrossedUpIndicatorRule;
 import eu.verdelhan.ta4j.trading.rules.StopGainRule;
 import eu.verdelhan.ta4j.trading.rules.UnderIndicatorRule;
@@ -29,6 +29,8 @@ import java.util.logging.Logger;
 @Slf4j
 public class StrategiesBuilder {
 
+    public static final int DEFAULT_TIME_FRAME = 14;
+
     public static void main(String[] args) {
         StrategiesBuilder strategiesBuilder = new StrategiesBuilder();
         TickersStorage tickersStorage = new TickersStorage();
@@ -37,7 +39,7 @@ public class StrategiesBuilder {
         loadTicks(tickersStorage);
 
         TimeSeries oneMinuteSeries = tickersStorage.getCandles(CurrencyPair.BTC_ETH, TimeFrame.ONE_MINUTE);
-        Strategy shortBuyStrategy = strategiesBuilder.buildShortBuyStrategy(oneMinuteSeries);
+        Strategy shortBuyStrategy = strategiesBuilder.buildShortBuyStrategy(oneMinuteSeries, DEFAULT_TIME_FRAME);
 
         // Initializing the trading history
         TradingRecord tradingRecord = new TradingRecord();
@@ -107,26 +109,38 @@ public class StrategiesBuilder {
      * Buy on RSI < 30, K intersects D, K < 20
      * Sell +2.5%
      */
-    public Strategy buildShortBuyStrategy(TimeSeries timeSeries) {
-        int analyzePeriod = 14;
-
+    public Strategy buildShortBuyStrategy(TimeSeries timeSeries, int timeFrame) {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-        RSIIndicator rsi = new RSIIndicator(closePrice, analyzePeriod);
-        StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, analyzePeriod);
+        RSIIndicator rsi = new RSIIndicator(closePrice, timeFrame);
+        StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, timeFrame);
         StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
-        CrossIndicator kdCross = new CrossIndicator(stochK, stochD);
 
         // Entry rule
-        Rule entryRule = /*new UnderIndicatorRule(rsi, Decimal.valueOf(50));*/
-                new UnderIndicatorRule(rsi, Decimal.valueOf(20)) // RSI < 20
-                        .and(new UnderIndicatorRule(stochK, Decimal.valueOf(20))) // StochasticK < 20
-                        .and(new CrossedUpIndicatorRule(stochK, stochD)); // K cross D from the bottom
+        Rule entryRule = new UnderIndicatorRule(rsi, Decimal.valueOf(20)) // RSI < 20
+                .and(new UnderIndicatorRule(stochK, Decimal.valueOf(20))) // StochasticK < 20
+                .and(new CrossedUpIndicatorRule(stochK, stochD)); // K cross D from the bottom
 
         // Exit rule
-        Rule exitRule = /*new StopGainRule(closePrice, Decimal.valueOf(0.0001));*/
-                new StopGainRule(closePrice, Decimal.valueOf(1));
+        Rule exitRule = new StopGainRule(closePrice, Decimal.valueOf(1));
         Strategy strategy = new Strategy(entryRule, exitRule);
-        //strategy.setUnstablePeriod(analyzePeriod);
+        strategy.setUnstablePeriod(timeFrame);
+
+        return strategy;
+    }
+
+    /**
+     * Buys every first tick
+     * Sells every second tick
+     */
+    public Strategy buildTestStrategy(TimeSeries timeSeries, int timeFrame) {
+         // Entry rule
+        Rule entryRule = new BooleanRule(true);
+
+        // Exit rule
+        Rule exitRule = new BooleanRule(true);
+        Strategy strategy = new Strategy(entryRule, exitRule);
+        strategy.setUnstablePeriod(timeFrame);
+
         return strategy;
     }
 }

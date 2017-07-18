@@ -22,7 +22,7 @@ public class PoloniexTrade {
     private String type;
 
     public PoloniexTrade(PoloniexHistoryTrade historyTrade) {
-        this.tradeId = historyTrade.getTradeId();
+        this.tradeId = historyTrade.getTradeId() != null ? historyTrade.getTradeId() : historyTrade.getGlobalTradeId();
         this.tradeTime = historyTrade.getDate();
         this.amount = historyTrade.getAmount();
         this.rate = historyTrade.getRate();

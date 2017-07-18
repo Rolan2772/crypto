@@ -28,7 +28,7 @@ public class LoadHistoryService {
 
     public List<PoloniexHistoryTrade> loadTradesHistory() {
         List<PoloniexHistoryTrade> trades = new ArrayList<>();
-        int count = 72;
+        int count = 12;
         int inc = 6;
         for (int i = count; i > inc; i -= inc) {
             Map<String, Object> parameters = new HashMap<>();
@@ -44,7 +44,6 @@ public class LoadHistoryService {
             trades.addAll(response.getBody());
 
         }
-        //tickersStorage.addTradesHistory("BTC_ETH", items);
         return trades;
     }
 }

@@ -56,7 +56,7 @@ public class TickersStorage {
     public void addTrade(CurrencyPair currency, PoloniexTrade poloniexTrade) {
         addCurrencyIfAbsent(currency);
         trades.get(currency).add(poloniexTrade);
-        updateCandles(candles.get(currency), poloniexTrade);
+        updateCandles(candles.get(currency), poloniexTrade, false);
     }
 
     private void addCurrencyIfAbsent(CurrencyPair currency) {
@@ -70,11 +70,11 @@ public class TickersStorage {
         }
     }
 
-    private void updateCandles(Map<TimeFrame, List<Tick>> candles, PoloniexTrade poloniexTrade) {
+    private void updateCandles(Map<TimeFrame, List<Tick>> candles, PoloniexTrade poloniexTrade, boolean historyTick) {
         candles.entrySet().forEach(e -> {
             updateCandlesLock.lock();
             try {
-                Tick tick = getLastTick(e.getKey(), e.getValue(), poloniexTrade.getTradeTime());
+                Tick tick = getLastTick(e.getKey(), e.getValue(), poloniexTrade.getTradeTime(), historyTick);
                 tick.addTrade(Decimal.valueOf(poloniexTrade.getAmount()), Decimal.valueOf(poloniexTrade.getRate()));
             } finally {
                 updateCandlesLock.unlock();
@@ -82,7 +82,7 @@ public class TickersStorage {
         });
     }
 
-    private Tick getLastTick(TimeFrame timeFrame, List<Tick> ticks, ZonedDateTime time) {
+    private Tick getLastTick(TimeFrame timeFrame, List<Tick> ticks, ZonedDateTime time, boolean historyTick) {
         if (ticks.isEmpty() || !ticks.get(ticks.size() - 1).inPeriod(time)) {
             if (!ticks.isEmpty()) {
                 TimeSeries timeSeries = new TimeSeries("BTC_ETH", ticks);
@@ -93,7 +93,7 @@ public class TickersStorage {
                 Tick lastTick = ticks.get(index);
                 log.info("Analyzing lats tick {} for {} candles.", lastTick, timeFrame);
                 TradingAction action = realTimeAnalyticsService.analyzeTick(strategy, lastTick, index, tradingRecord);
-                if (TradingAction.shouldPlaceOrder(action)) {
+                if (!historyTick && TradingAction.shouldPlaceOrder(action)) {
                     Optional<PoloniexOrder> poloniexOrder = tradingService.placeOrder(tradingRecord, index, action, false);
                     poloniexOrder.ifPresent(order -> orders.get(timeFrame).add(order));
                 }
@@ -122,7 +122,7 @@ public class TickersStorage {
             log.info("Clearing candles with history for {}", currency);
             currencyCandles.values().forEach(List::clear);
             log.info("Updating candles with history for {}", currency);
-            currencyTrades.forEach(tick -> updateCandles(currencyCandles, tick));
+            currencyTrades.forEach(tick -> updateCandles(currencyCandles, tick, true));
         } finally {
             updateCandlesLock.unlock();
         }

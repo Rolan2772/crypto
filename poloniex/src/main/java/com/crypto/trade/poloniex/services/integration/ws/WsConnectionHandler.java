@@ -1,14 +1,16 @@
-package com.crypto.trade.poloniex.services.integration;
+package com.crypto.trade.poloniex.services.integration.ws;
 
 import com.crypto.trade.poloniex.dto.PoloniexTrade;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import com.crypto.trade.poloniex.storage.TickersStorage;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.web.socket.*;
 
-import javax.websocket.ClientEndpoint;
-import javax.websocket.OnMessage;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -17,17 +19,27 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 @Slf4j
-@ClientEndpoint
-public class PoloniexEndPoint {
+public class WsConnectionHandler implements WebSocketHandler {
 
     @Autowired
     private ThreadPoolTaskExecutor ticksExecutor;
     @Autowired
     private TickersStorage tickersStorage;
+    @Getter
+    private WebSocketSession session;
 
-    @OnMessage
-    public void onMessage(String message) {
+    @Override
+    public void afterConnectionEstablished(WebSocketSession webSocketSession) throws Exception {
+        log.info("Session started.");
+        webSocketSession.setTextMessageSizeLimit(1000000);
+        webSocketSession.setBinaryMessageSizeLimit(1000000);
+        webSocketSession.sendMessage(new TextMessage("{\"command\":\"subscribe\",\"channel\":\"" + "BTC_ETH" + "\"}"));
+        session = webSocketSession;
+    }
 
+    @Override
+    public void handleMessage(WebSocketSession webSocketSession, WebSocketMessage<?> webSocketMessage) throws Exception {
+        String message = webSocketMessage.getPayload().toString();
         if (message.startsWith("[148") && message.contains("[\"t\"")) {
 
             ticksExecutor.submit(() -> {
@@ -64,6 +76,29 @@ public class PoloniexEndPoint {
         return new BigDecimal(trade[3].split("\"")[1]).setScale(8, BigDecimal.ROUND_HALF_UP);
     }
 
+    @Scheduled(initialDelay = 60000, fixedDelay = 300000)
+    public void keepAlive() throws IOException {
+        if (session != null) {
+            session.sendMessage(new TextMessage("."));
+        }
+    }
 
+    public boolean isConnected() {
+        return session != null && session.isOpen();
+    }
+
+    @Override
+    public void handleTransportError(WebSocketSession webSocketSession, Throwable throwable) throws Exception {
+        log.error("Transport Error", throwable);
+    }
+
+    @Override
+    public void afterConnectionClosed(WebSocketSession webSocketSession, CloseStatus closeStatus) throws Exception {
+        log.error("Connection Closed {}" + closeStatus);
+    }
+
+    @Override
+    public boolean supportsPartialMessages() {
+        return true;
+    }
 }
-

@@ -2,11 +2,12 @@ package com.crypto.trade.poloniex.config;
 
 import com.crypto.trade.poloniex.config.properties.PoloniexProperties;
 import com.crypto.trade.poloniex.services.analytics.StrategiesBuilder;
-import com.crypto.trade.poloniex.services.integration.PoloniexEndPoint;
+import com.crypto.trade.poloniex.services.integration.ws.PoloniexEndPoint;
 import com.crypto.trade.poloniex.services.integration.PoloniexRequestHelper;
-import com.crypto.trade.poloniex.services.integration.WsConnectionHandler;
+import com.crypto.trade.poloniex.services.integration.ws.WsConnectionHandler;
 import com.crypto.trade.poloniex.storage.HistoryStorage;
 import com.crypto.trade.poloniex.storage.TickersStorage;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +24,9 @@ import java.net.Proxy;
 @EnableScheduling
 @EnableConfigurationProperties({PoloniexProperties.class})
 public class PoloniexAppConfig {
+
+    @Autowired
+    private PoloniexProperties properties;
 
     @Bean
     public TickersStorage tickersStorage() {
@@ -43,7 +47,7 @@ public class PoloniexAppConfig {
     public RestTemplate restTemplate() {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
 
-        Proxy proxy= new Proxy(Proxy.Type.HTTP, new InetSocketAddress("88.198.230.11", 3128));
+        Proxy proxy= new Proxy(Proxy.Type.HTTP, new InetSocketAddress(properties.getProxy().getHost(), properties.getProxy().getPort()));
         requestFactory.setProxy(proxy);
 
         return new RestTemplate(requestFactory);
@@ -60,7 +64,7 @@ public class PoloniexAppConfig {
     }
 
     @Bean
-    private PoloniexEndPoint poloniexEndPoint() {
+    public PoloniexEndPoint poloniexEndPoint() {
         return new PoloniexEndPoint();
     }
 }

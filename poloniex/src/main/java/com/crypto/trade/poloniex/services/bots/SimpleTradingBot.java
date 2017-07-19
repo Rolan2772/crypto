@@ -2,13 +2,16 @@ package com.crypto.trade.poloniex.services.bots;
 
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import com.crypto.trade.poloniex.services.integration.LoadHistoryService;
-import com.crypto.trade.poloniex.services.integration.WsConnector;
+import com.crypto.trade.poloniex.services.integration.ws.WsConnector;
 import com.crypto.trade.poloniex.storage.TickersStorage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.websocket.DeploymentException;
+import java.io.IOException;
 
 @Service
 public class SimpleTradingBot {
@@ -18,18 +21,19 @@ public class SimpleTradingBot {
     @Autowired
     private TickersStorage tickersStorage;
 
+    @Qualifier("tyrusWsConnector")
     @Autowired
-    private WsConnector plainWsConnector;
+    private WsConnector wsConnector;
 
     @PostConstruct
-    public void postConstruct() {
+    public void postConstruct() throws IOException, DeploymentException {
 
-        //plainWsConnector.connect();
+        wsConnector.connect();
         tickersStorage.addTradesHistory(CurrencyPair.BTC_ETH, loadHistoryService.loadTradesHistory());
     }
 
     @PreDestroy
     public void preDestroy() {
-        plainWsConnector.closeConnection();
+        wsConnector.closeConnection();
     }
 }

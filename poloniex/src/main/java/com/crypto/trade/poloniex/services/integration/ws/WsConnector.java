@@ -1,4 +1,4 @@
-package com.crypto.trade.poloniex.services.integration;
+package com.crypto.trade.poloniex.services.integration.ws;
 
 import javax.websocket.DeploymentException;
 import java.io.IOException;

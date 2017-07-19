@@ -1,16 +1,13 @@
-package com.crypto.trade.poloniex.services.integration;
+package com.crypto.trade.poloniex.services.integration.ws;
 
 import com.crypto.trade.poloniex.config.properties.PoloniexProperties;
 import com.crypto.trade.poloniex.dto.PoloniexTrade;
-import com.crypto.trade.poloniex.services.analytics.AnalyticsService;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
-import com.crypto.trade.poloniex.services.analytics.StrategiesBuilder;
 import com.crypto.trade.poloniex.storage.TickersStorage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import rx.Subscription;
 import ws.wamp.jawampa.WampClient;
 import ws.wamp.jawampa.WampClientBuilder;

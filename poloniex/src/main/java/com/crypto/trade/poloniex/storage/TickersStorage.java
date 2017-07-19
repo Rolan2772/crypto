@@ -86,8 +86,8 @@ public class TickersStorage {
         if (ticks.isEmpty() || !ticks.get(ticks.size() - 1).inPeriod(time)) {
             if (!ticks.isEmpty()) {
                 TimeSeries timeSeries = new TimeSeries("BTC_ETH", ticks);
-//                Strategy strategy = strategiesBuilder.buildShortBuyStrategy(timeSeries, StrategiesBuilder.DEFAULT_TIME_FRAME);
-                Strategy strategy = strategiesBuilder.buildTestStrategy(timeSeries, 1);
+                Strategy strategy = strategiesBuilder.buildShortBuyStrategy(timeSeries, StrategiesBuilder.DEFAULT_TIME_FRAME);
+                //Strategy strategy = strategiesBuilder.buildTestStrategy(timeSeries, 1);
                 int index = ticks.size() - 1;
                 TradingRecord tradingRecord = tradingRecords.get(timeFrame);
                 Tick lastTick = ticks.get(index);

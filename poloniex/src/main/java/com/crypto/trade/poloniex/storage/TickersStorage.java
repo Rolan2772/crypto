@@ -94,7 +94,7 @@ public class TickersStorage {
                 log.info("Analyzing lats tick {} for {} candles.", lastTick, timeFrame);
                 TradingAction action = realTimeAnalyticsService.analyzeTick(strategy, lastTick, index, tradingRecord);
                 if (!historyTick && TradingAction.shouldPlaceOrder(action)) {
-                    Optional<PoloniexOrder> poloniexOrder = tradingService.placeOrder(tradingRecord, index, action, false);
+                    Optional<PoloniexOrder> poloniexOrder = tradingService.placeOrder(tradingRecord, index, action, true);
                     poloniexOrder.ifPresent(order -> orders.get(timeFrame).add(order));
                 }
             }

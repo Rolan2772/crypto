@@ -15,7 +15,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 @Slf4j
@@ -69,7 +68,7 @@ public class WsConnectionHandler implements WebSocketHandler {
     private LocalDateTime parseTimeStamp(String[] trade) {
         String tradeTime = trade[5].split("]")[0];
         Date tradeDate = new Date(Long.parseLong(tradeTime) * 1000);
-        return LocalDateTime.ofInstant(tradeDate.toInstant(), ZoneId.of("GMT-0")).truncatedTo(ChronoUnit.MINUTES);
+        return LocalDateTime.ofInstant(tradeDate.toInstant(), ZoneId.of("GMT-0"));
     }
 
     private BigDecimal parseRate(String[] trade) {

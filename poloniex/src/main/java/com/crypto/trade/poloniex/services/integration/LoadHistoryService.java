@@ -28,14 +28,14 @@ public class LoadHistoryService {
 
     public List<PoloniexHistoryTrade> loadTradesHistory() {
         List<PoloniexHistoryTrade> trades = new ArrayList<>();
-        int count = 12;
+        int count = 20;
         int inc = 6;
         for (int i = count; i > inc; i -= inc) {
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("currencyPair", "BTC_ETH");
-            Instant from = Instant.now().minus(i, ChronoUnit.HOURS);
+            Instant from = Instant.now().minus(i, ChronoUnit.MINUTES);
             parameters.put("startTime", from.getEpochSecond());
-            Instant to = Instant.now().minus(i - inc, ChronoUnit.HOURS);
+            Instant to = Instant.now().minus(i - inc, ChronoUnit.MINUTES);
             parameters.put("endTime", to.getEpochSecond());
             log.info("Requesting time: {} - {}", from, to);
             ResponseEntity<List<PoloniexHistoryTrade>> response = restTemplate.exchange(poloniexProperties.getApi().getTradeHistoryUrl(),

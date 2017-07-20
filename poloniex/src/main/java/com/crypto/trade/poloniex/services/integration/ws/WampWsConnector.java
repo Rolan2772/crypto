@@ -3,7 +3,7 @@ package com.crypto.trade.poloniex.services.integration.ws;
 import com.crypto.trade.poloniex.config.properties.PoloniexProperties;
 import com.crypto.trade.poloniex.dto.PoloniexTrade;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
-import com.crypto.trade.poloniex.storage.TickersStorage;
+import com.crypto.trade.poloniex.storage.TradesStorage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -28,7 +28,7 @@ public class WampWsConnector implements WsConnector {
     @Autowired
     private ThreadPoolTaskExecutor ticksExecutor;
     @Autowired
-    private TickersStorage tickersStorage;
+    private TradesStorage tradesStorage;
 
     private Subscription eventSubscription;
     private AtomicLong counter = new AtomicLong(0);
@@ -72,7 +72,7 @@ public class WampWsConnector implements WsConnector {
                                                 pair,
                                                 s.arguments().get(1).asText(),
                                                 "", "");
-                                        tickersStorage.addTrade(CurrencyPair.BTC_ETH, trade);
+                                        tradesStorage.addTrade(CurrencyPair.BTC_ETH, trade);
                                     } catch (RuntimeException ex) {
                                         log.error("fsdfs", ex);
                                     }

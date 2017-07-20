@@ -1,5 +1,6 @@
 package com.crypto.trade.poloniex.dto;
 
+import com.crypto.trade.poloniex.services.analytics.TradingAction;
 import eu.verdelhan.ta4j.Order;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,6 +19,8 @@ public class PoloniexOrder {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime executedTime;
     private Order sourceOrder;
+    private TradingAction action;
+    private int index;
 
     public PoloniexOrder(Long orderId, Order sourceOrder) {
         this.orderId = orderId;

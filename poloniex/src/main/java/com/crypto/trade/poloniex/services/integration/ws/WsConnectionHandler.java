@@ -2,7 +2,7 @@ package com.crypto.trade.poloniex.services.integration.ws;
 
 import com.crypto.trade.poloniex.dto.PoloniexTrade;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
-import com.crypto.trade.poloniex.storage.TickersStorage;
+import com.crypto.trade.poloniex.storage.TradesStorage;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class WsConnectionHandler implements WebSocketHandler {
     @Autowired
     private ThreadPoolTaskExecutor ticksExecutor;
     @Autowired
-    private TickersStorage tickersStorage;
+    private TradesStorage tradesStorage;
     @Getter
     private WebSocketSession session;
 
@@ -54,7 +54,7 @@ public class WsConnectionHandler implements WebSocketHandler {
                         Long tradeId = Long.valueOf(trade[1].replace("\"", ""));
                         String type = "1".equals(trade[2]) ? "buy" : "sell";
                         PoloniexTrade pTrade = new PoloniexTrade(tradeId, ZonedDateTime.of(timestamp, ZoneId.of("GMT+0")), trade[4].replace("\"", ""), trade[3].replace("\"", ""), "0", type);
-                        tickersStorage.addTrade(CurrencyPair.BTC_ETH, pTrade);
+                        tradesStorage.addTrade(CurrencyPair.BTC_ETH, pTrade);
 
                         //log.info("rate = {}; timestamp = {}", rate, timestamp);
                     }

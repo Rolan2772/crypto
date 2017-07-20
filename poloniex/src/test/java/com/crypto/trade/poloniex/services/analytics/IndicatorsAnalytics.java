@@ -3,7 +3,7 @@ package com.crypto.trade.poloniex.services.analytics;
 import com.crypto.trade.poloniex.dto.PoloniexTrade;
 import com.crypto.trade.poloniex.services.export.AnalyticsExportService;
 import com.crypto.trade.poloniex.services.utils.CsvFileWriter;
-import com.crypto.trade.poloniex.storage.TickersStorage;
+import com.crypto.trade.poloniex.storage.TradesStorage;
 import com.opencsv.CSVReader;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -21,17 +21,17 @@ import java.util.logging.Logger;
 public class IndicatorsAnalytics {
 
     public static void main(String[] args) {
-        TickersStorage tickersStorage = new TickersStorage();
-        loadTicks(tickersStorage);
+        TradesStorage tradesStorage = new TradesStorage();
+        loadTicks(tradesStorage);
         CsvFileWriter csvFileWriter = new CsvFileWriter();
         AnalyticsExportService analyticsExportService = new AnalyticsExportService();
-        ReflectionTestUtils.setField(analyticsExportService, "tickersStorage", tickersStorage);
+        ReflectionTestUtils.setField(analyticsExportService, "tradesStorage", tradesStorage);
         ReflectionTestUtils.setField(analyticsExportService, "csvFileWriter", csvFileWriter);
 
         analyticsExportService.exportData();
     }
 
-    private static void loadTicks(TickersStorage tickersStorage) {
+    private static void loadTicks(TradesStorage tradesStorage) {
         InputStream stream = StrategiesBuilder.class.getClassLoader().getResourceAsStream("ticks/poloniex_ticks_2017-07-12.csv");
         CSVReader csvReader = null;
         List<String[]> lines = null;
@@ -54,12 +54,12 @@ public class IndicatorsAnalytics {
             for (String[] tradeLine : lines) {
                 ZonedDateTime time = ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(tradeLine[1]) * 1000), ZoneId.of("GMT+0"));
                 PoloniexTrade trade = new PoloniexTrade(0L, time, tradeLine[2], "", "", "");
-                tickersStorage.addTrade(CurrencyPair.BTC_ETH, trade);
+                tradesStorage.addTrade(CurrencyPair.BTC_ETH, trade);
             }
         }
     }
 
-    private static void loadTicks1(TickersStorage tickersStorage) {
+    private static void loadTicks1(TradesStorage tradesStorage) {
         InputStream stream = StrategiesBuilder.class.getClassLoader().getResourceAsStream("ticks/test.csv");
         CSVReader csvReader = null;
         List<String[]> lines = null;
@@ -82,7 +82,7 @@ public class IndicatorsAnalytics {
         if ((lines != null) && !lines.isEmpty()) {
             for (String[] tradeLine : lines) {
                 PoloniexTrade trade = new PoloniexTrade(0L, tickTime, tradeLine[0], "", "", "");
-                tickersStorage.addTrade(CurrencyPair.BTC_ETH, trade);
+                tradesStorage.addTrade(CurrencyPair.BTC_ETH, trade);
                 tickTime = tickTime.plusMinutes(1);
             }
         }

@@ -6,7 +6,7 @@ import com.crypto.trade.poloniex.dto.PoloniexOrder;
 import com.crypto.trade.poloniex.dto.PoloniexOrderResponse;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import com.crypto.trade.poloniex.services.analytics.TradingAction;
-import com.crypto.trade.poloniex.storage.TickersStorage;
+import com.crypto.trade.poloniex.storage.TradesStorage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.verdelhan.ta4j.Decimal;
 import eu.verdelhan.ta4j.Order;
@@ -38,7 +38,7 @@ public class TradingService {
     public static final BigDecimal MIN_PROFIT_PERCENT = new BigDecimal("1.01");
 
     @Autowired
-    private TickersStorage tickersStorage;
+    private TradesStorage tradesStorage;
     @Autowired
     private RestTemplate restTemplate;
     @Autowired
@@ -63,7 +63,7 @@ public class TradingService {
     private Optional<PoloniexOrder> buy(TradingRecord tradingRecord, int index, boolean real) {
         log.info("Processing BUY request {} at index {}", tradingRecord.getCurrentTrade(), index);
         Optional<PoloniexOrder> result = Optional.empty();
-        String lastTrade = tickersStorage.getLastTrade(CurrencyPair.BTC_ETH);
+        String lastTrade = tradesStorage.getLastTrade(CurrencyPair.BTC_ETH);
         String rate = real
                 ? lastTrade
                 : new BigDecimal(lastTrade).divide(new BigDecimal(2), PRECISION, BigDecimal.ROUND_HALF_UP).toString();
@@ -105,10 +105,10 @@ public class TradingService {
     }
 
     private Optional<PoloniexOrder> sell(TradingRecord tradingRecord, int index, boolean real) {
-        log.info("Processing BUY request {} at index {}", tradingRecord.getCurrentTrade(), index);
+        log.info("Processing SELL request {} at index {}", tradingRecord.getCurrentTrade(), index);
         Optional<PoloniexOrder> result = Optional.empty();
         Order entryOrder = tradingRecord.getCurrentTrade().getEntry();
-        BigDecimal lastTrade = new BigDecimal(tickersStorage.getLastTrade(CurrencyPair.BTC_ETH));
+        BigDecimal lastTrade = new BigDecimal(tradesStorage.getLastTrade(CurrencyPair.BTC_ETH));
         if (!real) {
             lastTrade = lastTrade.multiply(new BigDecimal(2));
         }
@@ -119,6 +119,7 @@ public class TradingService {
         BigDecimal buySpent = openPrice.multiply(buyAmount);
 
         BigDecimal sellGain = lastTrade.multiply(new BigDecimal(entryOrder.getAmount().toString())).multiply(AFTER_FEE_PERCENT);
+        log.debug("Open price = {}, buy amount = {}, but spent = {}, sell gain = {}", openPrice, buyAmount, buySpent, sellGain);
         BigDecimal diff = sellGain.divide(buySpent, PRECISION, BigDecimal.ROUND_HALF_UP);
         if (diff.compareTo(MIN_PROFIT_PERCENT) > 0) {
             String rate = lastTrade.toString();
@@ -176,7 +177,7 @@ public class TradingService {
             }
         } catch (InterruptedException e) {
             cancelOrder(poloniexOrder);
-            throw new PoloniexOrderNotExecuted("Polonex order execution has been interrupted", e);
+            throw new PoloniexOrderNotExecuted("Poloniex order execution has been interrupted", e);
         }
         return ZonedDateTime.now(ZoneId.of("GMT+0"));
     }

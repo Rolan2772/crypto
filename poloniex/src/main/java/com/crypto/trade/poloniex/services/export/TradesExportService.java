@@ -3,7 +3,7 @@ package com.crypto.trade.poloniex.services.export;
 import com.crypto.trade.poloniex.dto.PoloniexTrade;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import com.crypto.trade.poloniex.services.utils.CsvFileWriter;
-import com.crypto.trade.poloniex.storage.TickersStorage;
+import com.crypto.trade.poloniex.storage.TradesStorage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,11 +19,11 @@ public class TradesExportService implements ExportDataService {
     @Autowired
     private CsvFileWriter csvFileWriter;
     @Autowired
-    private TickersStorage tickersStorage;
+    private TradesStorage tradesStorage;
 
     @Override
     public void exportData() {
-        List<PoloniexTrade> poloniexTicks = tickersStorage.getTrades().getOrDefault(CurrencyPair.BTC_ETH, Collections.emptyList());
+        List<PoloniexTrade> poloniexTicks = tradesStorage.getTrades().getOrDefault(CurrencyPair.BTC_ETH, Collections.emptyList());
         StringBuilder sb = convert(poloniexTicks);
         csvFileWriter.write("poloniex_trades", sb);
     }

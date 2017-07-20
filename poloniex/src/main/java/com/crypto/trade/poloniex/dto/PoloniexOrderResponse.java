@@ -8,4 +8,5 @@ public class PoloniexOrderResponse {
 
     @JsonProperty("orderNumber")
     private Long orderId;
+    //@TODO: order response contains real trades
 }

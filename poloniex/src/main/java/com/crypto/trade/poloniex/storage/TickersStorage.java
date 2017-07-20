@@ -130,6 +130,8 @@ public class TickersStorage {
 
     public String getLastTrade(CurrencyPair currencyPair) {
         List<PoloniexTrade> pairTrades = trades.getOrDefault(currencyPair, Collections.emptyList());
-        return pairTrades.get(pairTrades.size() - 1).getRate();
+        String lastTrade = pairTrades.get(pairTrades.size() - 1).getRate();
+        log.debug("Last trade: " + lastTrade);
+        return lastTrade;
     }
 }

@@ -14,4 +14,12 @@ public class ExecutorsConfix {
         executor.setMaxPoolSize(200);
         return executor;
     }
+
+    @Bean
+    public ThreadPoolTaskExecutor tradesExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(50);
+        executor.setMaxPoolSize(100);
+        return executor;
+    }
 }

@@ -27,4 +27,8 @@ public class TimeFrameStorage {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }
+
+    public void addStrategy(PoloniexStrategy poloniexStrategy) {
+        this.activeStrategies.add(poloniexStrategy);
+    }
 }

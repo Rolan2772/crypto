@@ -15,15 +15,16 @@ public class PoloniexOrder {
 
     private Long orderId;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    private ZonedDateTime requestTime = ZonedDateTime.now(ZoneId.of("GMT+0"));
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    private ZonedDateTime executedTime;
+    private ZonedDateTime requestTime;
     private Order sourceOrder;
     private TradingAction action;
     private int index;
 
-    public PoloniexOrder(Long orderId, Order sourceOrder) {
+    public PoloniexOrder(Long orderId, Order sourceOrder, int index, TradingAction action) {
         this.orderId = orderId;
+        this.requestTime = ZonedDateTime.now(ZoneId.of("GMT+0"));
         this.sourceOrder = sourceOrder;
+        this.index = index;
+        this.action = action;
     }
 }

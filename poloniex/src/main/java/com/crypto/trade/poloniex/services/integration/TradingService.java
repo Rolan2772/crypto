@@ -91,7 +91,7 @@ public class TradingService {
                 if (!entered) {
                     log.warn("Trading record entering error at index={}, rate={}, amount={}/{}", index, rate, amount, amontAfterFee);
                 }
-                PoloniexOrder poloniexOrder = new PoloniexOrder(orderResponse.getOrderId(), tradingRecord.getLastOrder());
+                PoloniexOrder poloniexOrder = new PoloniexOrder(orderResponse.getOrderId(), tradingRecord.getLastOrder(), index, TradingAction.ENTERED);
                 log.debug("Poloniex order: {}", poloniexOrder);
                 result = Optional.of(poloniexOrder);
             }
@@ -147,7 +147,7 @@ public class TradingService {
                     if (!exited) {
                         log.warn("Trading record exiting error at index={}, rate={}/{}, amount={}", index, rate, rateAfterFee, amount);
                     }
-                    PoloniexOrder poloniexOrder = new PoloniexOrder(orderResponse.getOrderId(), tradingRecord.getLastOrder());
+                    PoloniexOrder poloniexOrder = new PoloniexOrder(orderResponse.getOrderId(), tradingRecord.getLastOrder(), index, TradingAction.EXITED);
                     log.debug("Poloniex order: {}", poloniexOrder);
                     result = Optional.of(poloniexOrder);
                 }

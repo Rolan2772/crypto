@@ -23,8 +23,8 @@ public class TradesExportService implements ExportDataService {
 
     @Override
     public void exportData() {
-        List<PoloniexTrade> poloniexTicks = tradesStorage.getTrades().getOrDefault(CurrencyPair.BTC_ETH, Collections.emptyList());
-        StringBuilder sb = convert(poloniexTicks);
+        List<PoloniexTrade> poloniexTrades = tradesStorage.getTrades().getOrDefault(CurrencyPair.BTC_ETH, Collections.emptyList());
+        StringBuilder sb = convert(poloniexTrades);
         csvFileWriter.write("poloniex_trades", sb);
     }
 

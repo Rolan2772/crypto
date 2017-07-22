@@ -32,19 +32,19 @@ public class TradeApiController {
 
     @GetMapping("/buy")
     public PoloniexOrder buy() {
-        return tradingService.placeOrder(new TradingRecord(), 0, TradingAction.SHOULD_ENTER, false).orElse(new PoloniexOrder(0L, null));
+        return tradingService.placeOrder(new TradingRecord(), 0, TradingAction.SHOULD_ENTER, false).orElse(new PoloniexOrder(0L, null, 0, TradingAction.ENTERED));
     }
 
     @GetMapping("/sell")
     public PoloniexOrder buy(@RequestParam(required = false, defaultValue = "0.094534523") BigDecimal price) {
         TradingRecord tradingRecord = new TradingRecord();
         tradingRecord.enter(0, Decimal.valueOf("0.02342523"), Decimal.valueOf("0.009975"));
-        return tradingService.placeOrder(tradingRecord, 1, TradingAction.SHOULD_ENTER, false).orElse(new PoloniexOrder(0L, null));
+        return tradingService.placeOrder(tradingRecord, 1, TradingAction.SHOULD_ENTER, false).orElse(new PoloniexOrder(0L, null, 0, TradingAction.EXITED));
     }
 
     @GetMapping("/cancel")
     public String getOrders(@RequestParam("orderId") Long orderId) {
-        return tradingService.cancelOrder(new PoloniexOrder(orderId, null));
+        return tradingService.cancelOrder(new PoloniexOrder(orderId, null, 0, TradingAction.CANCELLED));
     }
 
     @GetMapping("/orders")

@@ -35,12 +35,12 @@ public class CandlesExportService implements ExportDataService {
             TimeFrame timeFrame = timeFrameStorage.getTimeFrame();
             List<PoloniexStrategy> poloniexStrategies = timeFrameStorage.getActiveStrategies();
             List<PoloniexStrategy> strategiesCopy = exportHelper.createTradingRecordsCopy(poloniexStrategies);
-            List<PoloniexTradingRecord> realRecords = timeFrameStorage.getAllTradingRecords();
+            List<PoloniexTradingRecord> tradingRecords = timeFrameStorage.getAllTradingRecords();
             StringBuilder sb = new StringBuilder("timePeriod,beginTime,endTime,openPrice,closePrice,maxPrice,minPrice,amount,volume")
                     .append(",")
-                    .append(exportHelper.createStrategiesHeaders(realRecords, "sim"))
+                    .append(exportHelper.createStrategiesHeaders(tradingRecords, "sim"))
                     .append(",")
-                    .append(exportHelper.createStrategiesHeaders(realRecords, "real"))
+                    .append(exportHelper.createStrategiesHeaders(tradingRecords, "real"))
                     .append("\n");
 
             int count = timeFrameStorage.getCandles().size();
@@ -49,12 +49,17 @@ public class CandlesExportService implements ExportDataService {
                     .append(",")
                     .append(exportHelper.createHistoryTradesAnalytics(strategiesCopy, timeSeries, index))
                     .append(",")
-                    .append(exportHelper.convertRealTrades(realRecords, timeSeries, index))
+                    .append(exportHelper.convertRealTrades(tradingRecords, index))
                     .append("\n"));
 
-            sb.append(exportHelper.createResultAnalytics(timeSeries, poloniexStrategies));
-            sb.append("\n");
+            sb.append('\n');
+            sb.append("History analytics: ");
+            sb.append('\n');
             sb.append(exportHelper.createResultAnalytics(timeSeries, strategiesCopy));
+            sb.append('\n');
+            sb.append("Real trades: ");
+
+            sb.append(exportHelper.createResultAnalytics(timeSeries, poloniexStrategies));
 
             csvFileWriter.write("candles(" + timeFrame.getDisplayName() + ")", sb);
         }

@@ -13,6 +13,7 @@ import eu.verdelhan.ta4j.TradingRecord;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.time.ZonedDateTime;
 import java.util.Collections;
@@ -29,6 +30,8 @@ public class CandlesStorage {
     private AnalyticsService realTimeAnalyticsService;
     @Autowired
     private TradingService tradingService;
+    @Autowired
+    private ThreadPoolTaskExecutor tradesExecutor;
 
     private ReentrantLock updateCandlesLock = new ReentrantLock();
 
@@ -40,7 +43,7 @@ public class CandlesStorage {
                 .stream()
                 .filter(timeFrameStorage -> timeFrameStorage.getTimeFrame() == timeFrame)
                 .findFirst()
-                .get()
+                .orElse(new TimeFrameStorage(TimeFrame.ONE_MINUTE))
                 .getActiveStrategies();
     }
 
@@ -54,15 +57,26 @@ public class CandlesStorage {
     }
 
     private void updateCandles(TimeFrameStorage timeFrameStorage, PoloniexTrade poloniexTrade, boolean isHistoryTick) {
+        // @TODO: single lock for each time frame
         updateCandlesLock.lock();
         try {
             TimeFrame timeFrame = timeFrameStorage.getTimeFrame();
             List<Tick> candles = timeFrameStorage.getCandles();
             ZonedDateTime tradeTime = poloniexTrade.getTradeTime();
             boolean isNewCandleTrade = candles.isEmpty() || !candles.get(candles.size() - 1).inPeriod(tradeTime);
+            int index = candles.size() - 1;
             if (isNewCandleTrade) {
                 ////////////////////////////////////////////////////
-                onNewCandle(timeFrameStorage, isHistoryTick);
+                if (!candles.isEmpty()) {
+                    log.info("Trading on new {} candle", timeFrame);
+                    tradesExecutor.submit(() -> {
+                        try {
+                            onNewCandle(timeFrameStorage, index, isHistoryTick);
+                        } catch (Exception ex) {
+                            log.error("Failed to trade on {}", ex);
+                        }
+                    });
+                }
                 ////////////////////////////////////////////////////
                 candles.add(new Tick(timeFrame.getFrameDuration(), timeFrame.calculateEndTime(tradeTime)));
                 log.info("{} candle has been built.", timeFrame);
@@ -73,24 +87,21 @@ public class CandlesStorage {
         }
     }
 
-    private void onNewCandle(TimeFrameStorage timeFrameStorage, boolean historyTick) {
+    private void onNewCandle(TimeFrameStorage timeFrameStorage, int index, boolean isHistoryTick) {
         TimeFrame timeFrame = timeFrameStorage.getTimeFrame();
         List<Tick> candles = timeFrameStorage.getCandles();
-        log.info("Analyzing new {} candle.", timeFrame);
-        int index = candles.size() - 1;
+        log.info("Analyzing new {} candle at {}.", timeFrame, index);
         Tick lastCandle = candles.get(index);
         for (PoloniexStrategy poloniexStrategy : timeFrameStorage.getActiveStrategies()) {
-            log.debug("Executing strategy '{}' on time series {}", poloniexStrategy.getName(), candles);
+            log.debug("Executing strategy '{}' on time series {}", poloniexStrategy.getName(), timeFrame);
             List<PoloniexTradingRecord> tradingRecords = poloniexStrategy.getTradingRecords();
             // @TODO: only add new trading record if current is entered
             for (int trIndex = 0; trIndex < tradingRecords.size(); trIndex++) {
                 PoloniexTradingRecord poloniexTradingRecord = tradingRecords.get(trIndex);
                 TradingRecord tradingRecord = poloniexTradingRecord.getTradingRecord();
                 TradingAction action = realTimeAnalyticsService.analyzeTick(poloniexStrategy.getStrategy(), lastCandle, index, tradingRecord);
-                log.debug("Strategy {} trading record {} analytics result {}.", poloniexStrategy.getName(), trIndex, action);
-                // @TODO: separate buys from sells
-                if (!historyTick && TradingAction.shouldPlaceOrder(action)) {
-                    // @TODO: each HTTP request will slow strategies and trading records
+                log.debug("Strategy {}/{} trading record {} analytics result {}.", timeFrame, poloniexStrategy.getName(), trIndex, action);
+                if (!isHistoryTick && TradingAction.shouldPlaceOrder(action)) {
                     Optional<PoloniexOrder> poloniexOrder = tradingService.placeOrder(tradingRecord, index, action, true);
                     poloniexOrder.ifPresent(poloniexTradingRecord::addPoloniexOrder);
                 }

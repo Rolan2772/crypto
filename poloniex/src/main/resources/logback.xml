@@ -48,6 +48,7 @@
     <logger name="org.springframework" level="INFO"/>
     <logger name="eu.verdelhan.ta4j" level="TRACE"/>
     <logger name="org.springframework.web" level="DEBUG"/>
+    <logger name="org.glassfish.tyrus" level="INFO"/>
 
     <root level="INFO">
         <appender-ref ref="console"/>

@@ -13,13 +13,15 @@ import java.time.format.DateTimeFormatter;
 @Service
 public class CsvFileWriter {
 
+    private static String OS = System.getProperty("os.name").toLowerCase();
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public void write(String name, StringBuilder data) {
         BufferedWriter writer = null;
+        String str = OS.contains("win") ? data.toString().replaceAll("\\,", "\\;").replaceAll("\\.", "\\,") : data.toString();
         try {
             writer = new BufferedWriter(new FileWriter(name + "_" + LocalDateTime.now().format(formatter) + ".csv"));
-            writer.write(data.toString());
+            writer.write(str);
         } catch (IOException ioe) {
             log.error("Failed to write csv", ioe);
         } finally {

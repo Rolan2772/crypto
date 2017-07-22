@@ -30,9 +30,17 @@ public class TradesStorage {
     }
 
     public void addTradesHistory(CurrencyPair currency, List<PoloniexHistoryTrade> items) {
-        List<PoloniexTrade> currencyTrades = trades.get(currency);
-        currencyTrades.sort((o1, o2) -> o1.getTradeId().compareTo(o2.getTradeId()));
-        currencyTrades.addAll(items.stream().map(PoloniexTrade::new).collect(Collectors.toList()));
+        List<PoloniexTrade> currencyTrades = trades.getOrDefault(currency, Collections.emptyList());
+        currencyTrades.addAll(items.stream()
+                .map(PoloniexTrade::new)
+                .collect(Collectors.toList()));
+        currencyTrades.sort((o1, o2) -> {
+            int result = o1.getTradeTime().compareTo(o2.getTradeTime());
+            if (result == 0) {
+                result = o1.getTradeId().compareTo(o2.getTradeId());
+            }
+            return result;
+        });
         candlesStorage.addTradesHistory(currency, currencyTrades);
     }
 

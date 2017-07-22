@@ -26,7 +26,6 @@ public class PoloniexEndPoint {
 
     @OnMessage
     public void onMessage(String message) {
-
         if (message.startsWith("[148") && message.contains("[\"t\"")) {
 
             ticksExecutor.submit(() -> {
@@ -44,10 +43,9 @@ public class PoloniexEndPoint {
                         PoloniexTrade pTrade = new PoloniexTrade(tradeId, ZonedDateTime.of(timestamp, ZoneId.of("GMT+0")), trade[4].replace("\"", ""), trade[3].replace("\"", ""), "0", type);
                         tradesStorage.addTrade(CurrencyPair.BTC_ETH, pTrade);
 
-                        //log.info("rate = {}; timestamp = {}", rate, timestamp);
                     }
                 } catch (Exception ex) {
-                    log.error("dfgsd", ex);
+                    log.error("Failed to process message: " + message, ex);
                 }
             });
         }

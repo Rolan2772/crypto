@@ -37,10 +37,6 @@ public class AnalyticsExportService implements ExportDataService {
     @Autowired
     private CandlesStorage candlesStorage;
     @Autowired
-    private AnalyticsService historyAnalyticsService;
-    @Autowired
-    private StrategiesBuilder strategiesBuilder;
-    @Autowired
     private ExportHelper exportHelper;
 
     @Override
@@ -52,12 +48,12 @@ public class AnalyticsExportService implements ExportDataService {
             TimeFrame timeFrame = timeFrameStorage.getTimeFrame();
             List<PoloniexStrategy> poloniexStrategies = timeFrameStorage.getActiveStrategies();
             List<PoloniexStrategy> strategiesCopy = exportHelper.createTradingRecordsCopy(poloniexStrategies);
-            List<PoloniexTradingRecord> realRecords = timeFrameStorage.getAllTradingRecords();
+            List<PoloniexTradingRecord> tradingRecords = timeFrameStorage.getAllTradingRecords();
             StringBuilder sb = new StringBuilder("timestamp,close,rsi,stochK,stochD,sma,ema32,ema128")
                     .append(",")
-                    .append(exportHelper.createStrategiesHeaders(realRecords, "sim"))
+                    .append(exportHelper.createStrategiesHeaders(tradingRecords, "sim"))
                     .append(",")
-                    .append(exportHelper.createStrategiesHeaders(realRecords, "real"))
+                    .append(exportHelper.createStrategiesHeaders(tradingRecords, "real"))
                     .append("\n");
 
             int count = timeFrameStorage.getCandles().size();
@@ -67,14 +63,19 @@ public class AnalyticsExportService implements ExportDataService {
                     .append(",")
                     .append(exportHelper.createHistoryTradesAnalytics(strategiesCopy, timeSeries, index))
                     .append(",")
-                    .append(exportHelper.convertRealTrades(realRecords, timeSeries, index))
+                    .append(exportHelper.convertRealTrades(tradingRecords, index))
                     .append("\n"));
 
-            sb.append(exportHelper.createResultAnalytics(timeSeries, poloniexStrategies));
-            sb.append("\n");
+            sb.append('\n');
+            sb.append("History analytics: ");
+            sb.append('\n');
             sb.append(exportHelper.createResultAnalytics(timeSeries, strategiesCopy));
+            sb.append('\n');
+            sb.append("Real trades: ");
+            sb.append('\n');
+            sb.append(exportHelper.createResultAnalytics(timeSeries, poloniexStrategies));
 
-            csvFileWriter.write("candles(" + timeFrame.getDisplayName() + ")", sb);
+            csvFileWriter.write("analytics(" + timeFrame.getDisplayName() + ")", sb);
         }
     }
 

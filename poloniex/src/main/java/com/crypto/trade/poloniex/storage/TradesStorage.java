@@ -25,16 +25,20 @@ public class TradesStorage {
     private ConcurrentMap<CurrencyPair, List<PoloniexTrade>> trades = new ConcurrentHashMap<>();
 
     public void addTrade(CurrencyPair currency, PoloniexTrade poloniexTrade) {
-        trades.computeIfAbsent(currency, s -> new CopyOnWriteArrayList<>());
+        initCurrency(currency);
         trades.get(currency).add(poloniexTrade);
         candlesStorage.addTrade(currency, poloniexTrade);
     }
 
+    public void initCurrency(CurrencyPair currency) {
+        trades.computeIfAbsent(currency, s -> new CopyOnWriteArrayList<>());
+    }
+
     public void addTradesHistory(CurrencyPair currency, List<PoloniexHistoryTrade> items) {
-        List<PoloniexTrade> currencyTrades = trades.getOrDefault(currency, Collections.emptyList());
+        List<PoloniexTrade> currencyTrades = trades.get(currency);
         currencyTrades.addAll(items.stream()
                 .map(PoloniexTrade::new)
-                .collect(Collectors.toCollection(ArrayList::new)));
+                .collect(Collectors.toList()));
         currencyTrades.sort((o1, o2) -> {
             int result = o1.getTradeTime().compareTo(o2.getTradeTime());
             if (result == 0) {

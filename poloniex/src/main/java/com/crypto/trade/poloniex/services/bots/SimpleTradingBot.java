@@ -43,6 +43,7 @@ public class SimpleTradingBot {
 
     @PostConstruct
     public void postConstruct() throws IOException, DeploymentException {
+        tradesStorage.initCurrency(CurrencyPair.BTC_ETH);
         buildTradingStrategies(CurrencyPair.BTC_ETH);
         wsConnector.connect();
         tradesStorage.addTradesHistory(CurrencyPair.BTC_ETH, loadHistoryService.loadTradesHistory(CurrencyPair.BTC_ETH, Duration.ofMinutes(20)));

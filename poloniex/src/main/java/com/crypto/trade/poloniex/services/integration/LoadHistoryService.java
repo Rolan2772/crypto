@@ -36,21 +36,22 @@ public class LoadHistoryService {
     public List<PoloniexHistoryTrade> loadTradesHistory(CurrencyPair currencyPair, Duration historyDuration) {
         List<PoloniexHistoryTrade> trades = new ArrayList<>();
         Instant from = Instant.now().minus(historyDuration);
-        Instant to = Instant.now();
+        Instant now = Instant.now();
         log.info("Loading trades history from {} to {}",
                 ZonedDateTime.ofInstant(from, SimpleTradingBot.GMT0).toLocalDateTime(),
-                ZonedDateTime.ofInstant(to, SimpleTradingBot.GMT0).toLocalDateTime());
-        while (from.compareTo(to) < 0) {
+                ZonedDateTime.ofInstant(now, SimpleTradingBot.GMT0).toLocalDateTime());
+        while (from.compareTo(now) < 0) {
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("currencyPair", currencyPair);
             parameters.put("startTime", from.getEpochSecond());
+            Instant to = from.plus(MAXIMUM_PER_REQUEST);
             parameters.put("endTime", to.getEpochSecond());
-            log.info("Requesting time: {} - {}", from, to);
+            log.info("Requesting time: {} - {}", parameters.get("startTime"), parameters.get("endTime"));
             ResponseEntity<List<PoloniexHistoryTrade>> response = restTemplate.exchange(properties.getApi().getTradeHistoryUrl(),
                     HttpMethod.GET, null, new ParameterizedTypeReference<List<PoloniexHistoryTrade>>() {
                     }, parameters);
             trades.addAll(response.getBody());
-            from = from.plus(MAXIMUM_PER_REQUEST);
+            from = from.plus(MAXIMUM_PER_REQUEST).plusSeconds(1);
         }
         return trades;
     }

@@ -17,12 +17,16 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.websocket.DeploymentException;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class SimpleTradingBot {
+
+    public static final ZoneId GMT0 = ZoneId.of("GMT+0");
 
     @Autowired
     private LoadHistoryService loadHistoryService;
@@ -41,7 +45,7 @@ public class SimpleTradingBot {
     public void postConstruct() throws IOException, DeploymentException {
         buildTradingStrategies(CurrencyPair.BTC_ETH);
         wsConnector.connect();
-        tradesStorage.addTradesHistory(CurrencyPair.BTC_ETH, loadHistoryService.loadTradesHistory());
+        tradesStorage.addTradesHistory(CurrencyPair.BTC_ETH, loadHistoryService.loadTradesHistory(CurrencyPair.BTC_ETH, Duration.ofMinutes(20)));
     }
 
     private void buildTradingStrategies(CurrencyPair currencyPair) {

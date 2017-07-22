@@ -2,6 +2,7 @@ package com.crypto.trade.poloniex.conrollers;
 
 import com.crypto.trade.poloniex.services.export.AnalyticsExportService;
 import com.crypto.trade.poloniex.services.export.CandlesExportService;
+import com.crypto.trade.poloniex.services.export.OrdersExportService;
 import com.crypto.trade.poloniex.services.export.TradesExportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +19,8 @@ public class DataExportController {
     private CandlesExportService candlesExportService;
     @Autowired
     private AnalyticsExportService analyticsExportService;
+    @Autowired
+    private OrdersExportService ordersExportService;
 
     @GetMapping("/ticks")
     public void exportTicks() {
@@ -34,10 +37,16 @@ public class DataExportController {
         analyticsExportService.exportData();
     }
 
+    @GetMapping("/orders")
+    public void exportOrders() {
+        ordersExportService.exportData();
+    }
+
     @GetMapping("/all")
     public void all() {
         tradesExportService.exportData();
         candlesExportService.exportData();
         analyticsExportService.exportData();
+        ordersExportService.exportData();
     }
 }

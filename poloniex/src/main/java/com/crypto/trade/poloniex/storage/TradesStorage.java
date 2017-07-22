@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,7 +34,7 @@ public class TradesStorage {
         List<PoloniexTrade> currencyTrades = trades.getOrDefault(currency, Collections.emptyList());
         currencyTrades.addAll(items.stream()
                 .map(PoloniexTrade::new)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toCollection(ArrayList::new)));
         currencyTrades.sort((o1, o2) -> {
             int result = o1.getTradeTime().compareTo(o2.getTradeTime());
             if (result == 0) {

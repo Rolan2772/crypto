@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class Trade {
 
-    private boolean realTrade;
+    private boolean realPrice;
 }

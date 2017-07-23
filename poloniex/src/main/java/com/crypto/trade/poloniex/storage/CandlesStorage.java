@@ -114,7 +114,7 @@ public class CandlesStorage {
                     boolean canTrade = TradingAction.SHOULD_ENTER != action || !onceEntered;
                     log.debug("Strategy '{}' canTrade/onceEntered flags: {}/{}", poloniexStrategy.getName(), canTrade, onceEntered);
                     if (canTrade) {
-                        tradeResultOrder = tradingService.placeOrder(tradingRecord, index, action, properties.getTrade().isRealTrade());
+                        tradeResultOrder = tradingService.placeOrder(tradingRecord, index, action, properties.getTrade().isRealPrice());
                     }
                     onceEntered |= TradingAction.SHOULD_ENTER == action && tradeResultOrder.isPresent();
                     log.debug("Strategy '{}' onceEntered flag: {}", poloniexStrategy.getName(), onceEntered);

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,8 +46,24 @@ public class SimpleTradingBot {
     public void postConstruct() throws IOException, DeploymentException {
         tradesStorage.initCurrency(CurrencyPair.BTC_ETH);
         buildTradingStrategies(CurrencyPair.BTC_ETH);
+        //buildTestTradingStrategy(CurrencyPair.BTC_ETH);
         wsConnector.connect();
         tradesStorage.addTradesHistory(CurrencyPair.BTC_ETH, loadHistoryService.loadTradesHistory(CurrencyPair.BTC_ETH, Duration.ofMinutes(20)));
+    }
+
+    private void buildTestTradingStrategy(CurrencyPair currencyPair) {
+        TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
+        TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
+        String shortBuyName = "testStrategy";
+        Strategy shortBuyStrategy = strategiesBuilder.buildTestStrategy(new TimeSeries(timeFrameStorage.getCandles()), StrategiesBuilder.DEFAULT_TIME_FRAME);
+        PoloniexStrategy poloniexStrategy = new PoloniexStrategy(shortBuyName, shortBuyStrategy, timeFrame);
+        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(1, shortBuyName, new TradingRecord()));
+        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(2, shortBuyName, new TradingRecord()));
+        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(3, shortBuyName, new TradingRecord()));
+        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(4, shortBuyName, new TradingRecord()));
+        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(5, shortBuyName, new TradingRecord()));
+        timeFrameStorage.addStrategy(poloniexStrategy);
+        candlesStorage.getCandles().put(currencyPair, Collections.singletonList(timeFrameStorage));
     }
 
     private void buildTradingStrategies(CurrencyPair currencyPair) {
@@ -57,6 +74,9 @@ public class SimpleTradingBot {
             PoloniexStrategy poloniexStrategy = new PoloniexStrategy(shortBuyName, shortBuyStrategy, timeFrame);
             poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(1, shortBuyName, new TradingRecord()));
             poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(2, shortBuyName, new TradingRecord()));
+            poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(3, shortBuyName, new TradingRecord()));
+            poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(4, shortBuyName, new TradingRecord()));
+            poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(5, shortBuyName, new TradingRecord()));
             timeFrameStorage.addStrategy(poloniexStrategy);
             return timeFrameStorage;
         }).collect(Collectors.toList());

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 public class RealTimeAnalyticsService implements AnalyticsService {
 
     @Override
-    public TradingAction analyzeTick(Strategy strategy, Tick lastTick, int index, TradingRecord tradingRecord) {
+    public TradingAction analyzeTick(Strategy strategy, Tick lastTick, int index, int historyIndex, boolean analyzeHistory, TradingRecord tradingRecord) {
         TradingAction action = TradingAction.NO_ACTION;
         if (tradingRecord.getCurrentTrade().isNew() && strategy.shouldEnter(index, tradingRecord)) {
             log.debug("Strategy should ENTER on {}", index);

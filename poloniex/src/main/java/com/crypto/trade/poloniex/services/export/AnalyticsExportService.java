@@ -61,7 +61,7 @@ public class AnalyticsExportService implements ExportDataService {
             List<Indicator<?>> indicators = createIndicators(indicatorTimeFrame, timeSeries);
             IntStream.range(0, count).forEach(index -> sb.append(exportHelper.convertIndicators(timeSeries, indicators, index))
                     .append(",")
-                    .append(exportHelper.createHistoryTradesAnalytics(strategiesCopy, timeSeries, index))
+                    .append(exportHelper.createHistoryTradesAnalytics(strategiesCopy, timeSeries, index, timeFrameStorage.getHistoryIndex()))
                     .append(",")
                     .append(exportHelper.convertRealTrades(tradingRecords, index))
                     .append("\n"));

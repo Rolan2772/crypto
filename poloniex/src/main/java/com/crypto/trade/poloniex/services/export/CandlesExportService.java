@@ -47,7 +47,7 @@ public class CandlesExportService implements ExportDataService {
             TimeSeries timeSeries = new TimeSeries(timeFrame.name(), timeFrameStorage.getCandles());
             IntStream.range(0, count).forEach(index -> sb.append(exportHelper.convertCandle(timeSeries, index))
                     .append(",")
-                    .append(exportHelper.createHistoryTradesAnalytics(strategiesCopy, timeSeries, index))
+                    .append(exportHelper.createHistoryTradesAnalytics(strategiesCopy, timeSeries, index, timeFrameStorage.getHistoryIndex()))
                     .append(",")
                     .append(exportHelper.convertRealTrades(tradingRecords, index))
                     .append("\n"));
@@ -58,7 +58,7 @@ public class CandlesExportService implements ExportDataService {
             sb.append(exportHelper.createResultAnalytics(timeSeries, strategiesCopy));
             sb.append('\n');
             sb.append("Real trades: ");
-
+            sb.append('\n');
             sb.append(exportHelper.createResultAnalytics(timeSeries, poloniexStrategies));
 
             csvFileWriter.write("candles(" + timeFrame.getDisplayName() + ")", sb);

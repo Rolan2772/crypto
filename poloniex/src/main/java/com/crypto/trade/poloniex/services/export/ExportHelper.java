@@ -5,7 +5,10 @@ import com.crypto.trade.poloniex.services.analytics.AnalyticsService;
 import com.crypto.trade.poloniex.services.analytics.TradingAction;
 import com.crypto.trade.poloniex.storage.PoloniexStrategy;
 import com.crypto.trade.poloniex.storage.PoloniexTradingRecord;
-import eu.verdelhan.ta4j.*;
+import eu.verdelhan.ta4j.Indicator;
+import eu.verdelhan.ta4j.Tick;
+import eu.verdelhan.ta4j.TimeSeries;
+import eu.verdelhan.ta4j.TradingRecord;
 import eu.verdelhan.ta4j.analysis.criteria.TotalProfitCriterion;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +57,7 @@ public class ExportHelper {
         return closeTime + "," + values;
     }
 
-    public String createHistoryTradesAnalytics(List<PoloniexStrategy> strategies, TimeSeries timeSeries, int index) {
+    public String createHistoryTradesAnalytics(List<PoloniexStrategy> strategies, TimeSeries timeSeries, int index, int historyIndex) {
         Tick tick = timeSeries.getTick(index);
         return strategies.stream()
                 .flatMap(strategy -> strategy.getTradingRecords()
@@ -62,6 +65,8 @@ public class ExportHelper {
                         .map(tradingRecord -> analyticsService.analyzeTick(strategy.getStrategy(),
                                 tick,
                                 index,
+                                historyIndex,
+                                false,
                                 tradingRecord.getTradingRecord())))
                 .map(Object::toString)
                 .collect(Collectors.joining(","));
@@ -109,5 +114,17 @@ public class ExportHelper {
                             .collect(Collectors.toList());
                     return new PoloniexStrategy(strategy.getName(), strategy.getStrategy(), strategy.getTimeFrame(), tradingRecords);
                 }).collect(Collectors.toList());
+    }
+
+    public String convertOrder(String name, PoloniexOrder poloniexOrder) {
+        return Stream.of(name,
+                poloniexOrder.getOrderId(),
+                poloniexOrder.getRequestTime().toLocalDateTime(),
+                poloniexOrder.getIndex(),
+                poloniexOrder.getSourceOrder().getPrice(),
+                poloniexOrder.getSourceOrder().getAmount(),
+                poloniexOrder.getSourceOrder().getType())
+                .map(Object::toString)
+                .collect(Collectors.joining(","));
     }
 }

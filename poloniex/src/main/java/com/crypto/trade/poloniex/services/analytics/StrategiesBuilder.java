@@ -9,10 +9,7 @@ import eu.verdelhan.ta4j.indicators.oscillators.StochasticOscillatorDIndicator;
 import eu.verdelhan.ta4j.indicators.oscillators.StochasticOscillatorKIndicator;
 import eu.verdelhan.ta4j.indicators.simple.ClosePriceIndicator;
 import eu.verdelhan.ta4j.indicators.trackers.RSIIndicator;
-import eu.verdelhan.ta4j.trading.rules.BooleanRule;
-import eu.verdelhan.ta4j.trading.rules.CrossedUpIndicatorRule;
-import eu.verdelhan.ta4j.trading.rules.StopGainRule;
-import eu.verdelhan.ta4j.trading.rules.UnderIndicatorRule;
+import eu.verdelhan.ta4j.trading.rules.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -137,7 +134,7 @@ public class StrategiesBuilder {
         Rule entryRule = new BooleanRule(true);
 
         // Exit rule
-        Rule exitRule = new BooleanRule(true);
+        Rule exitRule = new FixedRule(27, 34, 36, 50, 60);
         Strategy strategy = new Strategy(entryRule, exitRule);
         strategy.setUnstablePeriod(timeFrame);
 

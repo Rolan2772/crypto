@@ -5,7 +5,6 @@ import com.crypto.trade.poloniex.services.analytics.StrategiesBuilder;
 import com.crypto.trade.poloniex.services.analytics.TimeFrame;
 import com.crypto.trade.poloniex.services.utils.CsvFileWriter;
 import com.crypto.trade.poloniex.storage.CandlesStorage;
-import com.crypto.trade.poloniex.storage.PoloniexStrategy;
 import com.crypto.trade.poloniex.storage.PoloniexTradingRecord;
 import com.crypto.trade.poloniex.storage.TimeFrameStorage;
 import lombok.extern.slf4j.Slf4j;
@@ -39,17 +38,7 @@ public class OrdersExportService implements ExportDataService {
             StringBuilder sb = new StringBuilder("name,id,time,index,price,amount,type\n");
             tradingRecords.forEach(tradingRecord -> {
                 String name = tradingRecord.getStrategyName() + "-tr-" + tradingRecord.getId();
-                sb.append(name).append("\n");
-                tradingRecord.getOrders().forEach(poloniexOrder -> {
-                    sb.append(",")
-                            .append(poloniexOrder.getOrderId())
-                            .append(poloniexOrder.getRequestTime().toLocalDateTime())
-                            .append(poloniexOrder.getIndex())
-                            .append(poloniexOrder.getSourceOrder().getPrice())
-                            .append(poloniexOrder.getSourceOrder().getAmount())
-                            .append(poloniexOrder.getSourceOrder().getType())
-                            .append("\n");
-                });
+                tradingRecord.getOrders().forEach(poloniexOrder -> sb.append(exportHelper.convertOrder(name, poloniexOrder)).append("\n"));
             });
 
             csvFileWriter.write("orders(" + timeFrame.getDisplayName() + ")", sb);

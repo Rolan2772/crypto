@@ -5,12 +5,6 @@ poloniex:
     wsApi2: wss://api2.poloniex.com/
     tradeHistoryUrl: https://poloniex.com/public?command=returnTradeHistory&currencyPair={currencyPair}&start={startTime}&end={endTime}
     tradingApi: https://poloniex.com/tradingApi
-  secret:
-    key: ZFNMRR2B-FV6US5OV-BJTQP0LW-ROHIO5FE
-    signature: 8662e56994002c90b60e98e1e8e55ec1acbcf049a330ab0b01080f52f6b16c4bd83eda3b7dd50918a266ed3322e0191db4dcd288ecf3eac8d8692d73e28824f5
-  proxy:
-    host: 94.177.180.226
-    port: 80
   trade:
     realPrice: true
 

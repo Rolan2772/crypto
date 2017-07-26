@@ -18,7 +18,6 @@ import javax.annotation.PreDestroy;
 import javax.websocket.DeploymentException;
 import java.io.IOException;
 import java.time.Duration;
-import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -26,8 +25,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class SimpleTradingBot {
-
-    public static final ZoneId GMT0 = ZoneId.of("GMT+0");
 
     @Autowired
     private LoadHistoryService loadHistoryService;
@@ -63,7 +60,7 @@ public class SimpleTradingBot {
         poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(4, shortBuyName, new TradingRecord()));
         poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(5, shortBuyName, new TradingRecord()));
         timeFrameStorage.addStrategy(poloniexStrategy);
-        candlesStorage.getCandles().put(currencyPair, Collections.singletonList(timeFrameStorage));
+        candlesStorage.setupCurrency(currencyPair, Collections.singletonList(timeFrameStorage));
     }
 
     private void buildTradingStrategies(CurrencyPair currencyPair) {
@@ -80,7 +77,7 @@ public class SimpleTradingBot {
             timeFrameStorage.addStrategy(poloniexStrategy);
             return timeFrameStorage;
         }).collect(Collectors.toList());
-        candlesStorage.getCandles().put(currencyPair, timeFrameData);
+        candlesStorage.setupCurrency(currencyPair, timeFrameData);
     }
 
     @PreDestroy

@@ -13,13 +13,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.IntStream;
 
 @Slf4j
 @Service
-public class CandlesExportService implements ExportDataService {
+public class CandlesExportService implements ExportDataService<TimeFrameStorage> {
+
+    public static final String CANDLES_FILE_NAME = "candles-";
 
     @Autowired
     private CsvFileWriter csvFileWriter;
@@ -29,9 +31,13 @@ public class CandlesExportService implements ExportDataService {
     private ExportHelper exportHelper;
 
     @Override
-    public void exportData() {
-        List<TimeFrameStorage> btcEth = candlesStorage.getCandles().getOrDefault(CurrencyPair.BTC_ETH, Collections.emptyList());
-        for (TimeFrameStorage timeFrameStorage : btcEth) {
+    public void exportData(CurrencyPair currencyPair, Collection<TimeFrameStorage> data) {
+        exportData(CANDLES_FILE_NAME + currencyPair, data, false);
+    }
+
+    @Override
+    public void exportData(String name, Collection<TimeFrameStorage> data, boolean append) {
+        for (TimeFrameStorage timeFrameStorage : data) {
             TimeFrame timeFrame = timeFrameStorage.getTimeFrame();
             List<PoloniexStrategy> poloniexStrategies = timeFrameStorage.getActiveStrategies();
             List<PoloniexStrategy> strategiesCopy = exportHelper.createTradingRecordsCopy(poloniexStrategies);
@@ -61,12 +67,13 @@ public class CandlesExportService implements ExportDataService {
             sb.append('\n');
             sb.append(exportHelper.createResultAnalytics(timeSeries, poloniexStrategies));
 
-            csvFileWriter.write("candles(" + timeFrame.getDisplayName() + ")", sb);
+            csvFileWriter.write(name + "(" + timeFrame.getDisplayName() + ")", sb, append);
         }
     }
 
     @PreDestroy
     public void preDestroy() {
-        exportData();
+        List<TimeFrameStorage> btcEth = candlesStorage.getData(CurrencyPair.BTC_ETH);
+        exportData(CurrencyPair.BTC_ETH, btcEth);
     }
 }

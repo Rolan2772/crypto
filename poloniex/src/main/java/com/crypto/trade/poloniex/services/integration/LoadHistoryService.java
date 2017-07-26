@@ -12,10 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.time.Period;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,8 +35,8 @@ public class LoadHistoryService {
         Instant from = Instant.now().minus(historyDuration);
         Instant now = Instant.now();
         log.info("Loading trades history from {} to {}",
-                ZonedDateTime.ofInstant(from, SimpleTradingBot.GMT0).toLocalDateTime(),
-                ZonedDateTime.ofInstant(now, SimpleTradingBot.GMT0).toLocalDateTime());
+                ZonedDateTime.ofInstant(from, ZoneOffset.UTC).toLocalDateTime(),
+                ZonedDateTime.ofInstant(now, ZoneOffset.UTC).toLocalDateTime());
         while (from.compareTo(now) < 0) {
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("currencyPair", currencyPair);

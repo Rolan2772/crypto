@@ -9,15 +9,14 @@ poloniex:
     key: ZFNMRR2B-FV6US5OV-BJTQP0LW-ROHIO5FE
     signature: 8662e56994002c90b60e98e1e8e55ec1acbcf049a330ab0b01080f52f6b16c4bd83eda3b7dd50918a266ed3322e0191db4dcd288ecf3eac8d8692d73e28824f5
   proxy:
-    host: 213.152.165.16
-    port: 3128
+    host: 94.177.180.226
+    port: 80
   trade:
     realPrice: true
 
-
 # Spring app configuration properties
 server:
-  port: 8089
+  port: 8090
 
 
 #spring:

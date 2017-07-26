@@ -7,11 +7,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import javax.websocket.ClientEndpoint;
-import javax.websocket.OnMessage;
+import javax.websocket.*;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
@@ -23,6 +24,17 @@ public class PoloniexEndPoint {
     private ThreadPoolTaskExecutor ticksExecutor;
     @Autowired
     private TradesStorage tradesStorage;
+
+    @OnOpen
+    public void onOpen(Session session) {
+        try {
+            String msg = "{\"command\":\"subscribe\",\"channel\":\"" + CurrencyPair.BTC_ETH + "\"}";
+            log.info("Sending message to endpoint: {}", msg);
+            session.getBasicRemote().sendText(msg, true);
+        } catch (IOException ex) {
+            log.error(ex.getMessage(), ex);
+        }
+    }
 
     @OnMessage
     public void onMessage(String message) {
@@ -40,7 +52,7 @@ public class PoloniexEndPoint {
 
                         Long tradeId = Long.valueOf(trade[1].replace("\"", ""));
                         String type = "1".equals(trade[2]) ? "buy" : "sell";
-                        PoloniexTrade pTrade = new PoloniexTrade(tradeId, ZonedDateTime.of(timestamp, ZoneId.of("GMT+0")), trade[4].replace("\"", ""), trade[3].replace("\"", ""), "0", type);
+                        PoloniexTrade pTrade = new PoloniexTrade(tradeId, ZonedDateTime.of(timestamp, ZoneOffset.UTC), trade[4].replace("\"", ""), trade[3].replace("\"", ""), "0", type);
                         tradesStorage.addTrade(CurrencyPair.BTC_ETH, pTrade);
 
                     }
@@ -61,6 +73,10 @@ public class PoloniexEndPoint {
         return new BigDecimal(trade[3].split("\"")[1]).setScale(8, BigDecimal.ROUND_HALF_UP);
     }
 
+    @OnClose
+    public void onClose(Session session, CloseReason closeReason) {
+        log.info("Disconnected: " + closeReason);
+    }
 
 }
 

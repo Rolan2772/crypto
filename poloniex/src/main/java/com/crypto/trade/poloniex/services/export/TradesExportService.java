@@ -9,12 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
-import java.util.Collections;
-import java.util.List;
+import java.util.Collection;
+import java.util.SortedSet;
 
 @Slf4j
 @Service
-public class TradesExportService implements ExportDataService {
+public class TradesExportService implements ExportDataService<PoloniexTrade> {
+
+    public static final String TRADES_FILE_NAME = "poloniex-trades-";
+    public static final String STALE_TRADES_FILE_NAME = "poloniex-stale-trades-";
 
     @Autowired
     private CsvFileWriter csvFileWriter;
@@ -22,13 +25,16 @@ public class TradesExportService implements ExportDataService {
     private TradesStorage tradesStorage;
 
     @Override
-    public void exportData() {
-        List<PoloniexTrade> poloniexTrades = tradesStorage.getTrades().getOrDefault(CurrencyPair.BTC_ETH, Collections.emptyList());
-        StringBuilder sb = convert(poloniexTrades);
-        csvFileWriter.write("poloniex_trades", sb);
+    public void exportData(CurrencyPair currencyPair, Collection<PoloniexTrade> data) {
+        exportData(TRADES_FILE_NAME + currencyPair, data, false);
     }
 
-    private StringBuilder convert(List<PoloniexTrade> poloniexTrades) {
+    @Override
+    public void exportData(String name, Collection<PoloniexTrade> trades, boolean append) {
+        csvFileWriter.write(name, convert(trades), append);
+    }
+
+    private StringBuilder convert(Collection<PoloniexTrade> poloniexTrades) {
         StringBuilder sb = new StringBuilder("time,timestamp,price,amount\n");
 
         for (PoloniexTrade poloniexTrade : poloniexTrades) {
@@ -43,6 +49,7 @@ public class TradesExportService implements ExportDataService {
 
     @PreDestroy
     public void preDestroy() {
-        exportData();
+        SortedSet<PoloniexTrade> poloniexTrades = tradesStorage.getTrades(CurrencyPair.BTC_ETH);
+        exportData(STALE_TRADES_FILE_NAME + CurrencyPair.BTC_ETH, poloniexTrades, true);
     }
 }

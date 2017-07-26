@@ -11,7 +11,6 @@ import com.crypto.trade.poloniex.services.integration.TradingService;
 import eu.verdelhan.ta4j.Decimal;
 import eu.verdelhan.ta4j.Tick;
 import eu.verdelhan.ta4j.TradingRecord;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -20,6 +19,7 @@ import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantLock;
@@ -37,11 +37,7 @@ public class CandlesStorage {
     private ThreadPoolTaskExecutor tradesExecutor;
 
     private ReentrantLock updateCandlesLock = new ReentrantLock();
-
-    @Getter
     private ConcurrentMap<CurrencyPair, List<TimeFrameStorage>> candles = new ConcurrentHashMap<>();
-    @Getter
-    private int lastHistoryIndex = 0;
 
     public List<PoloniexStrategy> getActiveStrategies(CurrencyPair currencyPair, TimeFrame timeFrame) {
         return candles.getOrDefault(currencyPair, Collections.emptyList())
@@ -58,7 +54,10 @@ public class CandlesStorage {
             candles.forEach(timeFrameStorage -> updateCandles(timeFrameStorage, poloniexTrade, false));
             return candles;
         });
+    }
 
+    public void setupCurrency(CurrencyPair currencyPair, List<TimeFrameStorage> timeFrameData) {
+        candles.put(currencyPair, timeFrameData);
     }
 
     private void updateCandles(TimeFrameStorage timeFrameStorage, PoloniexTrade poloniexTrade, boolean isHistoryTick) {
@@ -124,7 +123,11 @@ public class CandlesStorage {
         }
     }
 
-    public void addTradesHistory(CurrencyPair currency, List<PoloniexTrade> poloniexTrades) {
+    public List<TimeFrameStorage> getData(CurrencyPair currencyPair) {
+        return candles.getOrDefault(CurrencyPair.BTC_ETH, Collections.emptyList());
+    }
+
+    public void addTradesHistory(CurrencyPair currency, Set<PoloniexTrade> poloniexTrades) {
         candles.computeIfPresent(currency, (currencyPair, candles) -> {
             updateCandlesLock.lock();
             try {

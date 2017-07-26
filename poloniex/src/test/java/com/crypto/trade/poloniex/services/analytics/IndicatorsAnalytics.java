@@ -28,7 +28,7 @@ public class IndicatorsAnalytics {
         ReflectionTestUtils.setField(analyticsExportService, "tradesStorage", tradesStorage);
         ReflectionTestUtils.setField(analyticsExportService, "csvFileWriter", csvFileWriter);
 
-        analyticsExportService.exportData();
+        //analyticsExportService.exportData();
     }
 
     private static void loadTicks(TradesStorage tradesStorage) {

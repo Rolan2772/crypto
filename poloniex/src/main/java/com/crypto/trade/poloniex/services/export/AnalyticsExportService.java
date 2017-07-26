@@ -1,6 +1,5 @@
 package com.crypto.trade.poloniex.services.export;
 
-import com.crypto.trade.poloniex.services.analytics.AnalyticsService;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import com.crypto.trade.poloniex.services.analytics.StrategiesBuilder;
 import com.crypto.trade.poloniex.services.analytics.TimeFrame;
@@ -22,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -30,7 +29,9 @@ import java.util.stream.Stream;
 
 @Slf4j
 @Service
-public class AnalyticsExportService implements ExportDataService {
+public class AnalyticsExportService implements ExportDataService<TimeFrameStorage> {
+
+    public static final String ANALYTICS_FILE_NAME = "analytics-";
 
     @Autowired
     private CsvFileWriter csvFileWriter;
@@ -40,11 +41,15 @@ public class AnalyticsExportService implements ExportDataService {
     private ExportHelper exportHelper;
 
     @Override
-    public void exportData() {
+    public void exportData(CurrencyPair currencyPair, Collection<TimeFrameStorage> data) {
+        exportData(ANALYTICS_FILE_NAME + currencyPair, data, false);
+    }
+
+    @Override
+    public void exportData(String name, Collection<TimeFrameStorage> data, boolean append) {
         int indicatorTimeFrame = StrategiesBuilder.DEFAULT_TIME_FRAME;
 
-        List<TimeFrameStorage> btcEth = candlesStorage.getCandles().getOrDefault(CurrencyPair.BTC_ETH, Collections.emptyList());
-        for (TimeFrameStorage timeFrameStorage : btcEth) {
+        for (TimeFrameStorage timeFrameStorage : data) {
             TimeFrame timeFrame = timeFrameStorage.getTimeFrame();
             List<PoloniexStrategy> poloniexStrategies = timeFrameStorage.getActiveStrategies();
             List<PoloniexStrategy> strategiesCopy = exportHelper.createTradingRecordsCopy(poloniexStrategies);
@@ -75,7 +80,7 @@ public class AnalyticsExportService implements ExportDataService {
             sb.append('\n');
             sb.append(exportHelper.createResultAnalytics(timeSeries, poloniexStrategies));
 
-            csvFileWriter.write("analytics(" + timeFrame.getDisplayName() + ")", sb);
+            csvFileWriter.write(name + "(" + timeFrame.getDisplayName() + ")", sb, append);
         }
     }
 
@@ -92,6 +97,7 @@ public class AnalyticsExportService implements ExportDataService {
 
     @PreDestroy
     public void preDestroy() {
-        exportData();
+        List<TimeFrameStorage> btcEth = candlesStorage.getData(CurrencyPair.BTC_ETH);
+        exportData(CurrencyPair.BTC_ETH, btcEth);
     }
 }

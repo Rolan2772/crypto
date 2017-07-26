@@ -57,12 +57,6 @@ public class TyrusWsConnector implements WsConnector {
         session = client.connectToServer(
                 poloniexEndPoint,
                 URI.create(poloniexProperties.getApi().getWsApi2()));
-
-        if (session.isOpen()) {
-            session.getBasicRemote().sendText("{\"command\":\"subscribe\",\"channel\":\"" + CurrencyPair.BTC_ETH + "\"}", true);
-        }
-
-
     }
 
     @Scheduled(initialDelay = 60000, fixedDelay = 30000)

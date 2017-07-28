@@ -21,7 +21,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class TradesStorage {
 
-    public static final Duration MAX_AGE = Duration.ofHours(3);
+    public static final Duration MAX_AGE = Duration.ofHours(2);
+
     public static final Comparator<PoloniexTrade> TRADES_COMPARATOR = Comparator.comparing(PoloniexTrade::getTradeTime)
             .thenComparing(PoloniexTrade::getTradeId);
 
@@ -60,7 +61,7 @@ public class TradesStorage {
         return trades.getOrDefault(currencyPair, new TreeSet<>()).last().getRate();
     }
 
-    @Scheduled(fixedRate = 3600000)
+    @Scheduled(fixedRate = 1800000)
     public void cleanTrades() {
         CurrencyPair currencyPair = CurrencyPair.BTC_ETH;
 

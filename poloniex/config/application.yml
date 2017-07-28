@@ -1,0 +1,7 @@
+poloniex:
+  secret:
+    key:
+    signature:
+  proxy:
+    host: 94.177.180.226
+    port: 80

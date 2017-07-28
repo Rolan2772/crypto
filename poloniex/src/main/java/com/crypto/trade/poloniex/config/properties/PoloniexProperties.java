@@ -10,4 +10,5 @@ public class PoloniexProperties {
     private ApiResources api;
     private ApiSecretProperties secret;
     private ProxyProperties proxy;
+    private Trade trade;
 }

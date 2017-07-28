@@ -2,11 +2,12 @@ package com.crypto.trade.poloniex.config;
 
 import com.crypto.trade.poloniex.config.properties.PoloniexProperties;
 import com.crypto.trade.poloniex.services.analytics.StrategiesBuilder;
-import com.crypto.trade.poloniex.services.integration.ws.PoloniexEndPoint;
+import com.crypto.trade.poloniex.services.export.ExportHelper;
 import com.crypto.trade.poloniex.services.integration.PoloniexRequestHelper;
+import com.crypto.trade.poloniex.services.integration.ws.PoloniexEndPoint;
 import com.crypto.trade.poloniex.services.integration.ws.WsConnectionHandler;
-import com.crypto.trade.poloniex.storage.HistoryStorage;
-import com.crypto.trade.poloniex.storage.TickersStorage;
+import com.crypto.trade.poloniex.storage.CandlesStorage;
+import com.crypto.trade.poloniex.storage.TradesStorage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -29,13 +30,13 @@ public class PoloniexAppConfig {
     private PoloniexProperties properties;
 
     @Bean
-    public TickersStorage tickersStorage() {
-        return new TickersStorage();
+    public TradesStorage tradesStorage() {
+        return new TradesStorage();
     }
 
     @Bean
-    public HistoryStorage historyStorage() {
-        return new HistoryStorage();
+    public CandlesStorage strategiesStorage() {
+        return new CandlesStorage();
     }
 
     @Bean
@@ -47,7 +48,7 @@ public class PoloniexAppConfig {
     public RestTemplate restTemplate() {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
 
-        Proxy proxy= new Proxy(Proxy.Type.HTTP, new InetSocketAddress(properties.getProxy().getHost(), properties.getProxy().getPort()));
+        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(properties.getProxy().getHost(), properties.getProxy().getPort()));
         requestFactory.setProxy(proxy);
 
         return new RestTemplate(requestFactory);
@@ -67,4 +68,10 @@ public class PoloniexAppConfig {
     public PoloniexEndPoint poloniexEndPoint() {
         return new PoloniexEndPoint();
     }
+
+    @Bean
+    public ExportHelper exportHelper() {
+        return new ExportHelper();
+    }
+
 }

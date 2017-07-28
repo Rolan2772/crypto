@@ -1,7 +1,7 @@
 package com.crypto.trade.poloniex.services.analytics;
 
 import com.crypto.trade.poloniex.dto.PoloniexTrade;
-import com.crypto.trade.poloniex.storage.TickersStorage;
+import com.crypto.trade.poloniex.storage.TradesStorage;
 import com.opencsv.CSVReader;
 import eu.verdelhan.ta4j.*;
 import eu.verdelhan.ta4j.analysis.criteria.TotalProfitCriterion;
@@ -9,10 +9,7 @@ import eu.verdelhan.ta4j.indicators.oscillators.StochasticOscillatorDIndicator;
 import eu.verdelhan.ta4j.indicators.oscillators.StochasticOscillatorKIndicator;
 import eu.verdelhan.ta4j.indicators.simple.ClosePriceIndicator;
 import eu.verdelhan.ta4j.indicators.trackers.RSIIndicator;
-import eu.verdelhan.ta4j.trading.rules.BooleanRule;
-import eu.verdelhan.ta4j.trading.rules.CrossedUpIndicatorRule;
-import eu.verdelhan.ta4j.trading.rules.StopGainRule;
-import eu.verdelhan.ta4j.trading.rules.UnderIndicatorRule;
+import eu.verdelhan.ta4j.trading.rules.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -33,12 +30,12 @@ public class StrategiesBuilder {
 
     public static void main(String[] args) {
         StrategiesBuilder strategiesBuilder = new StrategiesBuilder();
-        TickersStorage tickersStorage = new TickersStorage();
+        TradesStorage tradesStorage = new TradesStorage();
         // Reading all lines of the CSV file
 
-        loadTicks(tickersStorage);
+        loadTicks(tradesStorage);
 
-        TimeSeries oneMinuteSeries = tickersStorage.getCandles(CurrencyPair.BTC_ETH, TimeFrame.ONE_MINUTE);
+        TimeSeries oneMinuteSeries = null;//tradesStorage.getCandles(CurrencyPair.BTC_ETH, TimeFrame.ONE_MINUTE);
         Strategy shortBuyStrategy = strategiesBuilder.buildShortBuyStrategy(oneMinuteSeries, DEFAULT_TIME_FRAME);
 
         // Initializing the trading history
@@ -76,7 +73,7 @@ public class StrategiesBuilder {
         System.out.println("Total profit for the strategy: " + new TotalProfitCriterion().calculate(oneMinuteSeries, tradingRecord));
     }
 
-    private static void loadTicks(TickersStorage tickersStorage) {
+    private static void loadTicks(TradesStorage tradesStorage) {
         InputStream stream = StrategiesBuilder.class.getClassLoader().getResourceAsStream("ticks/poloniex_ticks_2017-07-12.csv");
         CSVReader csvReader = null;
         List<String[]> lines = null;
@@ -99,7 +96,7 @@ public class StrategiesBuilder {
             for (String[] tradeLine : lines) {
                 ZonedDateTime time = ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(tradeLine[1]) * 1000), ZoneId.of("GMT+0"));
                 PoloniexTrade trade = new PoloniexTrade(0L, time, tradeLine[2], "", "", "");
-                tickersStorage.addTrade(CurrencyPair.BTC_ETH, trade);
+                tradesStorage.addTrade(CurrencyPair.BTC_ETH, trade);
             }
         }
     }
@@ -107,7 +104,7 @@ public class StrategiesBuilder {
     /**
      * RSI 14, StochasticK 14, StochasticD 3
      * Buy on RSI < 30, K intersects D, K < 20
-     * Sell +2.5%
+     * Sell +1%
      */
     public Strategy buildShortBuyStrategy(TimeSeries timeSeries, int timeFrame) {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
@@ -137,7 +134,7 @@ public class StrategiesBuilder {
         Rule entryRule = new BooleanRule(true);
 
         // Exit rule
-        Rule exitRule = new BooleanRule(true);
+        Rule exitRule = new FixedRule(27, 34, 36, 50, 60);
         Strategy strategy = new Strategy(entryRule, exitRule);
         strategy.setUnstablePeriod(timeFrame);
 

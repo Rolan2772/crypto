@@ -1,10 +1,12 @@
 package com.crypto.trade.poloniex.conrollers;
 
 import com.crypto.trade.poloniex.dto.PoloniexOrder;
+import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import com.crypto.trade.poloniex.services.analytics.TimeFrame;
 import com.crypto.trade.poloniex.services.analytics.TradingAction;
 import com.crypto.trade.poloniex.services.integration.TradingService;
-import com.crypto.trade.poloniex.storage.TickersStorage;
+import com.crypto.trade.poloniex.storage.CandlesStorage;
+import com.crypto.trade.poloniex.storage.PoloniexStrategy;
 import eu.verdelhan.ta4j.Decimal;
 import eu.verdelhan.ta4j.TradingRecord;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +16,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
-import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/trade")
@@ -24,28 +28,27 @@ public class TradeApiController {
     @Autowired
     private TradingService tradingService;
     @Autowired
-    private TickersStorage tickersStorage;
+    private CandlesStorage candlesStorage;
 
     @GetMapping("/buy")
     public PoloniexOrder buy() {
-        return tradingService.placeOrder(new TradingRecord(), 0, TradingAction.SHOULD_ENTER, false).orElse(new PoloniexOrder(0L, null));
+        return tradingService.placeOrder(new TradingRecord(), 0, TradingAction.SHOULD_ENTER, false).orElse(new PoloniexOrder(0L, null, 0, TradingAction.ENTERED));
     }
 
     @GetMapping("/sell")
     public PoloniexOrder buy(@RequestParam(required = false, defaultValue = "0.094534523") BigDecimal price) {
         TradingRecord tradingRecord = new TradingRecord();
         tradingRecord.enter(0, Decimal.valueOf("0.02342523"), Decimal.valueOf("0.009975"));
-        return tradingService.placeOrder(tradingRecord, 1, TradingAction.SHOULD_ENTER, false).orElse(new PoloniexOrder(0L, null));
+        return tradingService.placeOrder(tradingRecord, 1, TradingAction.SHOULD_ENTER, false).orElse(new PoloniexOrder(0L, null, 0, TradingAction.EXITED));
     }
 
     @GetMapping("/cancel")
     public String getOrders(@RequestParam("orderId") Long orderId) {
-        return tradingService.cancelOrder(new PoloniexOrder(orderId, null));
+        return tradingService.cancelOrder(new PoloniexOrder(orderId, null, 0, TradingAction.CANCELLED));
     }
 
     @GetMapping("/orders")
-
-    public ConcurrentMap<TimeFrame, Set<PoloniexOrder>> getOrders() {
-        return tickersStorage.getOrders();
+    public Map<TimeFrame, List<PoloniexStrategy>> getOrders() {
+        return Arrays.stream(TimeFrame.values()).collect(Collectors.toMap(timeFrame -> timeFrame, timeFrame -> candlesStorage.getActiveStrategies(CurrencyPair.BTC_ETH, timeFrame)));
     }
 }

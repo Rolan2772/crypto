@@ -1,4 +1,4 @@
-package com.crypto.trade.poloniex.services.integration;
+package com.crypto.trade.poloniex.services.trade;
 
 public class PoloniexResponseException extends RuntimeException {
 

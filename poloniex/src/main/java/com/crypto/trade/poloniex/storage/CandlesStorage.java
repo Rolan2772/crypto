@@ -7,7 +7,7 @@ import com.crypto.trade.poloniex.services.analytics.AnalyticsService;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import com.crypto.trade.poloniex.services.analytics.TimeFrame;
 import com.crypto.trade.poloniex.services.analytics.TradingAction;
-import com.crypto.trade.poloniex.services.integration.TradingService;
+import com.crypto.trade.poloniex.services.trade.TradingService;
 import eu.verdelhan.ta4j.Decimal;
 import eu.verdelhan.ta4j.Tick;
 import eu.verdelhan.ta4j.TradingRecord;
@@ -34,7 +34,7 @@ public class CandlesStorage {
     @Autowired
     private TradingService tradingService;
     @Autowired
-    private ThreadPoolTaskExecutor tradesExecutor;
+    private ThreadPoolTaskExecutor strategyExecutor;
 
     private ReentrantLock updateCandlesLock = new ReentrantLock();
     private ConcurrentMap<CurrencyPair, List<TimeFrameStorage>> candles = new ConcurrentHashMap<>();
@@ -73,7 +73,7 @@ public class CandlesStorage {
                 ////////////////////////////////////////////////////
                 if (!candles.isEmpty()) {
                     log.info("Trading on new {} candle", timeFrame);
-                    tradesExecutor.submit(() -> {
+                    strategyExecutor.submit(() -> {
                         try {
                             onNewCandle(timeFrameStorage, builtCandleIndex, isHistoryTick);
                         } catch (Exception ex) {
@@ -113,7 +113,7 @@ public class CandlesStorage {
                     boolean canTrade = TradingAction.SHOULD_ENTER != action || !onceEntered;
                     log.debug("Strategy '{}' canTrade/onceEntered flags: {}/{}", poloniexStrategy.getName(), canTrade, onceEntered);
                     if (canTrade) {
-                        tradeResultOrder = tradingService.placeOrder(tradingRecord, index, action, properties.getTrade().isRealPrice());
+                        tradeResultOrder = tradingService.placeOrder(tradingRecord, index, action, poloniexStrategy.getTradeVolume(), properties.getTrade().isRealPrice());
                     }
                     onceEntered |= TradingAction.SHOULD_ENTER == action && tradeResultOrder.isPresent();
                     log.debug("Strategy '{}' onceEntered flag: {}", poloniexStrategy.getName(), onceEntered);

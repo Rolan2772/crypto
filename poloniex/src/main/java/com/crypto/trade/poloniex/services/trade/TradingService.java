@@ -1,4 +1,4 @@
-package com.crypto.trade.poloniex.services.integration;
+package com.crypto.trade.poloniex.services.trade;
 
 import com.crypto.trade.poloniex.config.properties.PoloniexProperties;
 import com.crypto.trade.poloniex.dto.OrderTrade;
@@ -21,17 +21,13 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
 public class TradingService {
 
     public static final int PRECISION = 8;
-    public static final BigDecimal BTC_TRADE_AMOUNT = new BigDecimal("0.000105");
     // @TODO: Both BUY/SELL can have 0.25% fee
     public static final BigDecimal FEE_PERCENT = new BigDecimal("0.0025");
     public static final BigDecimal AFTER_FEE_PERCENT = BigDecimal.ONE.subtract(FEE_PERCENT);
@@ -48,10 +44,10 @@ public class TradingService {
     @Autowired
     private PoloniexRequestHelper requestHelper;
 
-    public Optional<PoloniexOrder> placeOrder(TradingRecord tradingRecord, int index, TradingAction action, boolean real) {
+    public Optional<PoloniexOrder> placeOrder(TradingRecord tradingRecord, int index, TradingAction action, BigDecimal volume, boolean real) {
         Optional<PoloniexOrder> poloniexOrder = Optional.empty();
         if (tradingRecord.getCurrentTrade().isNew()) {
-            poloniexOrder = buy(tradingRecord, index, real);
+            poloniexOrder = buy(tradingRecord, index, volume, real);
         } else if (tradingRecord.getCurrentTrade().isOpened()) {
             poloniexOrder = sell(tradingRecord, index, real);
         } else {
@@ -60,14 +56,14 @@ public class TradingService {
         return poloniexOrder;
     }
 
-    private Optional<PoloniexOrder> buy(TradingRecord tradingRecord, int index, boolean real) {
+    private Optional<PoloniexOrder> buy(TradingRecord tradingRecord, int index, BigDecimal volume, boolean real) {
         log.info("Processing BUY request {} at index {}", tradingRecord.getCurrentTrade(), index);
         Optional<PoloniexOrder> result = Optional.empty();
         String lastTrade = tradesStorage.getLastTrade(CurrencyPair.BTC_ETH);
         String rate = real
                 ? lastTrade
                 : new BigDecimal(lastTrade).divide(new BigDecimal(2), PRECISION, BigDecimal.ROUND_HALF_UP).toString();
-        String amount = BTC_TRADE_AMOUNT.divide(new BigDecimal(rate), PRECISION, BigDecimal.ROUND_HALF_UP).toString();
+        String amount = volume.divide(new BigDecimal(rate), PRECISION, BigDecimal.ROUND_HALF_UP).toString();
 
         Map<String, Object> params = new HashMap<>();
         params.put("command", "buy");
@@ -99,8 +95,7 @@ public class TradingService {
                 result = Optional.of(poloniexOrder);
             }
         } catch (HttpClientErrorException e) {
-            String responseBody = e.getResponseBodyAsString();
-            log.warn("Failed to place BUY order {} : {}", params, requestEntity);
+            log.warn("Failed to place BUY order {} : {}", params, e.getResponseBodyAsString());
         } catch (Exception /*RuntimeException*/ e) {
             log.warn("BUY order has not been placed {} : {}", params, requestEntity);
         }
@@ -190,9 +185,6 @@ public class TradingService {
             return Collections.emptyList();//response.getBody(); todo: parse.
         } catch (HttpClientErrorException e) {
             String responseBody = e.getResponseBodyAsString();
-            String statusText = e.getStatusText();
-            // log or process either of these...
-            // you'll probably have to unmarshall the XML manually (only 2 fields so easy)
             log.warn("Failed to cancel '{}' order: {}", poloniexOrder.getOrderId(), responseBody);
         }
         return Collections.emptyList();
@@ -216,9 +208,6 @@ public class TradingService {
         } catch (HttpClientErrorException e) {
             String responseBody = e.getResponseBodyAsString();
             result = responseBody;
-            String statusText = e.getStatusText();
-            // log or process either of these...
-            // you'll probably have to unmarshall the XML manually (only 2 fields so easy)
             log.warn("Failed to cancel '{}' order: {}", poloniexOrder.getOrderId(), responseBody);
         } catch (PoloniexResponseException e) {
             log.warn("Failed to cancel '{}' order: {}", poloniexOrder.getOrderId(), e.getMessage());

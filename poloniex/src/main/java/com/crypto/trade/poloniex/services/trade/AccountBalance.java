@@ -1,4 +1,4 @@
-package com.crypto.trade.poloniex.services.integration;
+package com.crypto.trade.poloniex.services.trade;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

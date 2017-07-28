@@ -1,4 +1,4 @@
-package com.crypto.trade.poloniex.services.integration;
+package com.crypto.trade.poloniex.services.trade;
 
 import com.crypto.trade.poloniex.config.properties.PoloniexProperties;
 import com.crypto.trade.poloniex.services.utils.HashUtils;

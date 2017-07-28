@@ -1,7 +1,7 @@
 package com.crypto.trade.poloniex.conrollers;
 
-import com.crypto.trade.poloniex.services.integration.AccountBalance;
-import com.crypto.trade.poloniex.services.integration.AccountService;
+import com.crypto.trade.poloniex.services.trade.AccountBalance;
+import com.crypto.trade.poloniex.services.trade.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

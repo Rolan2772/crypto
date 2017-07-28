@@ -1,4 +1,4 @@
-package com.crypto.trade.poloniex.services.integration.ws;
+package com.crypto.trade.poloniex.services.ws;
 
 import com.crypto.trade.poloniex.config.properties.PoloniexProperties;
 import com.crypto.trade.poloniex.dto.PoloniexTrade;
@@ -26,7 +26,7 @@ public class WampWsConnector implements WsConnector {
     @Autowired
     private PoloniexProperties poloniexProperties;
     @Autowired
-    private ThreadPoolTaskExecutor ticksExecutor;
+    private ThreadPoolTaskExecutor tradesExecutor;
     @Autowired
     private TradesStorage tradesStorage;
 
@@ -61,7 +61,7 @@ public class WampWsConnector implements WsConnector {
                         .subscribe(s -> {
                             ZonedDateTime time = ZonedDateTime.now(ZoneOffset.UTC);
                             if (s.arguments().get(0).asText().equals(CurrencyPair.BTC_ETH.name())) {
-                                ticksExecutor.submit(() -> {
+                                tradesExecutor.submit(() -> {
                                     try {
                                         String pair = s.arguments().get(0).asText();
                                         if (pair.equals(CurrencyPair.BTC_ETH.name())) {

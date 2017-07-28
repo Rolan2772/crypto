@@ -1,15 +1,13 @@
-package com.crypto.trade.poloniex.services.integration.ws;
+package com.crypto.trade.poloniex.services.ws;
 
 import com.crypto.trade.poloniex.dto.PoloniexTrade;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import com.crypto.trade.poloniex.storage.TradesStorage;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.web.socket.*;
 
+import javax.websocket.*;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -19,30 +17,30 @@ import java.time.ZonedDateTime;
 import java.util.Date;
 
 @Slf4j
-public class WsConnectionHandler implements WebSocketHandler {
+@ClientEndpoint
+public class PoloniexEndPoint {
 
     @Autowired
-    private ThreadPoolTaskExecutor ticksExecutor;
+    private ThreadPoolTaskExecutor tradesExecutor;
     @Autowired
     private TradesStorage tradesStorage;
-    @Getter
-    private WebSocketSession session;
 
-    @Override
-    public void afterConnectionEstablished(WebSocketSession webSocketSession) throws Exception {
-        log.info("Session started.");
-        webSocketSession.setTextMessageSizeLimit(1000000);
-        webSocketSession.setBinaryMessageSizeLimit(1000000);
-        webSocketSession.sendMessage(new TextMessage("{\"command\":\"subscribe\",\"channel\":\"" + "BTC_ETH" + "\"}"));
-        session = webSocketSession;
+    @OnOpen
+    public void onOpen(Session session) {
+        try {
+            String msg = "{\"command\":\"subscribe\",\"channel\":\"" + CurrencyPair.BTC_ETH + "\"}";
+            log.info("Sending message to endpoint: {}", msg);
+            session.getBasicRemote().sendText(msg, true);
+        } catch (IOException ex) {
+            log.error(ex.getMessage(), ex);
+        }
     }
 
-    @Override
-    public void handleMessage(WebSocketSession webSocketSession, WebSocketMessage<?> webSocketMessage) throws Exception {
-        String message = webSocketMessage.getPayload().toString();
+    @OnMessage
+    public void onMessage(String message) {
         if (message.startsWith("[148") && message.contains("[\"t\"")) {
 
-            ticksExecutor.submit(() -> {
+            tradesExecutor.submit(() -> {
                 log.info(message);
                 try {
                     String[] split = message.split("\"t\"");
@@ -57,10 +55,9 @@ public class WsConnectionHandler implements WebSocketHandler {
                         PoloniexTrade pTrade = new PoloniexTrade(tradeId, ZonedDateTime.of(timestamp, ZoneOffset.UTC), trade[4].replace("\"", ""), trade[3].replace("\"", ""), "0", type);
                         tradesStorage.addTrade(CurrencyPair.BTC_ETH, pTrade);
 
-                        //log.info("rate = {}; timestamp = {}", rate, timestamp);
                     }
                 } catch (Exception ex) {
-                    log.error("dfgsd", ex);
+                    log.error("Failed to process message: " + message, ex);
                 }
             });
         }
@@ -76,29 +73,10 @@ public class WsConnectionHandler implements WebSocketHandler {
         return new BigDecimal(trade[3].split("\"")[1]).setScale(8, BigDecimal.ROUND_HALF_UP);
     }
 
-    @Scheduled(initialDelay = 60000, fixedDelay = 300000)
-    public void keepAlive() throws IOException {
-        if (session != null) {
-            session.sendMessage(new TextMessage("."));
-        }
+    @OnClose
+    public void onClose(Session session, CloseReason closeReason) {
+        log.info("Disconnected: " + closeReason);
     }
 
-    public boolean isConnected() {
-        return session != null && session.isOpen();
-    }
-
-    @Override
-    public void handleTransportError(WebSocketSession webSocketSession, Throwable throwable) throws Exception {
-        log.error("Transport Error", throwable);
-    }
-
-    @Override
-    public void afterConnectionClosed(WebSocketSession webSocketSession, CloseStatus closeStatus) throws Exception {
-        log.error("Connection Closed {}" + closeStatus);
-    }
-
-    @Override
-    public boolean supportsPartialMessages() {
-        return true;
-    }
 }
+

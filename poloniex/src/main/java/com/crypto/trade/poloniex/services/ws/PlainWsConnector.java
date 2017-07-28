@@ -1,9 +1,8 @@
-package com.crypto.trade.poloniex.services.integration.ws;
+package com.crypto.trade.poloniex.services.ws;
 
 import com.crypto.trade.poloniex.config.properties.PoloniexProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.client.WebSocketConnectionManager;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;

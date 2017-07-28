@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.Value;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,12 +22,14 @@ public class PoloniexStrategy {
     @JsonIgnore
     private Strategy strategy;
     private TimeFrame timeFrame;
+    private BigDecimal tradeVolume;
     private List<PoloniexTradingRecord> tradingRecords = new ArrayList<>();
 
-    public PoloniexStrategy(String name, Strategy strategy, TimeFrame timeFrame, List<PoloniexTradingRecord> tradingRecords) {
-        this.name = name;
-        this.strategy = strategy;
-        this.timeFrame = timeFrame;
+    public PoloniexStrategy(PoloniexStrategy poloniexStrategy, List<PoloniexTradingRecord> tradingRecords) {
+        this.name = poloniexStrategy.getName();
+        this.strategy = poloniexStrategy.getStrategy();
+        this.timeFrame = poloniexStrategy.getTimeFrame();
+        this.tradeVolume = poloniexStrategy.getTradeVolume();
         this.tradingRecords.addAll(tradingRecords);
     }
 

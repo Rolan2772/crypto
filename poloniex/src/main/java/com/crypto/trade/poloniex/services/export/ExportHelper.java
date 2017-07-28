@@ -112,7 +112,7 @@ public class ExportHelper {
                     List<PoloniexTradingRecord> tradingRecords = strategy.getTradingRecords().stream()
                             .map(tr -> new PoloniexTradingRecord(tr.getId(), tr.getStrategyName(), new TradingRecord()))
                             .collect(Collectors.toList());
-                    return new PoloniexStrategy(strategy.getName(), strategy.getStrategy(), strategy.getTimeFrame(), tradingRecords);
+                    return new PoloniexStrategy(strategy, tradingRecords);
                 }).collect(Collectors.toList());
     }
 

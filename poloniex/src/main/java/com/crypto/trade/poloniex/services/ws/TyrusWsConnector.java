@@ -1,7 +1,6 @@
-package com.crypto.trade.poloniex.services.integration.ws;
+package com.crypto.trade.poloniex.services.ws;
 
 import com.crypto.trade.poloniex.config.properties.PoloniexProperties;
-import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import lombok.extern.slf4j.Slf4j;
 import org.glassfish.tyrus.client.ClientManager;
 import org.glassfish.tyrus.client.ClientProperties;

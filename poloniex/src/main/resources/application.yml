@@ -1,4 +1,4 @@
-# poloniex properties
+# poloniex configuration
 poloniex:
   api:
     wsApi: wss://api.poloniex.com
@@ -8,12 +8,6 @@ poloniex:
   trade:
     realPrice: true
 
-# Spring app configuration properties
+# Spring app configuration
 server:
   port: 8090
-
-
-#spring:
-#  jackson:
-#    serialization:
-#      WRITE_DATES_AS_TIMESTAMPS: false

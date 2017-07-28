@@ -48,9 +48,9 @@ public class SimpleTradingBot {
     @PostConstruct
     public void postConstruct() throws IOException, DeploymentException {
         tradesStorage.initCurrency(CurrencyPair.BTC_ETH);
-        buildRealTradingAmountBuyStrategy(CurrencyPair.BTC_ETH);
+        buildRsiSlowFastStrategy(CurrencyPair.BTC_ETH);
         wsConnector.connect();
-        tradesStorage.addTradesHistory(CurrencyPair.BTC_ETH, loadHistoryService.loadTradesHistory(CurrencyPair.BTC_ETH, Duration.ofMinutes(20)));
+        tradesStorage.addTradesHistory(CurrencyPair.BTC_ETH, loadHistoryService.loadTradesHistory(CurrencyPair.BTC_ETH, Duration.ofDays(2)));
     }
 
     private void buildTestTradingStrategy(CurrencyPair currencyPair) {
@@ -89,9 +89,24 @@ public class SimpleTradingBot {
         TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
         TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
         String shortBuyName = "real-amount-shot-buy";
-        Strategy shortBuyStrategy = strategiesBuilder.buildTestStrategy(new TimeSeries(timeFrameStorage.getCandles()), StrategiesBuilder.DEFAULT_TIME_FRAME);
+        Strategy shortBuyStrategy = strategiesBuilder.buildShortBuyStrategy(new TimeSeries(timeFrameStorage.getCandles()), StrategiesBuilder.DEFAULT_TIME_FRAME);
         PoloniexStrategy poloniexStrategy = new PoloniexStrategy(shortBuyName, shortBuyStrategy, timeFrame, BTC_REAL_TRADE_AMOUNT);
         poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(1, shortBuyName, new TradingRecord()));
+        timeFrameStorage.addStrategy(poloniexStrategy);
+        candlesStorage.setupCurrency(currencyPair, Collections.singletonList(timeFrameStorage));
+    }
+
+    private void buildRsiSlowFastStrategy(CurrencyPair currencyPair) {
+        TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
+        TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
+        String shortBuyName = "rsi-slow-fast";
+        Strategy shortBuyStrategy = strategiesBuilder.buildRsiSlowFastStrategy(new TimeSeries(timeFrameStorage.getCandles()));
+        PoloniexStrategy poloniexStrategy = new PoloniexStrategy(shortBuyName, shortBuyStrategy, timeFrame, BTC_MIN_TRADE_AMOUNT);
+        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(1, shortBuyName, new TradingRecord()));
+        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(2, shortBuyName, new TradingRecord()));
+        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(3, shortBuyName, new TradingRecord()));
+        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(4, shortBuyName, new TradingRecord()));
+        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(5, shortBuyName, new TradingRecord()));
         timeFrameStorage.addStrategy(poloniexStrategy);
         candlesStorage.setupCurrency(currencyPair, Collections.singletonList(timeFrameStorage));
     }

@@ -103,7 +103,7 @@ public class StrategiesBuilder {
 
     /**
      * RSI 14, StochasticK 14, StochasticD 3
-     * Buy on RSI < 30, K intersects D, K < 20
+     * Buy on RSI < 20, K intersects D, K < 20
      * Sell +1%
      */
     public Strategy buildShortBuyStrategy(TimeSeries timeSeries, int timeFrame) {
@@ -126,11 +126,34 @@ public class StrategiesBuilder {
     }
 
     /**
+     * RSI 14, RSI 5
+     * Buy on RSI 5 intersects RSI 14 from bottom,
+     * Sell on RSI 5 intersects RSI 14 from top,
+     */
+    public Strategy buildRsiSlowFastStrategy(TimeSeries timeSeries) {
+        ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
+        RSIIndicator rsiSlow = new RSIIndicator(closePrice, 5);
+        RSIIndicator rsiFast = new RSIIndicator(closePrice, 14);
+
+        // Entry rule
+        Rule entryRule = new UnderIndicatorRule(rsiSlow, Decimal.valueOf(70))
+                .and(new CrossedUpIndicatorRule(rsiSlow, rsiFast));
+
+        // Exit rule
+        Rule exitRule = new CrossedDownIndicatorRule(rsiFast, rsiSlow);
+        Strategy strategy = new Strategy(entryRule, exitRule);
+        strategy.setUnstablePeriod(14);
+
+        return strategy;
+    }
+
+
+    /**
      * Buys every first tick
      * Sells every second tick
      */
     public Strategy buildTestStrategy(TimeSeries timeSeries, int timeFrame) {
-         // Entry rule
+        // Entry rule
         Rule entryRule = new BooleanRule(true);
 
         // Exit rule

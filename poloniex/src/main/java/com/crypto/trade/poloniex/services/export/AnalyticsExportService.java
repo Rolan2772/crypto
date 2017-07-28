@@ -54,7 +54,7 @@ public class AnalyticsExportService implements ExportDataService<TimeFrameStorag
             List<PoloniexStrategy> poloniexStrategies = timeFrameStorage.getActiveStrategies();
             List<PoloniexStrategy> strategiesCopy = exportHelper.createTradingRecordsCopy(poloniexStrategies);
             List<PoloniexTradingRecord> tradingRecords = timeFrameStorage.getAllTradingRecords();
-            StringBuilder sb = new StringBuilder("timestamp,close,rsi,stochK,stochD,sma,ema32,ema128")
+            StringBuilder sb = new StringBuilder("timestamp,close,rsi5,rsi14,stochK,stochD,sma,ema32,ema128")
                     .append(",")
                     .append(exportHelper.createStrategiesHeaders(tradingRecords, "sim"))
                     .append(",")
@@ -86,13 +86,14 @@ public class AnalyticsExportService implements ExportDataService<TimeFrameStorag
 
     private List<Indicator<?>> createIndicators(int indicatorTimeFrame, TimeSeries timeSeries) {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-        RSIIndicator rsi = new RSIIndicator(closePrice, indicatorTimeFrame);
+        RSIIndicator rsi5 = new RSIIndicator(closePrice, 5);
+        RSIIndicator rsi14 = new RSIIndicator(closePrice, indicatorTimeFrame);
         StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, indicatorTimeFrame);
         StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
         SMAIndicator sma = new SMAIndicator(stochK, indicatorTimeFrame);
         EMAIndicator ema32 = new EMAIndicator(closePrice, 32);
         EMAIndicator ema128 = new EMAIndicator(closePrice, 128);
-        return Stream.of(closePrice, rsi, stochK, stochD, sma, ema32, ema128).collect(Collectors.toList());
+        return Stream.of(closePrice, rsi5, rsi14, stochK, stochD, sma, ema32, ema128).collect(Collectors.toList());
     }
 
     @PreDestroy

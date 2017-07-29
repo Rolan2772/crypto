@@ -140,7 +140,7 @@ public class StrategiesBuilder {
                 .and(new CrossedUpIndicatorRule(rsiSlow, rsiFast));
 
         // Exit rule
-        Rule exitRule = new CrossedDownIndicatorRule(rsiFast, rsiSlow);
+        Rule exitRule = new CrossedDownIndicatorRule(rsiSlow, rsiFast);
         Strategy strategy = new Strategy(entryRule, exitRule);
         strategy.setUnstablePeriod(14);
 

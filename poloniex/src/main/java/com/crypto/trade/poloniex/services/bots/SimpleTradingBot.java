@@ -50,9 +50,10 @@ public class SimpleTradingBot {
         tradesStorage.initCurrency(CurrencyPair.BTC_ETH);
         buildRsiSlowFastStrategy(CurrencyPair.BTC_ETH);
         wsConnector.connect();
-        tradesStorage.addTradesHistory(CurrencyPair.BTC_ETH, loadHistoryService.loadTradesHistory(CurrencyPair.BTC_ETH, Duration.ofDays(2)));
+        tradesStorage.addTradesHistory(CurrencyPair.BTC_ETH, loadHistoryService.loadTradesHistory(CurrencyPair.BTC_ETH, Duration.ofHours(4)));
     }
 
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!! real flag should be false
     private void buildTestTradingStrategy(CurrencyPair currencyPair) {
         TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
         TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
@@ -68,7 +69,7 @@ public class SimpleTradingBot {
         candlesStorage.setupCurrency(currencyPair, Collections.singletonList(timeFrameStorage));
     }
 
-    private void buildTradingStrategies(CurrencyPair currencyPair) {
+    private void buildShortBuyAllTimeFrames(CurrencyPair currencyPair) {
         List<TimeFrameStorage> timeFrameData = Arrays.stream(TimeFrame.values()).map(timeFrame -> {
             TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
             String shortBuyName = "short-buy";

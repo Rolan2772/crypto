@@ -2,15 +2,13 @@ package com.crypto.trade.poloniex.conrollers;
 
 import com.crypto.trade.poloniex.dto.PoloniexTrade;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
-import com.crypto.trade.poloniex.services.export.AnalyticsExportService;
-import com.crypto.trade.poloniex.services.export.CandlesExportService;
-import com.crypto.trade.poloniex.services.export.OrdersExportService;
-import com.crypto.trade.poloniex.services.export.TradesExportService;
+import com.crypto.trade.poloniex.services.export.*;
 import com.crypto.trade.poloniex.storage.CandlesStorage;
 import com.crypto.trade.poloniex.storage.TimeFrameStorage;
 import com.crypto.trade.poloniex.storage.TradesStorage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,10 +36,21 @@ public class DataExportController {
     public void all() {
         CurrencyPair currencyPair = CurrencyPair.BTC_ETH;
         SortedSet<PoloniexTrade> trades = tradesStorage.getTrades(currencyPair);
-        tradesExportService.exportData(currencyPair, trades);
+        tradesExportService.exportMemoryData(currencyPair, trades);
         List<TimeFrameStorage> candlesData = candlesStorage.getData(currencyPair);
-        candlesExportService.exportData(currencyPair, candlesData);
-        analyticsExportService.exportData(currencyPair, candlesData);
-        ordersExportService.exportData(currencyPair, candlesData);
+        candlesExportService.exportMemoryData(currencyPair, candlesData);
+        analyticsExportService.exportMemoryData(currencyPair, candlesData);
+        ordersExportService.exportMemoryData(currencyPair, candlesData);
+    }
+
+    @GetMapping("/{type}")
+    public void allWithType(@PathVariable OsType type) {
+        CurrencyPair currencyPair = CurrencyPair.BTC_ETH;
+        SortedSet<PoloniexTrade> trades = tradesStorage.getTrades(currencyPair);
+        tradesExportService.exportMemoryData(currencyPair, trades, type);
+        List<TimeFrameStorage> candlesData = candlesStorage.getData(currencyPair);
+        candlesExportService.exportMemoryData(currencyPair, candlesData, type);
+        analyticsExportService.exportMemoryData(currencyPair, candlesData, type);
+        ordersExportService.exportMemoryData(currencyPair, candlesData, type);
     }
 }

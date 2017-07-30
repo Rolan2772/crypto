@@ -1,7 +1,8 @@
 package com.crypto.trade.poloniex.config;
 
 import com.crypto.trade.poloniex.config.properties.PoloniexProperties;
-import com.crypto.trade.poloniex.services.analytics.StrategiesBuilder;
+import com.crypto.trade.poloniex.services.analytics.PoloniexStrategyFactory;
+import com.crypto.trade.poloniex.services.analytics.TradeStrategyFactory;
 import com.crypto.trade.poloniex.services.export.ExportHelper;
 import com.crypto.trade.poloniex.services.trade.PoloniexRequestHelper;
 import com.crypto.trade.poloniex.storage.CandlesStorage;
@@ -29,8 +30,13 @@ public class PoloniexAppConfig {
     }
 
     @Bean
-    public StrategiesBuilder strategiesBuilder() {
-        return new StrategiesBuilder();
+    public TradeStrategyFactory tradeStrategyBuilder() {
+        return new TradeStrategyFactory();
+    }
+
+    @Bean
+    public PoloniexStrategyFactory poloniexStrategyBuilder() {
+        return new PoloniexStrategyFactory();
     }
 
     @Bean

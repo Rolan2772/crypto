@@ -76,7 +76,7 @@ public class TradesStorage {
         log.info("Found {} trades older than {}.", staleElementsCount, minTime);
         if (staleElementsCount > 0) {
             currencyTrades.removeAll(staleTrades);
-            tradesExportService.exportData(TradesExportService.STALE_TRADES_FILE_NAME + currencyPair, staleTrades, true);
+            tradesExportService.exportExcessData(TradesExportService.STALE_TRADES_FILE_NAME + currencyPair, staleTrades);
         }
     }
 }

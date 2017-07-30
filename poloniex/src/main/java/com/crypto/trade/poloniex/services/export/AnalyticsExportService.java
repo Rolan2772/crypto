@@ -1,8 +1,8 @@
 package com.crypto.trade.poloniex.services.export;
 
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
-import com.crypto.trade.poloniex.services.analytics.StrategiesBuilder;
 import com.crypto.trade.poloniex.services.analytics.TimeFrame;
+import com.crypto.trade.poloniex.services.analytics.TradeStrategyFactory;
 import com.crypto.trade.poloniex.services.utils.CsvFileWriter;
 import com.crypto.trade.poloniex.storage.CandlesStorage;
 import com.crypto.trade.poloniex.storage.PoloniexStrategy;
@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 
 @Slf4j
 @Service
-public class AnalyticsExportService implements ExportDataService<TimeFrameStorage> {
+public class AnalyticsExportService implements MemoryExportService<TimeFrameStorage> {
 
     public static final String ANALYTICS_FILE_NAME = "analytics-";
 
@@ -41,47 +41,56 @@ public class AnalyticsExportService implements ExportDataService<TimeFrameStorag
     private ExportHelper exportHelper;
 
     @Override
-    public void exportData(CurrencyPair currencyPair, Collection<TimeFrameStorage> data) {
-        exportData(ANALYTICS_FILE_NAME + currencyPair, data, false);
+    public void exportMemoryData(CurrencyPair currencyPair, Collection<TimeFrameStorage> data, OsType osType) {
+        data.forEach(timeFrameStorage -> {
+            String name = osType + "-" + createName(timeFrameStorage.getTimeFrame(), currencyPair);
+            csvFileWriter.write(new ExportData(currencyPair, name, convert(timeFrameStorage), osType));
+        });
     }
 
     @Override
-    public void exportData(String name, Collection<TimeFrameStorage> data, boolean append) {
-        int indicatorTimeFrame = StrategiesBuilder.DEFAULT_TIME_FRAME;
+    public void exportMemoryData(CurrencyPair currencyPair, Collection<TimeFrameStorage> data) {
+        data.forEach(timeFrameStorage -> {
+            String name = createName(timeFrameStorage.getTimeFrame(), currencyPair);
+            csvFileWriter.write(new ExportData(currencyPair, name, convert(timeFrameStorage)));
+        });
+    }
 
-        for (TimeFrameStorage timeFrameStorage : data) {
-            TimeFrame timeFrame = timeFrameStorage.getTimeFrame();
-            List<PoloniexStrategy> poloniexStrategies = timeFrameStorage.getActiveStrategies();
-            List<PoloniexStrategy> strategiesCopy = exportHelper.createTradingRecordsCopy(poloniexStrategies);
-            List<PoloniexTradingRecord> tradingRecords = timeFrameStorage.getAllTradingRecords();
-            StringBuilder sb = new StringBuilder("timestamp,close,rsi,stochK,stochD,sma,ema32,ema128")
-                    .append(",")
-                    .append(exportHelper.createStrategiesHeaders(tradingRecords, "sim"))
-                    .append(",")
-                    .append(exportHelper.createStrategiesHeaders(tradingRecords, "real"))
-                    .append("\n");
+    private StringBuilder convert(TimeFrameStorage timeFrameStorage) {
+        TimeFrame timeFrame = timeFrameStorage.getTimeFrame();
+        List<PoloniexStrategy> poloniexStrategies = timeFrameStorage.getActiveStrategies();
+        List<PoloniexStrategy> strategiesCopy = exportHelper.createTradingRecordsCopy(poloniexStrategies);
+        List<PoloniexTradingRecord> tradingRecords = timeFrameStorage.getAllTradingRecords();
+        StringBuilder sb = new StringBuilder("timestamp,close,rsi,stochK,stochD,sma,ema32,ema128")
+                .append(",")
+                .append(exportHelper.createStrategiesHeaders(tradingRecords, "sim"))
+                .append(",")
+                .append(exportHelper.createStrategiesHeaders(tradingRecords, "real"))
+                .append("\n");
 
-            int count = timeFrameStorage.getCandles().size();
-            TimeSeries timeSeries = new TimeSeries(timeFrame.name(), timeFrameStorage.getCandles());
-            List<Indicator<?>> indicators = createIndicators(indicatorTimeFrame, timeSeries);
-            IntStream.range(0, count).forEach(index -> sb.append(exportHelper.convertIndicators(timeSeries, indicators, index))
-                    .append(",")
-                    .append(exportHelper.createHistoryTradesAnalytics(strategiesCopy, timeSeries, index, timeFrameStorage.getHistoryIndex()))
-                    .append(",")
-                    .append(exportHelper.convertRealTrades(tradingRecords, index))
-                    .append("\n"));
+        int count = timeFrameStorage.getCandles().size();
+        TimeSeries timeSeries = new TimeSeries(timeFrame.name(), timeFrameStorage.getCandles());
+        List<Indicator<?>> indicators = createIndicators(TradeStrategyFactory.DEFAULT_TIME_FRAME, timeSeries);
+        IntStream.range(0, count).forEach(index -> sb.append(exportHelper.convertIndicators(timeSeries, indicators, index))
+                .append(",")
+                .append(exportHelper.createHistoryTradesAnalytics(strategiesCopy, timeSeries, index, timeFrameStorage.getHistoryIndex()))
+                .append(",")
+                .append(exportHelper.convertRealTrades(tradingRecords, index))
+                .append("\n"));
 
-            sb.append('\n');
-            sb.append("History analytics: ");
-            sb.append('\n');
-            sb.append(exportHelper.createResultAnalytics(timeSeries, strategiesCopy));
-            sb.append('\n');
-            sb.append("Real trades: ");
-            sb.append('\n');
-            sb.append(exportHelper.createResultAnalytics(timeSeries, poloniexStrategies));
+        sb.append('\n');
+        sb.append("History analytics: ");
+        sb.append('\n');
+        sb.append(exportHelper.createResultAnalytics(timeSeries, strategiesCopy));
+        sb.append('\n');
+        sb.append("Real trades: ");
+        sb.append('\n');
+        sb.append(exportHelper.createResultAnalytics(timeSeries, poloniexStrategies));
+        return sb;
+    }
 
-            csvFileWriter.write(name + "(" + timeFrame.getDisplayName() + ")", sb, append);
-        }
+    private String createName(TimeFrame timeFrame, CurrencyPair currencyPair) {
+        return ANALYTICS_FILE_NAME + currencyPair + "(" + timeFrame.getDisplayName() + ")";
     }
 
     private List<Indicator<?>> createIndicators(int indicatorTimeFrame, TimeSeries timeSeries) {
@@ -98,6 +107,6 @@ public class AnalyticsExportService implements ExportDataService<TimeFrameStorag
     @PreDestroy
     public void preDestroy() {
         List<TimeFrameStorage> btcEth = candlesStorage.getData(CurrencyPair.BTC_ETH);
-        exportData(CurrencyPair.BTC_ETH, btcEth);
+        exportMemoryData(CurrencyPair.BTC_ETH, btcEth);
     }
 }

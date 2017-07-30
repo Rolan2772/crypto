@@ -28,11 +28,11 @@ public class IndicatorsAnalytics {
         ReflectionTestUtils.setField(analyticsExportService, "tradesStorage", tradesStorage);
         ReflectionTestUtils.setField(analyticsExportService, "csvFileWriter", csvFileWriter);
 
-        //analyticsExportService.exportData();
+        //analyticsExportService.exportExcessData();
     }
 
     private static void loadTicks(TradesStorage tradesStorage) {
-        InputStream stream = StrategiesBuilder.class.getClassLoader().getResourceAsStream("ticks/poloniex_ticks_2017-07-12.csv");
+        InputStream stream = TradeStrategyFactory.class.getClassLoader().getResourceAsStream("ticks/poloniex_ticks_2017-07-12.csv");
         CSVReader csvReader = null;
         List<String[]> lines = null;
         try {
@@ -40,7 +40,7 @@ public class IndicatorsAnalytics {
             lines = csvReader.readAll();
             lines.remove(0); // Removing header line
         } catch (IOException ioe) {
-            Logger.getLogger(StrategiesBuilder.class.getName()).log(Level.SEVERE, "Unable to load trades from CSV", ioe);
+            Logger.getLogger(TradeStrategyFactory.class.getName()).log(Level.SEVERE, "Unable to load trades from CSV", ioe);
         } finally {
             if (csvReader != null) {
                 try {
@@ -60,7 +60,7 @@ public class IndicatorsAnalytics {
     }
 
     private static void loadTicks1(TradesStorage tradesStorage) {
-        InputStream stream = StrategiesBuilder.class.getClassLoader().getResourceAsStream("ticks/test.csv");
+        InputStream stream = TradeStrategyFactory.class.getClassLoader().getResourceAsStream("ticks/test.csv");
         CSVReader csvReader = null;
         List<String[]> lines = null;
         try {
@@ -68,7 +68,7 @@ public class IndicatorsAnalytics {
             lines = csvReader.readAll();
             lines.remove(0); // Removing header line
         } catch (IOException ioe) {
-            Logger.getLogger(StrategiesBuilder.class.getName()).log(Level.SEVERE, "Unable to load trades from CSV", ioe);
+            Logger.getLogger(TradeStrategyFactory.class.getName()).log(Level.SEVERE, "Unable to load trades from CSV", ioe);
         } finally {
             if (csvReader != null) {
                 try {

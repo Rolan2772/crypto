@@ -5,8 +5,12 @@ poloniex:
     wsApi2: wss://api2.poloniex.com/
     tradeHistoryUrl: https://poloniex.com/public?command=returnTradeHistory&currencyPair={currencyPair}&start={startTime}&end={endTime}
     tradingApi: https://poloniex.com/tradingApi
-  trade:
+  tradeConfig:
     realPrice: true
+    # Minimal order amount
+    minBtcTradeAmount: 0.000105
+    # 50$ approximately
+    realBtcTradeAmount: 0.018
 
 # Spring app configuration
 server:

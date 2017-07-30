@@ -12,7 +12,6 @@ import javax.websocket.DeploymentException;
 import javax.websocket.Session;
 import java.io.IOException;
 import java.net.URI;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -65,7 +64,7 @@ public class TyrusWsConnector implements WsConnector {
                         log.error("Reconnection attempt was interrupted.", e);
                     }
                 },
-                new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1)),
+                //new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1)),
                 TimeUnit.MINUTES.toMillis(5));
     }
 

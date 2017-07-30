@@ -56,7 +56,7 @@ public class CandlesStorage {
         });
     }
 
-    public void setupCurrency(CurrencyPair currencyPair, List<TimeFrameStorage> timeFrameData) {
+    public void initCurrency(CurrencyPair currencyPair, List<TimeFrameStorage> timeFrameData) {
         candles.put(currencyPair, timeFrameData);
     }
 
@@ -114,7 +114,7 @@ public class CandlesStorage {
                     boolean canTrade = TradingAction.SHOULD_ENTER != action || !onceEntered;
                     log.debug("Strategy '{}' canTrade/onceEntered flags: {}/{}", poloniexStrategy.getName(), canTrade, onceEntered);
                     if (canTrade) {
-                        tradeResultOrder = tradingService.placeOrder(tradingRecord, index, action, poloniexStrategy.getTradeVolume(), properties.getTrade().isRealPrice());
+                        tradeResultOrder = tradingService.placeOrder(tradingRecord, index, action, poloniexStrategy.getTradeVolume(), properties.getTradeConfig().isRealPrice());
                     }
                     onceEntered |= TradingAction.SHOULD_ENTER == action && tradeResultOrder.isPresent();
                     log.debug("Strategy '{}' onceEntered flag: {}", poloniexStrategy.getName(), onceEntered);

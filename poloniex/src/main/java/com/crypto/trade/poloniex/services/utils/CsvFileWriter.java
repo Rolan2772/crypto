@@ -1,41 +1,38 @@
 package com.crypto.trade.poloniex.services.utils;
 
+import com.crypto.trade.poloniex.services.export.ExportData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Slf4j
 @Service
 public class CsvFileWriter {
 
-    private static String OS = System.getProperty("os.name").toLowerCase();
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-    public void write(String name, StringBuilder data) {
-        write(name, data, false);
+    public void write(ExportData exportData) {
+        write(exportData, false);
     }
 
-    public void write(String name, StringBuilder data, boolean append) {
-        BufferedWriter writer = null;
-        String str = OS.contains("win") ? data.toString().replaceAll("\\,", "\\;").replaceAll("\\.", "\\,") : data.toString();
+    public void write(ExportData exportData, boolean append) {
+        String path = exportData.getCurrencyPair() + "/" + exportData.getNamePrefix() + ".csv";
         try {
-            writer = new BufferedWriter(new FileWriter(name + "_" + LocalDateTime.now().format(formatter) + ".csv", append));
-            writer.write(str);
-        } catch (IOException ioe) {
-            log.error("Failed to write csv", ioe);
-        } finally {
-            try {
-                if (writer != null) {
-                    writer.close();
-                }
-            } catch (IOException ioe) {
-                log.error("Failed to close writer.", ioe);
+            Path pathToFile = Paths.get(path);
+            Files.createDirectories(pathToFile.getParent());
+            Files.createFile(pathToFile);
+
+            try (FileWriter fileWriter = new FileWriter(pathToFile.toFile(), append);
+                 BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
+                bufferedWriter.write(exportData.getData());
             }
+
+        } catch (IOException e) {
+            log.error("Failed to write file: " + path, e);
         }
     }
 }

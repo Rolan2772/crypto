@@ -14,7 +14,7 @@ import java.util.SortedSet;
 
 @Slf4j
 @Service
-public class TradesExportService implements ExportDataService<PoloniexTrade> {
+public class TradesExportService implements MemoryExportService<PoloniexTrade>, ExcessDataExportService<PoloniexTrade> {
 
     public static final String TRADES_FILE_NAME = "poloniex-trades-";
     public static final String STALE_TRADES_FILE_NAME = "poloniex-stale-trades-";
@@ -25,13 +25,18 @@ public class TradesExportService implements ExportDataService<PoloniexTrade> {
     private TradesStorage tradesStorage;
 
     @Override
-    public void exportData(CurrencyPair currencyPair, Collection<PoloniexTrade> data) {
-        exportData(TRADES_FILE_NAME + currencyPair, data, false);
+    public void exportMemoryData(CurrencyPair currencyPair, Collection<PoloniexTrade> trades, OsType osType) {
+        csvFileWriter.write(new ExportData(currencyPair, osType + "-" + TRADES_FILE_NAME + currencyPair, convert(trades)));
     }
 
     @Override
-    public void exportData(String name, Collection<PoloniexTrade> trades, boolean append) {
-        csvFileWriter.write(name, convert(trades), append);
+    public void exportMemoryData(CurrencyPair currencyPair, Collection<PoloniexTrade> trades) {
+        csvFileWriter.write(new ExportData(currencyPair, TRADES_FILE_NAME + currencyPair, convert(trades)));
+    }
+
+    @Override
+    public void exportExcessData(String name, Collection<PoloniexTrade> trades) {
+        csvFileWriter.write(new ExportData(CurrencyPair.BTC_ETH, name, convert(trades)), true);
     }
 
     private StringBuilder convert(Collection<PoloniexTrade> poloniexTrades) {
@@ -50,6 +55,6 @@ public class TradesExportService implements ExportDataService<PoloniexTrade> {
     @PreDestroy
     public void preDestroy() {
         SortedSet<PoloniexTrade> poloniexTrades = tradesStorage.getTrades(CurrencyPair.BTC_ETH);
-        exportData(STALE_TRADES_FILE_NAME + CurrencyPair.BTC_ETH, poloniexTrades, true);
+        exportExcessData(STALE_TRADES_FILE_NAME + CurrencyPair.BTC_ETH, poloniexTrades);
     }
 }

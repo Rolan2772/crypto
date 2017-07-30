@@ -11,7 +11,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.*;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,7 +22,7 @@ import java.util.Map;
 
 @Slf4j
 @Service
-public class LoadHistoryService {
+public class HistoryService {
 
     public static final Duration MAXIMUM_PER_REQUEST = Duration.ofHours(6);
 

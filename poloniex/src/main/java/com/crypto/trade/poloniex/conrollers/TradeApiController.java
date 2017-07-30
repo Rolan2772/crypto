@@ -1,10 +1,10 @@
 package com.crypto.trade.poloniex.conrollers;
 
+import com.crypto.trade.poloniex.config.properties.PoloniexProperties;
 import com.crypto.trade.poloniex.dto.PoloniexOrder;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import com.crypto.trade.poloniex.services.analytics.TimeFrame;
 import com.crypto.trade.poloniex.services.analytics.TradingAction;
-import com.crypto.trade.poloniex.services.bots.SimpleTradingBot;
 import com.crypto.trade.poloniex.services.trade.TradingService;
 import com.crypto.trade.poloniex.storage.CandlesStorage;
 import com.crypto.trade.poloniex.storage.PoloniexStrategy;
@@ -30,17 +30,19 @@ public class TradeApiController {
     private TradingService tradingService;
     @Autowired
     private CandlesStorage candlesStorage;
+    @Autowired
+    private PoloniexProperties properties;
 
     @GetMapping("/buy")
     public PoloniexOrder buy() {
-        return tradingService.placeOrder(new TradingRecord(), 0, TradingAction.SHOULD_ENTER, SimpleTradingBot.BTC_MIN_TRADE_AMOUNT, false).orElse(new PoloniexOrder(0L, null, 0, TradingAction.ENTERED));
+        return tradingService.placeOrder(new TradingRecord(), 0, TradingAction.SHOULD_ENTER, properties.getTradeConfig().getMinBtcTradeAmount(), false).orElse(new PoloniexOrder(0L, null, 0, TradingAction.ENTERED));
     }
 
     @GetMapping("/sell")
     public PoloniexOrder buy(@RequestParam(required = false, defaultValue = "0.094534523") BigDecimal price) {
         TradingRecord tradingRecord = new TradingRecord();
         tradingRecord.enter(0, Decimal.valueOf("0.02342523"), Decimal.valueOf("0.009975"));
-        return tradingService.placeOrder(tradingRecord, 1, TradingAction.SHOULD_ENTER, SimpleTradingBot.BTC_MIN_TRADE_AMOUNT, false).orElse(new PoloniexOrder(0L, null, 0, TradingAction.EXITED));
+        return tradingService.placeOrder(tradingRecord, 1, TradingAction.SHOULD_ENTER, properties.getTradeConfig().getMinBtcTradeAmount(), false).orElse(new PoloniexOrder(0L, null, 0, TradingAction.EXITED));
     }
 
     @GetMapping("/cancel")

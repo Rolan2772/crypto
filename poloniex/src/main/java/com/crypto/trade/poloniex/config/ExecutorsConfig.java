@@ -10,16 +10,18 @@ public class ExecutorsConfig {
     @Bean
     public ThreadPoolTaskExecutor tradesExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(10);
-        executor.setMaxPoolSize(15);
+        // @TODO: poll sohuld be smaller, how ever core pull size of 10 threads leads to race conditions
+        executor.setCorePoolSize(100);
+        executor.setMaxPoolSize(200);
         return executor;
     }
 
     @Bean
     public ThreadPoolTaskExecutor strategyExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(5);
-        executor.setMaxPoolSize(10);
+        // @TODO: poll sohuld be smaller, how ever core pull size of 10 threads leads to race conditions
+        executor.setCorePoolSize(50);
+        executor.setMaxPoolSize(100);
         return executor;
     }
 }

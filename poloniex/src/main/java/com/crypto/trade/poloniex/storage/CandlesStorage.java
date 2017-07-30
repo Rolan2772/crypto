@@ -72,21 +72,22 @@ public class CandlesStorage {
             if (isNewCandleTrade) {
                 ////////////////////////////////////////////////////
                 if (!candles.isEmpty()) {
-                    log.info("Trading on new {} candle", timeFrame);
+                    log.info("Trading on new {} candle at index {}", timeFrame, builtCandleIndex);
                     strategyExecutor.submit(() -> {
                         try {
                             onNewCandle(timeFrameStorage, builtCandleIndex, isHistoryTick);
                         } catch (Exception ex) {
-                            log.error("Failed to trade on {}", ex);
+                            log.error("Failed to trade on " + timeFrame + " at index " + builtCandleIndex, ex);
                         }
                     });
                 }
                 ////////////////////////////////////////////////////
                 candles.add(new Tick(timeFrame.getFrameDuration(), timeFrame.calculateEndTime(tradeTime)));
+                int newIndex = candles.size() - 1;
                 if (isHistoryTick) {
-                    timeFrameStorage.setHistoryIndex(candles.size() - 1);
+                    timeFrameStorage.setHistoryIndex(newIndex);
                 }
-                log.info("New {} candle has been created.", timeFrame);
+                log.info("New {} candle with index {} has been created.", timeFrame, newIndex);
             }
             candles.get(candles.size() - 1).addTrade(Decimal.valueOf(poloniexTrade.getAmount()), Decimal.valueOf(poloniexTrade.getRate()));
         } finally {

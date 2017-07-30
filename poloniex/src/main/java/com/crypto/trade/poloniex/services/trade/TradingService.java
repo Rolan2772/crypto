@@ -95,9 +95,9 @@ public class TradingService {
                 result = Optional.of(poloniexOrder);
             }
         } catch (HttpClientErrorException e) {
-            log.warn("Failed to place BUY order {} : {}", params, e.getResponseBodyAsString());
+            log.warn("Failed to place BUY order : {}", e.getResponseBodyAsString());
         } catch (Exception /*RuntimeException*/ e) {
-            log.warn("BUY order has not been placed {} : {}", params, requestEntity);
+            log.error("BUY order has not been placed.", e);
         }
         return result;
     }
@@ -156,10 +156,9 @@ public class TradingService {
                     result = Optional.of(poloniexOrder);
                 }
             } catch (HttpClientErrorException e) {
-                String responseBody = e.getResponseBodyAsString();
-                log.warn("Failed to place SELL order {} : {}", params, requestEntity);
+                log.warn("Failed to place BUY order : {}", e.getResponseBodyAsString());
             } catch (Exception /*RuntimeException*/ e) {
-                log.warn("SELL order has not been placed {} : {}", params, requestEntity);
+                log.error("SELL order has not been placed.", e);
             }
         } else {
             log.warn("SELL profit didn't reach minimum value: {}/{}", diff, MIN_PROFIT_PERCENT);

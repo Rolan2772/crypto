@@ -68,7 +68,7 @@ public class SimpleTradingBot {
         candlesStorage.setupCurrency(currencyPair, Collections.singletonList(timeFrameStorage));
     }
 
-    private void buildTradingStrategies(CurrencyPair currencyPair) {
+    private void buildShortBuyAllTimeFrames(CurrencyPair currencyPair) {
         List<TimeFrameStorage> timeFrameData = Arrays.stream(TimeFrame.values()).map(timeFrame -> {
             TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
             String shortBuyName = "short-buy";
@@ -89,9 +89,10 @@ public class SimpleTradingBot {
         TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
         TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
         String shortBuyName = "real-amount-shot-buy";
-        Strategy shortBuyStrategy = strategiesBuilder.buildTestStrategy(new TimeSeries(timeFrameStorage.getCandles()), StrategiesBuilder.DEFAULT_TIME_FRAME);
+        Strategy shortBuyStrategy = strategiesBuilder.buildShortBuyStrategy(new TimeSeries(timeFrameStorage.getCandles()), StrategiesBuilder.DEFAULT_TIME_FRAME);
         PoloniexStrategy poloniexStrategy = new PoloniexStrategy(shortBuyName, shortBuyStrategy, timeFrame, BTC_REAL_TRADE_AMOUNT);
         poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(1, shortBuyName, new TradingRecord()));
+        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(2, shortBuyName, new TradingRecord()));
         timeFrameStorage.addStrategy(poloniexStrategy);
         candlesStorage.setupCurrency(currencyPair, Collections.singletonList(timeFrameStorage));
     }

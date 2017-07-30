@@ -10,7 +10,6 @@ import eu.verdelhan.ta4j.Strategy;
 import eu.verdelhan.ta4j.TimeSeries;
 import eu.verdelhan.ta4j.TradingRecord;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -41,14 +40,13 @@ public class SimpleTradingBot {
 
     @Autowired
     private TradesStorage tradesStorage;
-    @Qualifier("tyrusWsConnector")
     @Autowired
     private WsConnector wsConnector;
 
     @PostConstruct
     public void postConstruct() throws IOException, DeploymentException {
         tradesStorage.initCurrency(CurrencyPair.BTC_ETH);
-        buildRealTradingAmountBuyStrategy(CurrencyPair.BTC_ETH);
+        buildShortBuyAllTimeFrames(CurrencyPair.BTC_ETH);
         wsConnector.connect();
         tradesStorage.addTradesHistory(CurrencyPair.BTC_ETH, loadHistoryService.loadTradesHistory(CurrencyPair.BTC_ETH, Duration.ofMinutes(20)));
     }

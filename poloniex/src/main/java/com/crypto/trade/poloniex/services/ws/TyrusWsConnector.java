@@ -5,27 +5,28 @@ import lombok.extern.slf4j.Slf4j;
 import org.glassfish.tyrus.client.ClientManager;
 import org.glassfish.tyrus.client.ClientProperties;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import javax.websocket.CloseReason;
 import javax.websocket.DeploymentException;
 import javax.websocket.Session;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
-@Service
 public class TyrusWsConnector implements WsConnector {
 
     @Autowired
     private PoloniexProperties poloniexProperties;
     @Autowired
     private PoloniexEndPoint poloniexEndPoint;
+    @Autowired
+    private ThreadPoolTaskScheduler connectionScheduler;
 
     private Session session;
-
 
     @Override
     public void connect() throws IOException, DeploymentException {
@@ -56,9 +57,18 @@ public class TyrusWsConnector implements WsConnector {
         session = client.connectToServer(
                 poloniexEndPoint,
                 URI.create(poloniexProperties.getApi().getWsApi2()));
+
+        connectionScheduler.scheduleWithFixedDelay(() -> {
+                    try {
+                        keepAlive();
+                    } catch (IOException e) {
+                        log.error("Reconnection attempt was interrupted.", e);
+                    }
+                },
+                new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1)),
+                TimeUnit.MINUTES.toMillis(5));
     }
 
-    @Scheduled(initialDelay = 60000, fixedDelay = 30000)
     public void keepAlive() throws IOException {
         if (session != null && session.isOpen()) {
             session.getBasicRemote().sendText(".", true);

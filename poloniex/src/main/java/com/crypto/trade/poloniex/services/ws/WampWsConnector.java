@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
-@Service
 public class WampWsConnector implements WsConnector {
 
     @Autowired

@@ -3,11 +3,10 @@ package com.crypto.trade.poloniex.services.ws;
 import com.crypto.trade.poloniex.dto.PoloniexTrade;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import com.crypto.trade.poloniex.storage.TradesStorage;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.socket.*;
 
 import java.io.IOException;
@@ -17,6 +16,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class WsConnectionHandler implements WebSocketHandler {
@@ -25,7 +25,8 @@ public class WsConnectionHandler implements WebSocketHandler {
     private ThreadPoolTaskExecutor tradesExecutor;
     @Autowired
     private TradesStorage tradesStorage;
-    @Getter
+    @Autowired
+    private ThreadPoolTaskScheduler connectionScheduler;
     private WebSocketSession session;
 
     @Override
@@ -35,6 +36,15 @@ public class WsConnectionHandler implements WebSocketHandler {
         webSocketSession.setBinaryMessageSizeLimit(1000000);
         webSocketSession.sendMessage(new TextMessage("{\"command\":\"subscribe\",\"channel\":\"" + "BTC_ETH" + "\"}"));
         session = webSocketSession;
+        connectionScheduler.scheduleAtFixedRate(() -> {
+                    try {
+                        keepAlive();
+                    } catch (IOException e) {
+                        log.error("Sending keep alive message was interrupted.", e);
+                    }
+                },
+                new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1)),
+                TimeUnit.MINUTES.toMillis(5));
     }
 
     @Override
@@ -74,7 +84,6 @@ public class WsConnectionHandler implements WebSocketHandler {
         return new BigDecimal(trade[3].split("\"")[1]).setScale(8, BigDecimal.ROUND_HALF_UP);
     }
 
-    @Scheduled(initialDelay = 60000, fixedDelay = 300000)
     public void keepAlive() throws IOException {
         if (session != null) {
             session.sendMessage(new TextMessage("."));

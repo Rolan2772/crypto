@@ -1,7 +1,6 @@
 package com.crypto.trade.poloniex.storage;
 
 import com.crypto.trade.poloniex.config.properties.PoloniexProperties;
-import com.crypto.trade.poloniex.dto.PoloniexOrder;
 import com.crypto.trade.poloniex.dto.PoloniexTrade;
 import com.crypto.trade.poloniex.services.analytics.AnalyticsService;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;

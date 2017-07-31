@@ -1,7 +1,7 @@
 package com.crypto.trade.poloniex.conrollers;
 
 import com.crypto.trade.poloniex.config.properties.PoloniexProperties;
-import com.crypto.trade.poloniex.dto.PoloniexOrder;
+import com.crypto.trade.poloniex.storage.PoloniexOrder;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import com.crypto.trade.poloniex.services.analytics.TimeFrame;
 import com.crypto.trade.poloniex.services.analytics.TradingAction;

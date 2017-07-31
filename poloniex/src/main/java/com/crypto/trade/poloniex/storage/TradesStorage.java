@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -56,9 +57,10 @@ public class TradesStorage {
         candlesStorage.addTradesHistory(currency, currencyTrades);
     }
 
-    public String getLastTrade(CurrencyPair currencyPair) {
+    public BigDecimal getLastTrade(CurrencyPair currencyPair) {
         // @TODO: NoSuchElementException
-        return trades.getOrDefault(currencyPair, new TreeSet<>()).last().getRate();
+        String lastTrade = trades.getOrDefault(currencyPair, new TreeSet<>()).last().getRate();
+        return new BigDecimal(lastTrade);
     }
 
     @Scheduled(fixedRate = 600000)

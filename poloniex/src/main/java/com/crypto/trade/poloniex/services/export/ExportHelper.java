@@ -1,6 +1,6 @@
 package com.crypto.trade.poloniex.services.export;
 
-import com.crypto.trade.poloniex.dto.PoloniexOrder;
+import com.crypto.trade.poloniex.storage.PoloniexOrder;
 import com.crypto.trade.poloniex.services.analytics.AnalyticsService;
 import com.crypto.trade.poloniex.services.analytics.TradingAction;
 import com.crypto.trade.poloniex.storage.PoloniexStrategy;
@@ -119,7 +119,7 @@ public class ExportHelper {
     public String convertOrder(String name, PoloniexOrder poloniexOrder) {
         return Stream.of(name,
                 poloniexOrder.getOrderId(),
-                poloniexOrder.getRequestTime().toLocalDateTime(),
+                poloniexOrder.getTradeTime().toLocalDateTime(),
                 poloniexOrder.getIndex(),
                 poloniexOrder.getSourceOrder().getPrice(),
                 poloniexOrder.getSourceOrder().getAmount(),

@@ -3,10 +3,13 @@ package com.crypto.trade.poloniex.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 public class PoloniexOrderResponse {
 
     @JsonProperty("orderNumber")
     private Long orderId;
-    //@TODO: order response contains real trades
+    private List<ResultTrade> trades = new ArrayList<>();
 }

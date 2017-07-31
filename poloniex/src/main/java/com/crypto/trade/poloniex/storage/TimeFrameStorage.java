@@ -2,12 +2,15 @@ package com.crypto.trade.poloniex.storage;
 
 import com.crypto.trade.poloniex.services.analytics.TimeFrame;
 import eu.verdelhan.ta4j.Tick;
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 @Data
@@ -15,8 +18,9 @@ import java.util.stream.Collectors;
 @ToString(of = {"timeFrame", "activeStrategies"})
 public class TimeFrameStorage {
 
+    private ReentrantLock updateLock = new ReentrantLock();
+    private int historyIndex;
     private TimeFrame timeFrame;
-    private int historyIndex = 0;
     private List<Tick> candles = new LinkedList<>();
     private List<PoloniexStrategy> activeStrategies = new ArrayList<>();
 

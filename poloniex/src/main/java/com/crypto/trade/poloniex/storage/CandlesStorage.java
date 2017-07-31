@@ -22,7 +22,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
 public class CandlesStorage {
@@ -36,7 +35,6 @@ public class CandlesStorage {
     @Autowired
     private ThreadPoolTaskExecutor strategyExecutor;
 
-    private ReentrantLock updateCandlesLock = new ReentrantLock();
     private ConcurrentMap<CurrencyPair, List<TimeFrameStorage>> candles = new ConcurrentHashMap<>();
 
     public List<PoloniexStrategy> getActiveStrategies(CurrencyPair currencyPair, TimeFrame timeFrame) {
@@ -50,7 +48,6 @@ public class CandlesStorage {
 
     public void addTrade(CurrencyPair currency, PoloniexTrade poloniexTrade) {
         candles.computeIfPresent(currency, (currencyPair, candles) -> {
-            // @TODO: implement update in new thread
             candles.forEach(timeFrameStorage -> updateCandles(timeFrameStorage, poloniexTrade, false));
             return candles;
         });
@@ -61,8 +58,7 @@ public class CandlesStorage {
     }
 
     private void updateCandles(TimeFrameStorage timeFrameStorage, PoloniexTrade poloniexTrade, boolean isHistoryTick) {
-        // @TODO: single lock for each time frame
-        updateCandlesLock.lock();
+        timeFrameStorage.getUpdateLock().lock();
         try {
             TimeFrame timeFrame = timeFrameStorage.getTimeFrame();
             List<Tick> candles = timeFrameStorage.getCandles();
@@ -91,7 +87,7 @@ public class CandlesStorage {
             }
             candles.get(candles.size() - 1).addTrade(Decimal.valueOf(poloniexTrade.getAmount()), Decimal.valueOf(poloniexTrade.getRate()));
         } finally {
-            updateCandlesLock.unlock();
+            timeFrameStorage.getUpdateLock().unlock();
         }
     }
 
@@ -111,10 +107,11 @@ public class CandlesStorage {
                 log.debug("Strategy {}/{} trading record {} analytics result {}.", timeFrame, poloniexStrategy.getName(), trIndex, action);
                 if (!isHistoryTick && TradingAction.shouldPlaceOrder(action)) {
                     Optional<PoloniexOrder> tradeResultOrder = Optional.empty();
-                    boolean canTrade = TradingAction.SHOULD_ENTER != action || !onceEntered;
-                    log.debug("Strategy '{}' canTrade/onceEntered flags: {}/{}", poloniexStrategy.getName(), canTrade, onceEntered);
+                    boolean canTrade = (TradingAction.SHOULD_ENTER != action || !onceEntered) && poloniexTradingRecord.getProcessing().compareAndSet(false, true);
+                    log.debug("Strategy '{}' canTrade - {}, onceEntered - {}, processing - {}", poloniexStrategy.getName(), canTrade, onceEntered, poloniexTradingRecord.getProcessing().get());
                     if (canTrade) {
                         tradeResultOrder = tradingService.placeOrder(tradingRecord, index, action, poloniexStrategy.getTradeVolume(), properties.getTradeConfig().isRealPrice());
+                        poloniexTradingRecord.setProcessed();
                     }
                     onceEntered |= TradingAction.SHOULD_ENTER == action && tradeResultOrder.isPresent();
                     log.debug("Strategy '{}' onceEntered flag: {}", poloniexStrategy.getName(), onceEntered);
@@ -130,19 +127,19 @@ public class CandlesStorage {
 
     public void addTradesHistory(CurrencyPair currency, Set<PoloniexTrade> poloniexTrades) {
         candles.computeIfPresent(currency, (currencyPair, candles) -> {
-            updateCandlesLock.lock();
-            try {
-                candles.forEach(timeFrameStorage -> {
+            candles.forEach(timeFrameStorage -> {
+                timeFrameStorage.getUpdateLock().lock();
+                try {
                     TimeFrame timeFrame = timeFrameStorage.getTimeFrame();
                     // @TODO: add history without candles recreation
                     log.info("Clearing {} candles with history for {}", timeFrame, currency);
                     timeFrameStorage.getCandles().clear();
                     log.info("Updating candles with history for {}", currency);
                     poloniexTrades.forEach(poloniexTrade -> updateCandles(timeFrameStorage, poloniexTrade, true));
-                });
-            } finally {
-                updateCandlesLock.unlock();
-            }
+                } finally {
+                    timeFrameStorage.getUpdateLock().unlock();
+                }
+            });
             return candles;
         });
     }

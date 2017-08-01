@@ -9,8 +9,8 @@ poloniex:
     realPrice: true
     # Minimal order amount
     minBtcTradeAmount: 0.000105
-    # 50$ approximately
-    realBtcTradeAmount: 0.018
+    # 5$ approximately
+    realBtcTradeAmount: 0.0018
 
 # Spring app configuration
 server:

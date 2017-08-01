@@ -44,14 +44,16 @@ public class OrdersExportService implements MemoryExportService<TimeFrameStorage
     }
 
     private StringBuilder convert(TimeFrameStorage timeFrameStorage) {
-        TimeFrame timeFrame = timeFrameStorage.getTimeFrame();
         List<PoloniexTradingRecord> tradingRecords = timeFrameStorage.getAllTradingRecords();
 
-        StringBuilder sb = new StringBuilder("name,id,time,index,price,amount,type\n");
+        StringBuilder sb = new StringBuilder("name,id,tradeTime,index,price,amount,fee,amountAfterFee,type\n");
         tradingRecords.forEach(tradingRecord -> {
             String trName = tradingRecord.getStrategyName() + "-tr-" + tradingRecord.getId();
             tradingRecord.getOrders().forEach(poloniexOrder -> sb.append(exportHelper.convertOrder(trName, poloniexOrder)).append("\n"));
         });
+
+        sb.append("\n");
+        sb.append(exportHelper.convertTotalProfit(timeFrameStorage));
         return sb;
     }
 

@@ -1,7 +1,6 @@
-- multiple currencies
 - profit calculations (with 0.5% fee), total profit
-- remove analytics 1 minute offset
-- sell strategy
 - clear candles
 - save all orders to db
+- multiple currencies
+- sell strategy
 - use stochD as on trading view

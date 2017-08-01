@@ -16,6 +16,24 @@ public class TradeCalculator {
         return CalculationsUtils.setCryptoScale(afterFee);
     }
 
+    public BigDecimal getProfit(Order buy, Order sell) {
+        BigDecimal buySpent = getBuySpent(buy);
+        BigDecimal sellGain = getSellGain(sell);
+        return CalculationsUtils.setCryptoScale(buySpent.multiply(sellGain));
+    }
+
+    public BigDecimal getBuySpent(Order entryOrder) {
+        BigDecimal openPrice = CalculationsUtils.toBigDecimal(entryOrder.getPrice());
+        BigDecimal buyAmount = CalculationsUtils.toBigDecimal(entryOrder.getAmount());
+        return openPrice.multiply(buyAmount);
+    }
+
+    public BigDecimal getSellGain(Order closeOrder) {
+        BigDecimal amount = getAmountAfterFee(closeOrder);
+        BigDecimal sellPrice = CalculationsUtils.toBigDecimal(closeOrder.getPrice());
+        return sellPrice.multiply(amount).multiply(CalculationsUtils.AFTER_FEE_PERCENT);
+    }
+
     public BigDecimal getResultAmount(List<ResultTrade> resultTrades, BigDecimal defaultAmount) {
         return resultTrades.stream()
                 .map(ResultTrade::getAmount)
@@ -31,14 +49,11 @@ public class TradeCalculator {
     }
 
     public boolean canSell(Order entryOrder, BigDecimal sellRate) {
-        // Profit calculations
-        BigDecimal openPrice = CalculationsUtils.toBigDecimal(entryOrder.getPrice());
-        BigDecimal buyAmount = CalculationsUtils.toBigDecimal(entryOrder.getAmount());
-        BigDecimal buySpent = openPrice.multiply(buyAmount);
+        BigDecimal buySpent = getBuySpent(entryOrder);
 
         BigDecimal buyAmountAfterFee = getAmountAfterFee(entryOrder);
         BigDecimal sellGain = sellRate.multiply(buyAmountAfterFee).multiply(CalculationsUtils.AFTER_FEE_PERCENT);
-        log.debug("Open price = {}, last price = {}, buy amount = {}, but spent = {}, sell gain = {}", openPrice, sellRate, buyAmount, buySpent, sellGain);
+        log.debug("Open price = {}, last price = {}, buy amount = {}, but spent = {}, sell gain = {}", entryOrder.getPrice(), sellRate, entryOrder.getAmount(), buySpent, sellGain);
         BigDecimal diff = CalculationsUtils.divide(sellGain, buySpent);
         log.info("Expected/required SELL profit {}/{}", diff, CalculationsUtils.MIN_PROFIT_PERCENT);
 

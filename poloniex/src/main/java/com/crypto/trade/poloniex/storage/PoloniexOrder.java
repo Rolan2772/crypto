@@ -1,6 +1,7 @@
 package com.crypto.trade.poloniex.storage;
 
 import com.crypto.trade.poloniex.services.analytics.TradingAction;
+import com.crypto.trade.poloniex.services.utils.CalculationsUtils;
 import com.crypto.trade.poloniex.services.utils.DateTimeUtils;
 import eu.verdelhan.ta4j.Order;
 import lombok.AllArgsConstructor;
@@ -18,7 +19,7 @@ public class PoloniexOrder {
     private int index;
     private TradingAction action;
     private Order sourceOrder;
-    private BigDecimal fee;
+    private BigDecimal fee = CalculationsUtils.FEE_PERCENT;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private ZonedDateTime tradeTime;
 

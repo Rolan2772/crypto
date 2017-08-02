@@ -4,6 +4,7 @@ import com.crypto.trade.poloniex.services.analytics.AnalyticsService;
 import com.crypto.trade.poloniex.services.analytics.TradingAction;
 import com.crypto.trade.poloniex.services.trade.TradeCalculator;
 import com.crypto.trade.poloniex.services.utils.DateTimeUtils;
+import com.crypto.trade.poloniex.services.utils.ExportUtils;
 import com.crypto.trade.poloniex.storage.PoloniexOrder;
 import com.crypto.trade.poloniex.storage.PoloniexStrategy;
 import com.crypto.trade.poloniex.storage.PoloniexTradingRecord;
@@ -18,7 +19,6 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -32,7 +32,7 @@ public class ExportHelper {
 
     public String createStrategiesHeaders(List<PoloniexTradingRecord> tradingRecords, String type) {
         return tradingRecords.stream()
-                .map(tradingRecord -> tradingRecord.getStrategyName() + "-tr-" + tradingRecord.getId() + "-" + type)
+                .map(tradingRecord -> ExportUtils.getTradingRecordName(tradingRecord) + "-" + type)
                 .collect(Collectors.joining(","));
     }
 
@@ -130,34 +130,53 @@ public class ExportHelper {
                 sourceOrder.getPrice(),
                 sourceOrder.getAmount(),
                 poloniexOrder.getFee(),
-                tradeCalculator.getAmountAfterFee(sourceOrder),
+                tradeCalculator.getBoughtAmount(sourceOrder),
                 sourceOrder.getType())
                 .map(Object::toString)
                 .collect(Collectors.joining(","));
     }
 
+    public String convertTradingRecordProfit(PoloniexTradingRecord tradingRecord) {
+        StringBuilder sb = new StringBuilder(ExportUtils.getTradingRecordName(tradingRecord));
+        sb.append(" profit: ")
+                .append(",")
+                .append(getTradingRecordProfit(tradingRecord));
+        return sb.toString();
+    }
+
+    public String convertStrategyProfit(PoloniexStrategy strategy) {
+        StringBuilder sb = new StringBuilder();
+        BigDecimal totalProfit = strategy.getTradingRecords()
+                .stream()
+                .map(this::getTradingRecordProfit)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        sb.append(strategy.getName())
+                .append(" profit: ")
+                .append(",")
+                .append(totalProfit);
+        return sb.toString();
+    }
+
     public String convertTotalProfit(TimeFrameStorage timeFrameStorage) {
         StringBuilder sb = new StringBuilder();
-
-        timeFrameStorage.getAllTradingRecords()
+        BigDecimal totalProfit = timeFrameStorage.getAllTradingRecords()
                 .stream()
-                .flatMap(tradingRecord -> {
-                    Stream<BigDecimal> profit = Stream.of(BigDecimal.ZERO);
-                    List<PoloniexOrder> orders = tradingRecord.getOrders();
-                    if (!orders.isEmpty()) {
-                        profit = IntStream.range(0, orders.size()).mapToObj(index -> {
-                            BigDecimal trProfit = BigDecimal.ZERO;
-                            PoloniexOrder order = orders.get(index);
-                            if (order.getSourceOrder().getType() == Order.OrderType.SELL) {
-                                PoloniexOrder buyOrder = orders.get(index - 1);
-                                //trProfit =
-                            }
-                            return trProfit;
-                        });
-                    }
-                    return profit;
-                }).reduce(BigDecimal.ZERO, BigDecimal::add);
-        sb.append("Total profit: ,");
+                .map(this::getTradingRecordProfit)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        sb.append("Total profit: ").append(",").append(totalProfit);
         return sb.toString();
+    }
+
+    private BigDecimal getTradingRecordProfit(PoloniexTradingRecord tradingRecord) {
+        BigDecimal profit = BigDecimal.ZERO;
+        List<PoloniexOrder> orders = tradingRecord.getOrders();
+        if (orders.size() > 1) {
+            for (int index = 1; index < orders.size(); index += 2) {
+                PoloniexOrder entryOrder = orders.get(index - 1);
+                PoloniexOrder exitOrder = orders.get(index);
+                profit = profit.add(tradeCalculator.getResultProfit(entryOrder.getSourceOrder(), exitOrder.getSourceOrder()));
+            }
+        }
+        return profit;
     }
 }

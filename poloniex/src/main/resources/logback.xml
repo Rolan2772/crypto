@@ -46,7 +46,7 @@
 
     <logger name="com.crypto.trade.poloniex" level="DEBUG"/>
     <logger name="org.springframework" level="INFO"/>
-    <logger name="eu.verdelhan.ta4j" level="TRACE"/>
+    <logger name="eu.verdelhan.ta4j" level="DEBUG"/>
     <logger name="org.springframework.web" level="DEBUG"/>
     <logger name="org.glassfish.tyrus" level="INFO"/>
 

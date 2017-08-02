@@ -16,6 +16,7 @@ public class PoloniexTradingRecord {
     private String strategyName;
     private TradingRecord tradingRecord;
     private AtomicBoolean processing = new AtomicBoolean();
+    // @TODO: create poloniex trade with related orders
     private List<PoloniexOrder> orders = new ArrayList<>();
 
     public void addPoloniexOrder(PoloniexOrder order) {

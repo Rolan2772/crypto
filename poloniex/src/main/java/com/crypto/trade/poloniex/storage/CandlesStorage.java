@@ -105,23 +105,23 @@ public class CandlesStorage {
                 TradingAction action = realTimeAnalyticsService.analyzeTick(poloniexStrategy.getStrategy(), lastCandle, index, timeFrameStorage.getHistoryIndex(), false, tradingRecord);
                 log.debug("Strategy {}/{} trading record {} analytics result {}.", timeFrame, poloniexStrategy.getName(), trIndex, action);
                 if (!isHistoryTick && TradingAction.shouldPlaceOrder(action)) {
-                    Optional<PoloniexOrder> tradeResultOrder = Optional.empty();
+                    Optional<PoloniexOrder> resultOrder = Optional.empty();
                     boolean canTrade = (TradingAction.SHOULD_ENTER != action || !onceEntered) && poloniexTradingRecord.getProcessing().compareAndSet(false, true);
-                    log.debug("Strategy '{}' canTrade - {}, onceEntered - {}, processing - {}", poloniexStrategy.getName(), canTrade, onceEntered, poloniexTradingRecord.getProcessing().get());
+                    log.debug("Strategy '{}' canTrade: {}, onceEntered: {}, processing: {}", poloniexStrategy.getName(), canTrade, onceEntered, poloniexTradingRecord.getProcessing().get());
                     if (canTrade) {
-                        tradeResultOrder = tradingService.placeOrder(tradingRecord, index, action, poloniexStrategy.getTradeVolume(), properties.getTradeConfig().isRealPrice());
+                        resultOrder = tradingService.placeOrder(tradingRecord, index, poloniexStrategy.getTradeVolume(), properties.getTradeConfig().isRealPrice());
                         poloniexTradingRecord.setProcessed();
                     }
-                    onceEntered |= TradingAction.SHOULD_ENTER == action && tradeResultOrder.isPresent();
+                    onceEntered |= TradingAction.SHOULD_ENTER == action && resultOrder.isPresent();
                     log.debug("Strategy '{}' onceEntered flag: {}", poloniexStrategy.getName(), onceEntered);
-                    tradeResultOrder.ifPresent(poloniexTradingRecord::addPoloniexOrder);
+                    resultOrder.ifPresent(poloniexTradingRecord::addPoloniexOrder);
                 }
             }
         }
     }
 
     public List<TimeFrameStorage> getData(CurrencyPair currencyPair) {
-        return candles.getOrDefault(CurrencyPair.BTC_ETH, Collections.emptyList());
+        return candles.getOrDefault(currencyPair, Collections.emptyList());
     }
 
     public void addTradesHistory(CurrencyPair currency, Set<PoloniexTrade> poloniexTrades) {

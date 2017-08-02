@@ -3,8 +3,8 @@ package com.crypto.trade.poloniex.services.export;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import com.crypto.trade.poloniex.services.analytics.TimeFrame;
 import com.crypto.trade.poloniex.services.utils.CsvFileWriter;
+import com.crypto.trade.poloniex.services.utils.ExportUtils;
 import com.crypto.trade.poloniex.storage.CandlesStorage;
-import com.crypto.trade.poloniex.storage.PoloniexTradingRecord;
 import com.crypto.trade.poloniex.storage.TimeFrameStorage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class OrdersExportService implements MemoryExportService<TimeFrameStorage> {
+public class OrdersExportService implements MemoryExportService<TimeFrameStorage>, DataConversionService {
 
     public static final String ORDERS_FILE_NAME = "orders-";
 
@@ -43,17 +43,19 @@ public class OrdersExportService implements MemoryExportService<TimeFrameStorage
         });
     }
 
-    private StringBuilder convert(TimeFrameStorage timeFrameStorage) {
-        List<PoloniexTradingRecord> tradingRecords = timeFrameStorage.getAllTradingRecords();
-
+    @Override
+    public StringBuilder convert(TimeFrameStorage timeFrameStorage) {
         StringBuilder sb = new StringBuilder("name,id,tradeTime,index,price,amount,fee,amountAfterFee,type\n");
-        tradingRecords.forEach(tradingRecord -> {
-            String trName = tradingRecord.getStrategyName() + "-tr-" + tradingRecord.getId();
-            tradingRecord.getOrders().forEach(poloniexOrder -> sb.append(exportHelper.convertOrder(trName, poloniexOrder)).append("\n"));
+        timeFrameStorage.getActiveStrategies().forEach(poloniexStrategy -> {
+            poloniexStrategy.getTradingRecords().forEach(tradingRecord -> {
+                String trName = ExportUtils.getTradingRecordName(tradingRecord);
+                tradingRecord.getOrders().forEach(poloniexOrder -> sb.append(exportHelper.convertOrder(trName, poloniexOrder)).append("\n"));
+                sb.append(exportHelper.convertTradingRecordProfit(tradingRecord)).append("\n");
+            });
+            sb.append(exportHelper.convertStrategyProfit(poloniexStrategy)).append("\n");
         });
 
-        sb.append("\n");
-        sb.append(exportHelper.convertTotalProfit(timeFrameStorage));
+        sb.append(exportHelper.convertTotalProfit(timeFrameStorage)).append("\n");
         return sb;
     }
 

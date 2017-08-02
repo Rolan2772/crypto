@@ -40,7 +40,7 @@ public class PoloniexEndPoint {
     public void onMessage(String message) {
         if (message.startsWith("[148") && message.contains("[\"t\"")) {
 
-            tradesExecutor.submit(() -> {
+            //tradesExecutor.submit(() -> {
                 log.info(message);
                 try {
                     String[] split = message.split("\"t\"");
@@ -59,7 +59,7 @@ public class PoloniexEndPoint {
                 } catch (Exception ex) {
                     log.error("Failed to process message: " + message, ex);
                 }
-            });
+            //});
         }
     }
 

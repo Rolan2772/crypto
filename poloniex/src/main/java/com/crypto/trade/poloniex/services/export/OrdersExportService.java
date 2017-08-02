@@ -52,10 +52,10 @@ public class OrdersExportService implements MemoryExportService<TimeFrameStorage
                 tradingRecord.getOrders().forEach(poloniexOrder -> sb.append(exportHelper.convertOrder(trName, poloniexOrder)).append("\n"));
                 sb.append(exportHelper.convertTradingRecordProfit(tradingRecord)).append("\n");
             });
-            sb.append(exportHelper.convertStrategyProfit(poloniexStrategy)).append("\n");
+            sb.append(exportHelper.convertStrategyProfit(poloniexStrategy)).append("\n").append("\n");
         });
 
-        sb.append(exportHelper.convertTotalProfit(timeFrameStorage)).append("\n");
+        sb.append("\n").append(exportHelper.convertTotalProfit(timeFrameStorage)).append("\n");
         return sb;
     }
 

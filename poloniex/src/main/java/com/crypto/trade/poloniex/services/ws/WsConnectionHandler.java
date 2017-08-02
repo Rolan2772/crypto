@@ -52,7 +52,7 @@ public class WsConnectionHandler implements WebSocketHandler {
         String message = webSocketMessage.getPayload().toString();
         if (message.startsWith("[148") && message.contains("[\"t\"")) {
 
-            tradesExecutor.submit(() -> {
+            //tradesExecutor.submit(() -> {
                 log.info(message);
                 try {
                     String[] split = message.split("\"t\"");
@@ -70,7 +70,7 @@ public class WsConnectionHandler implements WebSocketHandler {
                 } catch (Exception ex) {
                     log.error("dfgsd", ex);
                 }
-            });
+            //});
         }
     }
 

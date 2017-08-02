@@ -1,15 +1,11 @@
 package com.crypto.trade.poloniex.storage;
 
-import com.crypto.trade.poloniex.config.properties.PoloniexProperties;
 import com.crypto.trade.poloniex.dto.PoloniexTrade;
 import com.crypto.trade.poloniex.services.analytics.AnalyticsService;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import com.crypto.trade.poloniex.services.analytics.TimeFrame;
-import com.crypto.trade.poloniex.services.analytics.TradingAction;
-import com.crypto.trade.poloniex.services.trade.TradingService;
 import eu.verdelhan.ta4j.Decimal;
 import eu.verdelhan.ta4j.Tick;
-import eu.verdelhan.ta4j.TradingRecord;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -26,23 +22,13 @@ import java.util.concurrent.ConcurrentMap;
 public class CandlesStorage {
 
     @Autowired
-    private PoloniexProperties properties;
-    @Autowired
     private AnalyticsService realTimeAnalyticsService;
     @Autowired
-    private TradingService tradingService;
-    @Autowired
     private ThreadPoolTaskExecutor strategyExecutor;
-
     private ConcurrentMap<CurrencyPair, List<TimeFrameStorage>> candles = new ConcurrentHashMap<>();
 
-    public List<PoloniexStrategy> getActiveStrategies(CurrencyPair currencyPair, TimeFrame timeFrame) {
-        return candles.getOrDefault(currencyPair, Collections.emptyList())
-                .stream()
-                .filter(timeFrameStorage -> timeFrameStorage.getTimeFrame() == timeFrame)
-                .findFirst()
-                .orElse(new TimeFrameStorage(TimeFrame.ONE_MINUTE))
-                .getActiveStrategies();
+    public void initCurrency(CurrencyPair currencyPair, List<TimeFrameStorage> timeFrameData) {
+        candles.put(currencyPair, timeFrameData);
     }
 
     public void addTrade(CurrencyPair currency, PoloniexTrade poloniexTrade) {
@@ -52,72 +38,33 @@ public class CandlesStorage {
         });
     }
 
-    public void initCurrency(CurrencyPair currencyPair, List<TimeFrameStorage> timeFrameData) {
-        candles.put(currencyPair, timeFrameData);
-    }
-
     private void updateCandles(TimeFrameStorage timeFrameStorage, PoloniexTrade poloniexTrade, boolean isHistoryTick) {
         timeFrameStorage.getUpdateLock().lock();
         try {
-            TimeFrame timeFrame = timeFrameStorage.getTimeFrame();
-            List<Tick> candles = timeFrameStorage.getCandles();
-            ZonedDateTime tradeTime = poloniexTrade.getTradeTime();
-            boolean isNewCandleTrade = candles.isEmpty() || !candles.get(candles.size() - 1).inPeriod(tradeTime);
-            int builtCandleIndex = candles.size() - 1;
-            if (isNewCandleTrade) {
-                ////////////////////////////////////////////////////
-                if (!candles.isEmpty()) {
-                    log.info("Trading on new {} candle at index {}", timeFrame, builtCandleIndex);
-                    strategyExecutor.submit(() -> {
-                        try {
-                            onNewCandle(timeFrameStorage, builtCandleIndex, isHistoryTick);
-                        } catch (Exception ex) {
-                            log.error("Failed to trade on " + timeFrame + " at index " + builtCandleIndex, ex);
-                        }
-                    });
-                }
-                ////////////////////////////////////////////////////
-                candles.add(new Tick(timeFrame.getFrameDuration(), timeFrame.calculateEndTime(tradeTime)));
-                int newIndex = candles.size() - 1;
-                if (isHistoryTick) {
-                    timeFrameStorage.setHistoryIndex(newIndex);
-                }
-                log.info("New {} candle with index {} has been created.", timeFrame, newIndex);
-            }
-            candles.get(candles.size() - 1).addTrade(Decimal.valueOf(poloniexTrade.getAmount()), Decimal.valueOf(poloniexTrade.getRate()));
+            Tick candle = findCandle(timeFrameStorage.getCandles(), poloniexTrade.getTradeTime())
+                    .orElseGet(new NewCandleSupplier(timeFrameStorage,
+                            poloniexTrade.getTradeTime(),
+                            strategyExecutor,
+                            realTimeAnalyticsService,
+                            isHistoryTick));
+            candle.addTrade(Decimal.valueOf(poloniexTrade.getAmount()), Decimal.valueOf(poloniexTrade.getRate()));
         } finally {
             timeFrameStorage.getUpdateLock().unlock();
         }
     }
 
-    private void onNewCandle(TimeFrameStorage timeFrameStorage, int index, boolean isHistoryTick) {
-        TimeFrame timeFrame = timeFrameStorage.getTimeFrame();
-        List<Tick> candles = timeFrameStorage.getCandles();
-        log.info("Analyzing new {} candle at {}.", timeFrame, index);
-        Tick lastCandle = candles.get(index);
-        for (PoloniexStrategy poloniexStrategy : timeFrameStorage.getActiveStrategies()) {
-            log.debug("Executing strategy '{}' on time series {}", poloniexStrategy.getName(), timeFrame);
-            List<PoloniexTradingRecord> tradingRecords = poloniexStrategy.getTradingRecords();
-            boolean onceEntered = false;
-            for (int trIndex = 0; trIndex < tradingRecords.size(); trIndex++) {
-                PoloniexTradingRecord poloniexTradingRecord = tradingRecords.get(trIndex);
-                TradingRecord tradingRecord = poloniexTradingRecord.getTradingRecord();
-                TradingAction action = realTimeAnalyticsService.analyzeTick(poloniexStrategy.getStrategy(), lastCandle, index, timeFrameStorage.getHistoryIndex(), false, tradingRecord);
-                log.debug("Strategy {}/{} trading record {} analytics result {}.", timeFrame, poloniexStrategy.getName(), trIndex, action);
-                if (!isHistoryTick && TradingAction.shouldPlaceOrder(action)) {
-                    Optional<PoloniexOrder> resultOrder = Optional.empty();
-                    boolean canTrade = (TradingAction.SHOULD_ENTER != action || !onceEntered) && poloniexTradingRecord.getProcessing().compareAndSet(false, true);
-                    log.debug("Strategy '{}' canTrade: {}, onceEntered: {}, processing: {}", poloniexStrategy.getName(), canTrade, onceEntered, poloniexTradingRecord.getProcessing().get());
-                    if (canTrade) {
-                        resultOrder = tradingService.placeOrder(tradingRecord, index, poloniexStrategy.getTradeVolume(), properties.getTradeConfig().isRealPrice());
-                        poloniexTradingRecord.setProcessed();
-                    }
-                    onceEntered |= TradingAction.SHOULD_ENTER == action && resultOrder.isPresent();
-                    log.debug("Strategy '{}' onceEntered flag: {}", poloniexStrategy.getName(), onceEntered);
-                    resultOrder.ifPresent(poloniexTradingRecord::addPoloniexOrder);
+    private Optional<Tick> findCandle(List<Tick> candles, ZonedDateTime tradeTime) {
+        Optional<Tick> candle = Optional.empty();
+        int size = candles.size();
+        if (!candles.isEmpty()) {
+            for (int index = Math.max(0, candles.size() - 5); index < candles.size() && !candle.isPresent(); index++) {
+                Tick currentCandle = candles.get(index);
+                if (currentCandle.inPeriod(tradeTime)) {
+                    candle = Optional.of(currentCandle);
                 }
             }
         }
+        return candle;
     }
 
     public List<TimeFrameStorage> getData(CurrencyPair currencyPair) {
@@ -141,5 +88,14 @@ public class CandlesStorage {
             });
             return candles;
         });
+    }
+
+    public List<PoloniexStrategy> getActiveStrategies(CurrencyPair currencyPair, TimeFrame timeFrame) {
+        return candles.getOrDefault(currencyPair, Collections.emptyList())
+                .stream()
+                .filter(timeFrameStorage -> timeFrameStorage.getTimeFrame() == timeFrame)
+                .findFirst()
+                .orElse(new TimeFrameStorage(TimeFrame.ONE_MINUTE))
+                .getActiveStrategies();
     }
 }

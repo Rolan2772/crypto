@@ -24,7 +24,6 @@ public class CsvFileWriter {
         try {
             Path pathToFile = Paths.get(path);
             Files.createDirectories(pathToFile.getParent());
-            Files.createFile(pathToFile);
 
             try (FileWriter fileWriter = new FileWriter(pathToFile.toFile(), append);
                  BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {

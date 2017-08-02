@@ -7,7 +7,6 @@ import com.crypto.trade.poloniex.storage.TradesStorage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.stereotype.Service;
 import rx.Subscription;
 import ws.wamp.jawampa.WampClient;
 import ws.wamp.jawampa.WampClientBuilder;
@@ -60,7 +59,7 @@ public class WampWsConnector implements WsConnector {
                         .subscribe(s -> {
                             ZonedDateTime time = ZonedDateTime.now(ZoneOffset.UTC);
                             if (s.arguments().get(0).asText().equals(CurrencyPair.BTC_ETH.name())) {
-                                tradesExecutor.submit(() -> {
+                                //tradesExecutor.submit(() -> {
                                     try {
                                         String pair = s.arguments().get(0).asText();
                                         if (pair.equals(CurrencyPair.BTC_ETH.name())) {
@@ -75,7 +74,7 @@ public class WampWsConnector implements WsConnector {
                                     } catch (RuntimeException ex) {
                                         log.error("fsdfs", ex);
                                     }
-                                });
+                                //});
                             }
                         }, th -> log.error("Failed to subscribe on 'ticker' ", th));
 

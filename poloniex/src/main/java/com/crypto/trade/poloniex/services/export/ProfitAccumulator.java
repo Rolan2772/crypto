@@ -1,6 +1,5 @@
 package com.crypto.trade.poloniex.services.export;
 
-import com.crypto.trade.poloniex.services.trade.TradeCalculator;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -13,15 +12,13 @@ public class ProfitAccumulator {
     BigDecimal netCcyProfit = BigDecimal.ZERO;
     BigDecimal netPercentageProfit = BigDecimal.ZERO;
 
-    public void addCcyProfit(BigDecimal value) {
-        ccyProfit = ccyProfit.add(value);
-        netCcyProfit = netCcyProfit.add(TradeCalculator.applyFee(ccyProfit));
+    public void addCcyProfit(BigDecimal profit, BigDecimal netProfit) {
+        ccyProfit = ccyProfit.add(profit);
+        netCcyProfit = netCcyProfit.add(netProfit);
     }
 
-    public void addPercentageProfit(BigDecimal value) {
-        percentageProfit = percentageProfit.add(value);
-        netPercentageProfit = netPercentageProfit.add(TradeCalculator.applyFee(percentageProfit));
+    public void addPercentageProfit(BigDecimal profit, BigDecimal netProfit) {
+        percentageProfit = percentageProfit.add(profit);
+        netPercentageProfit = netPercentageProfit.add(netProfit);
     }
-
-
 }

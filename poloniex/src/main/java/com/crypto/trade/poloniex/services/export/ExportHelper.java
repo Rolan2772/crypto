@@ -188,8 +188,8 @@ public class ExportHelper {
 
     private BinaryOperator<ProfitAccumulator> profitAccumulator() {
         return (profitAccumulator1, profitAccumulator2) -> {
-            profitAccumulator1.addCcyProfit(profitAccumulator2.getCcyProfit());
-            profitAccumulator1.addPercentageProfit(profitAccumulator2.getPercentageProfit());
+            profitAccumulator1.addCcyProfit(profitAccumulator2.getCcyProfit(), profitAccumulator2.getNetCcyProfit());
+            profitAccumulator1.addPercentageProfit(profitAccumulator2.getPercentageProfit(), profitAccumulator2.getNetPercentageProfit());
             return profitAccumulator1;
         };
     }
@@ -201,8 +201,10 @@ public class ExportHelper {
             for (int index = 1; index < orders.size(); index += 2) {
                 PoloniexOrder entryOrder = orders.get(index - 1);
                 PoloniexOrder exitOrder = orders.get(index);
-                profit.addCcyProfit(TradeCalculator.getResultProfit(entryOrder.getSourceOrder(), exitOrder.getSourceOrder()));
-                profit.addPercentageProfit(TradeCalculator.getResultPercent(entryOrder.getSourceOrder(), exitOrder.getSourceOrder()));
+                profit.addCcyProfit(TradeCalculator.getResultProfit(entryOrder.getSourceOrder(), exitOrder.getSourceOrder()),
+                        TradeCalculator.getNetResultProfit(entryOrder.getSourceOrder(), exitOrder.getSourceOrder()));
+                profit.addPercentageProfit(TradeCalculator.getResultPercent(entryOrder.getSourceOrder(), exitOrder.getSourceOrder()),
+                        TradeCalculator.getNetResultPercent(entryOrder.getSourceOrder(), exitOrder.getSourceOrder()));
             }
         }
         return profit;

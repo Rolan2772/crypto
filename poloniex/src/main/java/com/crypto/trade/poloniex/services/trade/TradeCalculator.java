@@ -26,7 +26,8 @@ public class TradeCalculator {
     }
 
     public static BigDecimal getAmountWithFee(Order order) {
-        return applyFee(CalculationsUtils.toBigDecimal(order.getAmount()));
+        BigDecimal result = applyFee(CalculationsUtils.toBigDecimal(order.getAmount()));
+        return CalculationsUtils.setCryptoScale(result);
     }
 
     public static BigDecimal applyFee(BigDecimal value) {
@@ -39,23 +40,45 @@ public class TradeCalculator {
         return sellGain.subtract(buySpent);
     }
 
+    public static BigDecimal getNetResultProfit(Order entryOrder, Order exitOrder) {
+        BigDecimal buySpent = getTotal(entryOrder);
+        BigDecimal sellGain = getTotalWithFee(exitOrder);
+        return sellGain.subtract(buySpent);
+    }
+
     public static BigDecimal getResultPercent(Order entryOrder, Order exitOrder) {
         BigDecimal buySpent = getTotal(entryOrder);
         BigDecimal sellGain = getTotal(exitOrder);
-        return BigDecimal.ONE.subtract(CalculationsUtils.divide(sellGain, buySpent));
+        return CalculationsUtils.divide(sellGain, buySpent).subtract(BigDecimal.ONE);
     }
 
-    public static BigDecimal getTotal(Order order) {
-        return getTotal(CalculationsUtils.toBigDecimal(order.getPrice()),
-                CalculationsUtils.toBigDecimal(order.getAmount()));
+    public static BigDecimal getNetResultPercent(Order entryOrder, Order exitOrder) {
+        BigDecimal buySpent = getTotal(entryOrder);
+        BigDecimal sellGain = getTotalWithFee(exitOrder);
+        return CalculationsUtils.divide(sellGain, buySpent).subtract(BigDecimal.ONE);
     }
 
     public static BigDecimal getTotalWithFee(Order order) {
-        return applyFee(getTotal(order));
+        return CalculationsUtils.setCryptoScale(applyFee(getTotal(order, false)));
+    }
+
+    public static BigDecimal getTotal(Order order) {
+        return getTotal(order, true);
+    }
+
+    public static BigDecimal getTotal(Order order, boolean scale) {
+        return getTotal(CalculationsUtils.toBigDecimal(order.getPrice()),
+                CalculationsUtils.toBigDecimal(order.getAmount()),
+                scale);
     }
 
     public static BigDecimal getTotal(BigDecimal price, BigDecimal amount) {
-        return price.multiply(amount);
+        return getTotal(price, amount, true);
+    }
+
+        public static BigDecimal getTotal(BigDecimal price, BigDecimal amount, boolean scale) {
+        BigDecimal result = price.multiply(amount);
+        return scale ? CalculationsUtils.setCryptoScale(result) : result;
     }
 
     public static BigDecimal getResultRate(List<ResultTrade> resultTrades, BigDecimal defaultRate) {

@@ -11,67 +11,65 @@ import java.util.List;
 @Slf4j
 public class TradeCalculator {
 
-    // @TODO: smth with rounding
-    // @TODO: use 1% no fee need
-    public boolean canSell(Order entryOrder, BigDecimal sellPrice) {
+    public static boolean canSell(Order entryOrder, BigDecimal sellPrice) {
         BigDecimal expectedProfit = getExpectedProfit(entryOrder, sellPrice);
         log.info("Expected profit: {}, minimum profit: {}", expectedProfit, CalculationsUtils.MIN_PROFIT_PERCENT);
         return expectedProfit.compareTo(CalculationsUtils.MIN_PROFIT_PERCENT) > 0;
     }
 
-    public BigDecimal getExpectedProfit(Order entryOrder, BigDecimal sellPrice) {
+    public static BigDecimal getExpectedProfit(Order entryOrder, BigDecimal sellPrice) {
         BigDecimal buySpent = getTotal(entryOrder);
         BigDecimal boughtAmount = getAmountWithFee(entryOrder);
-        BigDecimal sellGain = applyFee(getTotal(sellPrice, boughtAmount));
-        log.debug("Sell price: {}, entry order: {}, bought amount: {}, sell gain: {}", sellPrice, entryOrder, boughtAmount, sellGain);
+        BigDecimal sellGain = getTotal(sellPrice, boughtAmount);
+        log.debug("Sell price: {}, entry order: {}, bought amount: {}, sell gain (no fee): {}", sellPrice, entryOrder, boughtAmount, sellGain);
         return CalculationsUtils.divide(sellGain, buySpent);
     }
 
-    public BigDecimal getAmountWithFee(Order order) {
+    public static BigDecimal getAmountWithFee(Order order) {
         return applyFee(CalculationsUtils.toBigDecimal(order.getAmount()));
     }
 
-    public BigDecimal applyFee(BigDecimal value) {
-        BigDecimal afterFee = value.multiply(CalculationsUtils.AFTER_FEE_PERCENT);
-        return CalculationsUtils.setCryptoScale(afterFee);
+    public static BigDecimal applyFee(BigDecimal value) {
+        return value.multiply(CalculationsUtils.AFTER_FEE_PERCENT);
     }
 
-    public BigDecimal getResultProfit(Order entryOrder, Order exitOrder) {
+    public static BigDecimal getResultProfit(Order entryOrder, Order exitOrder) {
         BigDecimal buySpent = getTotal(entryOrder);
-        BigDecimal sellGain = applyFee(getTotal(exitOrder));
+        BigDecimal sellGain = getTotal(exitOrder);
         return sellGain.subtract(buySpent);
     }
 
-    public BigDecimal getResultPercent(Order entryOrder, Order exitOrder) {
+    public static BigDecimal getResultPercent(Order entryOrder, Order exitOrder) {
         BigDecimal buySpent = getTotal(entryOrder);
-        BigDecimal sellGain = applyFee(getTotal(exitOrder));
-        return CalculationsUtils.divide(sellGain, buySpent);
+        BigDecimal sellGain = getTotal(exitOrder);
+        return BigDecimal.ONE.subtract(CalculationsUtils.divide(sellGain, buySpent));
     }
 
-    public BigDecimal getTotal(Order order) {
+    public static BigDecimal getTotal(Order order) {
         return getTotal(CalculationsUtils.toBigDecimal(order.getPrice()),
                 CalculationsUtils.toBigDecimal(order.getAmount()));
     }
 
-    public BigDecimal getTotalWithFee(Order order) {
-        return getTotal(CalculationsUtils.toBigDecimal(order.getPrice()),
-                getAmountWithFee(order));
+    public static BigDecimal getTotalWithFee(Order order) {
+        return applyFee(getTotal(order));
     }
 
-    public BigDecimal getTotal(BigDecimal price, BigDecimal amount) {
-        return CalculationsUtils.setCryptoScale(price.multiply(amount));
+    public static BigDecimal getTotal(BigDecimal price, BigDecimal amount) {
+        return price.multiply(amount);
     }
 
-    // @TODO: total/amount != amount*rate
-    public BigDecimal getResultRate(List<ResultTrade> resultTrades, BigDecimal defaultRate) {
-        BigDecimal spent = resultTrades.stream()
-                .map(ResultTrade::getTotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal rate = CalculationsUtils.divide(spent, getResultAmount(resultTrades, BigDecimal.ONE));
-        return rate.compareTo(BigDecimal.ZERO) == 0 ? defaultRate : rate;
+    public static BigDecimal getResultRate(List<ResultTrade> resultTrades, BigDecimal defaultRate) {
+        BigDecimal rate = resultTrades.isEmpty() ? resultTrades.get(0).getRate() : defaultRate;
+        if (resultTrades.size() > 1) {
+            BigDecimal spent = resultTrades.stream()
+                    .map(ResultTrade::getTotal)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            rate = CalculationsUtils.divide(spent, getResultAmount(resultTrades, BigDecimal.ONE));
+        }
+        return rate;
     }
 
-    public BigDecimal getResultAmount(List<ResultTrade> resultTrades, BigDecimal defaultAmount) {
+    public static BigDecimal getResultAmount(List<ResultTrade> resultTrades, BigDecimal defaultAmount) {
         return resultTrades.stream()
                 .map(ResultTrade::getAmount)
                 .reduce(defaultAmount, BigDecimal::add);

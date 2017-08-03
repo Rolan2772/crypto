@@ -4,7 +4,6 @@ import com.crypto.trade.poloniex.config.properties.PoloniexProperties;
 import com.crypto.trade.poloniex.services.analytics.PoloniexStrategyFactory;
 import com.crypto.trade.poloniex.services.analytics.TradeStrategyFactory;
 import com.crypto.trade.poloniex.services.export.ExportHelper;
-import com.crypto.trade.poloniex.services.trade.TradeCalculator;
 import com.crypto.trade.poloniex.services.trade.PoloniexRequestHelper;
 import com.crypto.trade.poloniex.storage.CandlesStorage;
 import com.crypto.trade.poloniex.storage.TradesStorage;
@@ -49,10 +48,4 @@ public class PoloniexAppConfig {
     public ExportHelper exportHelper() {
         return new ExportHelper();
     }
-
-    @Bean
-    public TradeCalculator feeCalculator() {
-        return new TradeCalculator();
-    }
-
 }

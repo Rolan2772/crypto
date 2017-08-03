@@ -6,6 +6,7 @@ import com.crypto.trade.poloniex.storage.CandlesStorage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.stream.Collectors;
@@ -28,5 +29,10 @@ public class TradeApiController {
                             ordersExportService.convert(timeFrameStorage).toString();
                 })
                 .collect(Collectors.joining("\n\n"));
+    }
+
+    @GetMapping("/loadOrders")
+    public void loadOrders(@RequestParam String fileName) {
+        // @TODO: load previos execution orders
     }
 }

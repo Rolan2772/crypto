@@ -29,8 +29,6 @@ public class ExportHelper {
     @Qualifier("historyAnalyticsService")
     @Autowired
     private AnalyticsService analyticsService;
-    @Autowired
-    private TradeCalculator tradeCalculator;
 
     public String createStrategiesHeaders(List<PoloniexTradingRecord> tradingRecords, String type) {
         return tradingRecords.stream()
@@ -129,8 +127,9 @@ public class ExportHelper {
                 sourceOrder.getPrice(),
                 sourceOrder.getAmount(),
                 poloniexOrder.getFee(),
-                tradeCalculator.getAmountWithFee(sourceOrder),
-                sourceOrder.isBuy() ? tradeCalculator.getTotal(sourceOrder) : tradeCalculator.getTotalWithFee(sourceOrder),
+                sourceOrder.isBuy() ? TradeCalculator.getAmountWithFee(sourceOrder) : "",
+                sourceOrder.isBuy() ? "" : TradeCalculator.getTotal(sourceOrder),
+                sourceOrder.isBuy() ? TradeCalculator.getTotal(sourceOrder) : TradeCalculator.getTotalWithFee(sourceOrder),
                 sourceOrder.getType())
                 .map(Object::toString)
                 .collect(Collectors.joining(","));
@@ -142,7 +141,11 @@ public class ExportHelper {
         sb.append(",")
                 .append(profitAccumulator.getCcyProfit())
                 .append(",")
-                .append(profitAccumulator.getPercentageProfit());
+                .append(profitAccumulator.getNetCcyProfit())
+                .append(",")
+                .append(profitAccumulator.getPercentageProfit())
+                .append(",")
+                .append(profitAccumulator.getNetPercentageProfit());
         return sb.toString();
     }
 
@@ -156,7 +159,11 @@ public class ExportHelper {
                 .append(",")
                 .append(strategyProfit.getCcyProfit())
                 .append(",")
-                .append(strategyProfit.getPercentageProfit());
+                .append(strategyProfit.getNetCcyProfit())
+                .append(",")
+                .append(strategyProfit.getPercentageProfit())
+                .append(",")
+                .append(strategyProfit.getNetPercentageProfit());
         return sb.toString();
     }
 
@@ -171,7 +178,11 @@ public class ExportHelper {
                 .append(",")
                 .append(totalProfit.getCcyProfit())
                 .append(",")
-                .append(totalProfit.getPercentageProfit());
+                .append(totalProfit.getNetCcyProfit())
+                .append(",")
+                .append(totalProfit.getPercentageProfit())
+                .append(",")
+                .append(totalProfit.getNetPercentageProfit());
         return sb.toString();
     }
 
@@ -190,8 +201,8 @@ public class ExportHelper {
             for (int index = 1; index < orders.size(); index += 2) {
                 PoloniexOrder entryOrder = orders.get(index - 1);
                 PoloniexOrder exitOrder = orders.get(index);
-                profit.addCcyProfit(tradeCalculator.getResultProfit(entryOrder.getSourceOrder(), exitOrder.getSourceOrder()));
-                profit.addPercentageProfit(tradeCalculator.getResultPercent(entryOrder.getSourceOrder(), exitOrder.getSourceOrder()));
+                profit.addCcyProfit(TradeCalculator.getResultProfit(entryOrder.getSourceOrder(), exitOrder.getSourceOrder()));
+                profit.addPercentageProfit(TradeCalculator.getResultPercent(entryOrder.getSourceOrder(), exitOrder.getSourceOrder()));
             }
         }
         return profit;

@@ -57,7 +57,7 @@ public class CandlesStorage {
         Optional<Tick> candle = Optional.empty();
         int size = candles.size();
         if (!candles.isEmpty()) {
-            for (int index = Math.max(0, candles.size() - 5); index < candles.size() && !candle.isPresent(); index++) {
+            for (int index = Math.max(0, candles.size() - 5); index < size && !candle.isPresent(); index++) {
                 Tick currentCandle = candles.get(index);
                 if (currentCandle.inPeriod(tradeTime)) {
                     candle = Optional.of(currentCandle);

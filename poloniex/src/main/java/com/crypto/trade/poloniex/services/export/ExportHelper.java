@@ -10,14 +10,15 @@ import com.crypto.trade.poloniex.storage.PoloniexStrategy;
 import com.crypto.trade.poloniex.storage.PoloniexTradingRecord;
 import com.crypto.trade.poloniex.storage.TimeFrameStorage;
 import eu.verdelhan.ta4j.*;
+import eu.verdelhan.ta4j.analysis.criteria.LinearTransactionCostCriterion;
 import eu.verdelhan.ta4j.analysis.criteria.TotalProfitCriterion;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -94,18 +95,13 @@ public class ExportHelper {
                 .flatMap(Collection::stream)
                 .forEach(record -> {
                     TradingRecord tr = record.getTradingRecord();
-                    sb.append(record.getStrategyName())
-                            .append("-")
-                            .append(record.getId())
-                            .append(" trades: ")
+                    sb.append(ExportUtils.getTradingRecordName(record))
                             .append(",")
-                            .append(tr.getTradeCount()).append('\n');
-                    sb.append(record.getStrategyName())
-                            .append("-")
-                            .append(record.getId())
-                            .append(" profit: ")
+                            .append(tr.getTradeCount()).append('\n')
                             .append(",")
-                            .append(new TotalProfitCriterion().calculate(candles, tr)).append('\n');
+                            .append(new TotalProfitCriterion().calculate(candles, tr)).append('\n')
+                            .append(",")
+                            .append(new LinearTransactionCostCriterion(0.0018, 0.0025).calculate(candles, tr)).append('\n');
                 });
         return sb.toString();
 
@@ -138,43 +134,62 @@ public class ExportHelper {
 
     public String convertTradingRecordProfit(PoloniexTradingRecord tradingRecord) {
         StringBuilder sb = new StringBuilder(ExportUtils.getTradingRecordName(tradingRecord));
+        ProfitAccumulator profitAccumulator = getTradingRecordProfit(tradingRecord);
         sb.append(" profit: ")
                 .append(",")
-                .append(getTradingRecordProfit(tradingRecord));
+                .append(profitAccumulator.getCcyProfit())
+                .append(",")
+                .append(profitAccumulator.getPercentageProfit());
         return sb.toString();
     }
 
     public String convertStrategyProfit(PoloniexStrategy strategy) {
         StringBuilder sb = new StringBuilder();
-        BigDecimal totalProfit = strategy.getTradingRecords()
+        ProfitAccumulator strategyProfit = strategy.getTradingRecords()
                 .stream()
                 .map(this::getTradingRecordProfit)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .reduce(new ProfitAccumulator(), profitAccumulator());
         sb.append(strategy.getName())
                 .append(" profit: ")
                 .append(",")
-                .append(totalProfit);
+                .append(strategyProfit.getCcyProfit())
+                .append(",")
+                .append(strategyProfit.getPercentageProfit());
         return sb.toString();
     }
 
     public String convertTotalProfit(TimeFrameStorage timeFrameStorage) {
         StringBuilder sb = new StringBuilder();
-        BigDecimal totalProfit = timeFrameStorage.getAllTradingRecords()
+        ProfitAccumulator totalProfit = timeFrameStorage.getAllTradingRecords()
                 .stream()
                 .map(this::getTradingRecordProfit)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        sb.append("Total profit: ").append(",").append(totalProfit);
+                .reduce(new ProfitAccumulator(), profitAccumulator());
+
+        sb.append("Total profit: ")
+                .append(",")
+                .append(totalProfit.getCcyProfit())
+                .append(",")
+                .append(totalProfit.getPercentageProfit());
         return sb.toString();
     }
 
-    private BigDecimal getTradingRecordProfit(PoloniexTradingRecord tradingRecord) {
-        BigDecimal profit = BigDecimal.ZERO;
+    private BinaryOperator<ProfitAccumulator> profitAccumulator() {
+        return (profitAccumulator1, profitAccumulator2) -> {
+            profitAccumulator1.addCcyProfit(profitAccumulator2.getCcyProfit());
+            profitAccumulator1.addPercentageProfit(profitAccumulator2.getPercentageProfit());
+            return profitAccumulator1;
+        };
+    }
+
+    private ProfitAccumulator getTradingRecordProfit(PoloniexTradingRecord tradingRecord) {
+        ProfitAccumulator profit = new ProfitAccumulator();
         List<PoloniexOrder> orders = tradingRecord.getOrders();
         if (orders.size() > 1) {
             for (int index = 1; index < orders.size(); index += 2) {
                 PoloniexOrder entryOrder = orders.get(index - 1);
                 PoloniexOrder exitOrder = orders.get(index);
-                profit = profit.add(tradeCalculator.getResultProfit(entryOrder.getSourceOrder(), exitOrder.getSourceOrder()));
+                profit.addCcyProfit(tradeCalculator.getResultProfit(entryOrder.getSourceOrder(), exitOrder.getSourceOrder()));
+                profit.addPercentageProfit(tradeCalculator.getResultPercent(entryOrder.getSourceOrder(), exitOrder.getSourceOrder()));
             }
         }
         return profit;

@@ -72,16 +72,21 @@ public class NewCandleSupplier implements Supplier<Tick> {
                 TradingAction action = realTimeAnalyticsService.analyzeTick(poloniexStrategy.getStrategy(), builtCandle, index, timeFrameStorage.getHistoryIndex(), false, tradingRecord);
                 log.debug("Strategy {}/{} trading record {} analytics result {}.", timeFrame, poloniexStrategy.getName(), trIndex, action);
                 if (TradingAction.shouldPlaceOrder(action)) {
-                    Optional<PoloniexOrder> resultOrder = Optional.empty();
-                    boolean canTrade = (TradingAction.SHOULD_ENTER != action || !onceEntered) && poloniexTradingRecord.getProcessing().compareAndSet(false, true);
-                    log.debug("Strategy '{}' canTrade: {}, onceEntered: {}, processing: {}", poloniexStrategy.getName(), canTrade, onceEntered, poloniexTradingRecord.getProcessing().get());
-                    if (canTrade) {
+                    try {
+                        boolean canTrade = (TradingAction.SHOULD_ENTER != action || !onceEntered) && poloniexTradingRecord.getProcessing().compareAndSet(false, true);
+                        log.debug("Strategy '{}' canTrade: {}, onceEntered: {}, processing: {}", poloniexStrategy.getName(), canTrade, onceEntered, poloniexTradingRecord.getProcessing().get());
+                        Optional<PoloniexOrder> resultOrder = Optional.empty();
+                        if (canTrade) {
                         /*resultOrder = tradingService.placeOrder(tradingRecord, index, poloniexStrategy.getTradeVolume(), properties.getTradeConfig().isRealPrice());
                         poloniexTradingRecord.setProcessed();*/
+                        }
+                        onceEntered |= TradingAction.SHOULD_ENTER == action && resultOrder.isPresent();
+                        log.debug("Strategy '{}' onceEntered flag: {}", poloniexStrategy.getName(), onceEntered);
+                        resultOrder.ifPresent(poloniexTradingRecord::addPoloniexOrder);
+                    } finally {
+                        poloniexTradingRecord.setProcessed();
+                        log.debug("Trading record processing: {}", poloniexTradingRecord.getProcessing().get());
                     }
-                    onceEntered |= TradingAction.SHOULD_ENTER == action && resultOrder.isPresent();
-                    log.debug("Strategy '{}' onceEntered flag: {}", poloniexStrategy.getName(), onceEntered);
-                    resultOrder.ifPresent(poloniexTradingRecord::addPoloniexOrder);
                 }
             }
         }

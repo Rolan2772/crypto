@@ -40,6 +40,12 @@ public class TradeCalculator {
         return buySpent.subtract(sellGain);
     }
 
+    public BigDecimal getResultPercent(Order entryOrder, Order exitOrder) {
+        BigDecimal buySpent = getTotal(entryOrder);
+        BigDecimal sellGain = applyFee(getTotal(exitOrder));
+        return CalculationsUtils.divide(sellGain, buySpent);
+    }
+
     public BigDecimal getTotal(Order order) {
         return getTotal(CalculationsUtils.toBigDecimal(order.getPrice()),
                 CalculationsUtils.toBigDecimal(order.getAmount()));

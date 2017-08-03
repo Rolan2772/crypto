@@ -11,21 +11,23 @@ import java.util.List;
 @Slf4j
 public class TradeCalculator {
 
+    // @TODO: smth with rounding
+    // @TODO: use 1% no fee need
     public boolean canSell(Order entryOrder, BigDecimal sellPrice) {
-        BigDecimal expectedProfit = getExpectedGrown(entryOrder, sellPrice);
+        BigDecimal expectedProfit = getExpectedProfit(entryOrder, sellPrice);
         log.info("Expected profit: {}, minimum profit: {}", expectedProfit, CalculationsUtils.MIN_PROFIT_PERCENT);
         return expectedProfit.compareTo(CalculationsUtils.MIN_PROFIT_PERCENT) > 0;
     }
 
-    public BigDecimal getExpectedGrown(Order entryOrder, BigDecimal sellPrice) {
+    public BigDecimal getExpectedProfit(Order entryOrder, BigDecimal sellPrice) {
         BigDecimal buySpent = getTotal(entryOrder);
-        BigDecimal boughtAmount = getBoughtAmount(entryOrder);
+        BigDecimal boughtAmount = getAmountWithFee(entryOrder);
         BigDecimal sellGain = applyFee(getTotal(sellPrice, boughtAmount));
         log.debug("Sell price: {}, entry order: {}, bought amount: {}, sell gain: {}", sellPrice, entryOrder, boughtAmount, sellGain);
         return CalculationsUtils.divide(sellGain, buySpent);
     }
 
-    public BigDecimal getBoughtAmount(Order order) {
+    public BigDecimal getAmountWithFee(Order order) {
         return applyFee(CalculationsUtils.toBigDecimal(order.getAmount()));
     }
 
@@ -37,7 +39,7 @@ public class TradeCalculator {
     public BigDecimal getResultProfit(Order entryOrder, Order exitOrder) {
         BigDecimal buySpent = getTotal(entryOrder);
         BigDecimal sellGain = applyFee(getTotal(exitOrder));
-        return buySpent.subtract(sellGain);
+        return sellGain.subtract(buySpent);
     }
 
     public BigDecimal getResultPercent(Order entryOrder, Order exitOrder) {
@@ -51,10 +53,16 @@ public class TradeCalculator {
                 CalculationsUtils.toBigDecimal(order.getAmount()));
     }
 
+    public BigDecimal getTotalWithFee(Order order) {
+        return getTotal(CalculationsUtils.toBigDecimal(order.getPrice()),
+                getAmountWithFee(order));
+    }
+
     public BigDecimal getTotal(BigDecimal price, BigDecimal amount) {
         return CalculationsUtils.setCryptoScale(price.multiply(amount));
     }
 
+    // @TODO: total/amount != amount*rate
     public BigDecimal getResultRate(List<ResultTrade> resultTrades, BigDecimal defaultRate) {
         BigDecimal spent = resultTrades.stream()
                 .map(ResultTrade::getTotal)

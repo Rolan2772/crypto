@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
+import java.lang.management.ManagementFactory;
 import java.util.Collection;
 import java.util.List;
 
@@ -40,23 +41,24 @@ public class OrdersExportService implements MemoryExportService<TimeFrameStorage
         data.forEach(timeFrameStorage -> {
             String name = createName(timeFrameStorage.getTimeFrame(), currencyPair);
             csvFileWriter.write(new ExportData(currencyPair, name, convert(timeFrameStorage)));
+            csvFileWriter.write(new ExportData(currencyPair, ManagementFactory.getRuntimeMXBean().getName() + "-" + name, convert(timeFrameStorage)));
         });
     }
 
     @Override
     public StringBuilder convert(TimeFrameStorage timeFrameStorage) {
         StringBuilder profit = new StringBuilder("\n\ndescription,profit,profit%\n");
-        StringBuilder orders = new StringBuilder("name,id,tradeTime,index,price,amount,fee,amountAfterFee,type\n");
+        StringBuilder orders = new StringBuilder("name,id,tradeTime,index,price,amount,fee,amountAfterFee,buySpent/sellGain,type\n");
         timeFrameStorage.getActiveStrategies().forEach(poloniexStrategy -> {
             poloniexStrategy.getTradingRecords().forEach(tradingRecord -> {
                 String trName = ExportUtils.getTradingRecordName(tradingRecord);
                 tradingRecord.getOrders().forEach(poloniexOrder -> orders.append(exportHelper.convertOrder(trName, poloniexOrder)).append("\n"));
                 profit.append(exportHelper.convertTradingRecordProfit(tradingRecord)).append("\n");
             });
-            profit.append(exportHelper.convertStrategyProfit(poloniexStrategy)).append("\n").append("\n");
+            profit.append(exportHelper.convertStrategyProfit(poloniexStrategy)).append("\n");
         });
 
-        profit.append("\n").append(exportHelper.convertTotalProfit(timeFrameStorage)).append("\n");
+        profit.append(exportHelper.convertTotalProfit(timeFrameStorage)).append("\n");
         return orders.append(profit);
     }
 

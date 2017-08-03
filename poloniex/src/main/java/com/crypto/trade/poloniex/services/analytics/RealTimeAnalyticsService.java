@@ -14,10 +14,10 @@ public class RealTimeAnalyticsService implements AnalyticsService {
     public TradingAction analyzeTick(Strategy strategy, Tick lastTick, int index, int historyIndex, boolean analyzeHistory, TradingRecord tradingRecord) {
         TradingAction action = TradingAction.NO_ACTION;
         if (tradingRecord.getCurrentTrade().isNew() && strategy.shouldEnter(index, tradingRecord)) {
-            log.debug("Strategy should ENTER on {}", index);
+            log.debug("Strategy should ENTER on {} with price: {}", index, lastTick.getClosePrice());
             action = TradingAction.SHOULD_ENTER;
         } else if (tradingRecord.getCurrentTrade().isOpened() && strategy.shouldExit(index, tradingRecord)) {
-            log.debug("Strategy should EXIT on {}", index);
+            log.debug("Strategy should EXIT on {} with price: {}", index, lastTick.getClosePrice());
             action = TradingAction.SHOULD_EXIT;
         }
         return action;

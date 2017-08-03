@@ -78,6 +78,7 @@ public class TradingService {
                 throw new PoloniexResponseException(response.getBody());
             } else {
                 PoloniexOrderResponse orderResponse = objectMapper.readValue(response.getBody(), PoloniexOrderResponse.class);
+                log.debug("Order response: {}", orderResponse);
                 BigDecimal resultRate = tradeCalculator.getResultRate(orderResponse.getTrades(), rate);
                 BigDecimal resultAmount = tradeCalculator.getResultAmount(orderResponse.getTrades(), amount);
                 log.debug("Result rate = {}, result amount = {}", resultRate, resultAmount);
@@ -107,7 +108,7 @@ public class TradingService {
         }
 
         if (tradeCalculator.canSell(entryOrder, rate)) {
-            BigDecimal amountToSell = tradeCalculator.getBoughtAmount(entryOrder);
+            BigDecimal amountToSell = tradeCalculator.getAmountWithFee(entryOrder);
 
             Map<String, Object> params = new HashMap<>();
             params.put("command", "sell");
@@ -126,6 +127,7 @@ public class TradingService {
                     throw new PoloniexResponseException(response.getBody());
                 } else {
                     PoloniexOrderResponse orderResponse = objectMapper.readValue(response.getBody(), PoloniexOrderResponse.class);
+                    log.debug("Order response: {}", orderResponse);
                     BigDecimal resultRate = tradeCalculator.getResultRate(orderResponse.getTrades(), rate);
                     BigDecimal resultAmount = tradeCalculator.getResultAmount(orderResponse.getTrades(), amountToSell);
                     log.debug("Result rate = {}, result amount = {}", resultRate, resultAmount);

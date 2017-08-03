@@ -57,7 +57,7 @@ public class PoloniexStrategyFactory {
     public List<TimeFrameStorage> createSimpleShortBuyStrategy(CurrencyPair currencyPair) {
         TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
         TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
-        String shortBuyName = "short-buy";
+        String shortBuyName = "new-short-buy";
         Strategy shortBuyStrategy = tradeStrategyFactory.createShortBuyStrategy(new TimeSeries(timeFrameStorage.getCandles()), TradeStrategyFactory.DEFAULT_TIME_FRAME);
         PoloniexStrategy poloniexStrategy = new PoloniexStrategy(shortBuyName, shortBuyStrategy, timeFrame, properties.getTradeConfig().getMinBtcTradeAmount());
         poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(1, shortBuyName, new TradingRecord()));

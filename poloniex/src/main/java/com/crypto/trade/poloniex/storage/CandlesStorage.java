@@ -1,9 +1,11 @@
 package com.crypto.trade.poloniex.storage;
 
+import com.crypto.trade.poloniex.config.properties.PoloniexProperties;
 import com.crypto.trade.poloniex.dto.PoloniexTrade;
 import com.crypto.trade.poloniex.services.analytics.AnalyticsService;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import com.crypto.trade.poloniex.services.analytics.TimeFrame;
+import com.crypto.trade.poloniex.services.trade.TradingService;
 import eu.verdelhan.ta4j.Decimal;
 import eu.verdelhan.ta4j.Tick;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,10 @@ public class CandlesStorage {
     private AnalyticsService realTimeAnalyticsService;
     @Autowired
     private ThreadPoolTaskExecutor strategyExecutor;
+    @Autowired
+    private TradingService tradingService;
+    @Autowired
+    private PoloniexProperties poloniexProperties;
     private ConcurrentMap<CurrencyPair, List<TimeFrameStorage>> candles = new ConcurrentHashMap<>();
 
     public void initCurrency(CurrencyPair currencyPair, List<TimeFrameStorage> timeFrameData) {
@@ -46,6 +52,8 @@ public class CandlesStorage {
                             poloniexTrade.getTradeTime(),
                             strategyExecutor,
                             realTimeAnalyticsService,
+                            tradingService,
+                            poloniexProperties.getTradeConfig().isRealPrice(),
                             isHistoryTick));
             candle.addTrade(Decimal.valueOf(poloniexTrade.getAmount()), Decimal.valueOf(poloniexTrade.getRate()));
         } finally {

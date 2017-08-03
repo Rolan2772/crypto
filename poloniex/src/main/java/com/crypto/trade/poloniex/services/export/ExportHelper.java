@@ -3,6 +3,7 @@ package com.crypto.trade.poloniex.services.export;
 import com.crypto.trade.poloniex.services.analytics.AnalyticsService;
 import com.crypto.trade.poloniex.services.analytics.TradingAction;
 import com.crypto.trade.poloniex.services.trade.TradeCalculator;
+import com.crypto.trade.poloniex.services.utils.CalculationsUtils;
 import com.crypto.trade.poloniex.services.utils.DateTimeUtils;
 import com.crypto.trade.poloniex.services.utils.ExportUtils;
 import com.crypto.trade.poloniex.storage.PoloniexOrder;
@@ -16,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import java.util.Collection;
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
@@ -89,19 +90,21 @@ public class ExportHelper {
     }
 
     public String createResultAnalytics(TimeSeries candles, List<PoloniexStrategy> strategies) {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder("name,tradesCount,profit,profitWithFee\n");
         strategies.stream()
-                .map(PoloniexStrategy::getTradingRecords)
-                .flatMap(Collection::stream)
-                .forEach(record -> {
-                    TradingRecord tr = record.getTradingRecord();
-                    sb.append(ExportUtils.getTradingRecordName(record))
-                            .append(",")
-                            .append(tr.getTradeCount()).append('\n')
-                            .append(",")
-                            .append(new TotalProfitCriterion().calculate(candles, tr)).append('\n')
-                            .append(",")
-                            .append(new LinearTransactionCostCriterion(0.0018, 0.0025).calculate(candles, tr)).append('\n');
+                .map(strategy -> new AbstractMap.SimpleEntry<>(strategy.getTradeVolume(), strategy.getTradingRecords()))
+                .forEach(entry -> {
+                    entry.getValue().forEach(record -> {
+                        TradingRecord tr = record.getTradingRecord();
+                        sb.append(ExportUtils.getTradingRecordName(record))
+                                .append(",")
+                                .append(tr.getTradeCount())
+                                .append(",")
+                                .append(new TotalProfitCriterion().calculate(candles, tr))
+                                .append(",")
+                                .append(new LinearTransactionCostCriterion(entry.getKey().doubleValue(), CalculationsUtils.FEE_PERCENT.doubleValue()).calculate(candles, tr))
+                                .append('\n');
+                    });
                 });
         return sb.toString();
 
@@ -126,7 +129,8 @@ public class ExportHelper {
                 sourceOrder.getPrice(),
                 sourceOrder.getAmount(),
                 poloniexOrder.getFee(),
-                tradeCalculator.getBoughtAmount(sourceOrder),
+                tradeCalculator.getAmountWithFee(sourceOrder),
+                sourceOrder.isBuy() ? tradeCalculator.getTotal(sourceOrder) : tradeCalculator.getTotalWithFee(sourceOrder),
                 sourceOrder.getType())
                 .map(Object::toString)
                 .collect(Collectors.joining(","));
@@ -135,8 +139,7 @@ public class ExportHelper {
     public String convertTradingRecordProfit(PoloniexTradingRecord tradingRecord) {
         StringBuilder sb = new StringBuilder(ExportUtils.getTradingRecordName(tradingRecord));
         ProfitAccumulator profitAccumulator = getTradingRecordProfit(tradingRecord);
-        sb.append(" profit: ")
-                .append(",")
+        sb.append(",")
                 .append(profitAccumulator.getCcyProfit())
                 .append(",")
                 .append(profitAccumulator.getPercentageProfit());
@@ -150,7 +153,6 @@ public class ExportHelper {
                 .map(this::getTradingRecordProfit)
                 .reduce(new ProfitAccumulator(), profitAccumulator());
         sb.append(strategy.getName())
-                .append(" profit: ")
                 .append(",")
                 .append(strategyProfit.getCcyProfit())
                 .append(",")
@@ -165,7 +167,7 @@ public class ExportHelper {
                 .map(this::getTradingRecordProfit)
                 .reduce(new ProfitAccumulator(), profitAccumulator());
 
-        sb.append("Total profit: ")
+        sb.append("Total")
                 .append(",")
                 .append(totalProfit.getCcyProfit())
                 .append(",")

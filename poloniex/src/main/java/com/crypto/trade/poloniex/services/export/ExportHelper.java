@@ -88,7 +88,7 @@ public class ExportHelper {
     }
 
     public String createResultAnalytics(TimeSeries candles, List<PoloniexStrategy> strategies) {
-        StringBuilder sb = new StringBuilder("name,tradesCount,profit,profitWithFee\n");
+        StringBuilder sb = new StringBuilder("name,tradesCount,profit,LinearTransactionCostCriterion\n");
         strategies.stream()
                 .map(strategy -> new AbstractMap.SimpleEntry<>(strategy.getTradeVolume(), strategy.getTradingRecords()))
                 .forEach(entry -> {

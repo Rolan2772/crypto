@@ -11,5 +11,5 @@ public class PoloniexOrderResponse {
 
     @JsonProperty("orderNumber")
     private Long orderId;
-    private List<ResultTrade> trades = new ArrayList<>();
+    private List<ResultTrade> resultingTrades = new ArrayList<>();
 }

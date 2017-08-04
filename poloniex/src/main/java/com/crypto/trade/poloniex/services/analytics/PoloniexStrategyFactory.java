@@ -64,21 +64,24 @@ public class PoloniexStrategyFactory {
         List<ExportedPoloniexOrder> exportedOrders = Stream.of(
                 new ExportedPoloniexOrder(shortBuyName + "-tr-1", 323348216260L, 0, "0.08150600", "0.00245380", TradingAction.ENTERED),
                 new ExportedPoloniexOrder(shortBuyName + "-tr-1", 323446507870L, 0, "0.08274000", "0.00244766", TradingAction.EXITED),
-                new ExportedPoloniexOrder(shortBuyName + "-tr-1", 323446507871L, 0, "0.08170600", "0.00245380", TradingAction.ENTERED),
-                new ExportedPoloniexOrder(shortBuyName + "-tr-1", 323446507872L, 0, "0.08299000", "0.00244766", TradingAction.EXITED))
+                new ExportedPoloniexOrder(shortBuyName + "-tr-1", 323446507871L, 0, "0.08050011", "0.00130434", TradingAction.ENTERED))
                 .collect(Collectors.toList());
-        PoloniexTradingRecord poloniexTradingRecord = createTratingRecordWithOrders(shortBuyName, exportedOrders);
+        List<ExportedPoloniexOrder> exportedOrders1 = Stream.of(
+                new ExportedPoloniexOrder(shortBuyName + "-tr-1", 323446507872L, 0, "0.08050011", "0.00130434", TradingAction.ENTERED))
+                .collect(Collectors.toList());
+        PoloniexTradingRecord poloniexTradingRecord = createTratingRecordWithOrders(1, shortBuyName, exportedOrders);
+        PoloniexTradingRecord poloniexTradingRecord1 = createTratingRecordWithOrders(2, shortBuyName, exportedOrders1);
 
         poloniexStrategy.addTradingRecord(poloniexTradingRecord);
-        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(2, shortBuyName, new TradingRecord()));
+        poloniexStrategy.addTradingRecord(poloniexTradingRecord1);
         poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(3, shortBuyName, new TradingRecord()));
         timeFrameStorage.addStrategy(poloniexStrategy);
         return Collections.singletonList(timeFrameStorage);
     }
 
-    private PoloniexTradingRecord createTratingRecordWithOrders(String shortBuyName, List<ExportedPoloniexOrder> exportedOrders) {
-        PoloniexTradingRecord poloniexTradingRecord = new PoloniexTradingRecord(1, shortBuyName, new TradingRecord());
+    private PoloniexTradingRecord createTratingRecordWithOrders(int id, String shortBuyName, List<ExportedPoloniexOrder> exportedOrders) {
         TradingRecord tradingRecord = new TradingRecord();
+        PoloniexTradingRecord poloniexTradingRecord = new PoloniexTradingRecord(id, shortBuyName, tradingRecord);
         exportedOrders.forEach(exportedOrder -> {
             if (TradingAction.ENTERED == exportedOrder.getTradingAction()) {
                 tradingRecord.enter(exportedOrder.getIndex(), Decimal.valueOf(exportedOrder.getRate()), Decimal.valueOf(exportedOrder.getAmount()));

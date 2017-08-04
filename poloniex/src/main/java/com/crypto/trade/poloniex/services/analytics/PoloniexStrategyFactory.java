@@ -61,6 +61,22 @@ public class PoloniexStrategyFactory {
         Strategy shortBuyStrategy = tradeStrategyFactory.createShortBuyStrategy(new TimeSeries(timeFrameStorage.getCandles()), TradeStrategyFactory.DEFAULT_TIME_FRAME);
         PoloniexStrategy poloniexStrategy = new PoloniexStrategy(shortBuyName, shortBuyStrategy, timeFrame, properties.getTradeConfig().getMinBtcTradeAmount());
 
+        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(1, shortBuyName, new TradingRecord()));
+        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(2, shortBuyName, new TradingRecord()));
+        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(3, shortBuyName, new TradingRecord()));
+        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(4, shortBuyName, new TradingRecord()));
+        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(5, shortBuyName, new TradingRecord()));
+        timeFrameStorage.addStrategy(poloniexStrategy);
+        return Collections.singletonList(timeFrameStorage);
+    }
+
+    public List<TimeFrameStorage> createSimpleShortBuyStrategyWithInitalOrders(CurrencyPair currencyPair) {
+        TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
+        TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
+        String shortBuyName = "new-short-buy";
+        Strategy shortBuyStrategy = tradeStrategyFactory.createShortBuyStrategy(new TimeSeries(timeFrameStorage.getCandles()), TradeStrategyFactory.DEFAULT_TIME_FRAME);
+        PoloniexStrategy poloniexStrategy = new PoloniexStrategy(shortBuyName, shortBuyStrategy, timeFrame, properties.getTradeConfig().getMinBtcTradeAmount());
+
         List<ExportedPoloniexOrder> exportedOrders = Stream.of(
                 new ExportedPoloniexOrder(shortBuyName + "-tr-1", 323348216260L, 0, "0.08150600", "0.00245380", TradingAction.ENTERED),
                 new ExportedPoloniexOrder(shortBuyName + "-tr-1", 323446507870L, 0, "0.08274000", "0.00244766", TradingAction.EXITED),

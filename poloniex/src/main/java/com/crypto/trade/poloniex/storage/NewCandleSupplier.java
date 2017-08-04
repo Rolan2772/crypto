@@ -40,6 +40,7 @@ public class NewCandleSupplier implements Supplier<Tick> {
             trade(timeFrameStorage, lastIndex);
         }
 
+        // @TODO: check missed candles and indicators when no ticks
         Tick newCandle = new Tick(timeFrame.getFrameDuration(), timeFrame.calculateEndTime(tradeTime));
         candles.add(newCandle);
         log.info("New {} candle {} - {} with index {} has been created.", timeFrame, newCandle.getBeginTime().toLocalDateTime(), newCandle.getEndTime().toLocalDateTime(), candles.size() - 1);
@@ -69,6 +70,7 @@ public class NewCandleSupplier implements Supplier<Tick> {
             log.debug("Executing strategy '{}' on time series {}", poloniexStrategy.getName(), timeFrame);
             List<PoloniexTradingRecord> tradingRecords = poloniexStrategy.getTradingRecords();
             boolean onceEntered = false;
+            // @TODO: {"error":"Unable to fill order completely."} with 20 trading records cause big delay (a lot of new candles olready been created)
             for (int trIndex = 0; trIndex < tradingRecords.size(); trIndex++) {
                 PoloniexTradingRecord poloniexTradingRecord = tradingRecords.get(trIndex);
                 TradingRecord tradingRecord = poloniexTradingRecord.getTradingRecord();

@@ -22,6 +22,7 @@ public class PlainWsConnector implements WsConnector {
 
     private WebSocketConnectionManager connectionManager;
 
+    // @TODO: no connection for some time 2017-08-04 05:12 - 2017-08-04 8:29, then everything is ok
     public void connect() {
         StandardWebSocketClient client = new StandardWebSocketClient();
         connectionManager = new WebSocketConnectionManager(client, wsConnectionHandler, poloniexProperties.getApi().getWsApi2());

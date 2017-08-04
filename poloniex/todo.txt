@@ -1,6 +1,5 @@
-- profit calculations (with 0.5% fee), total profit
+- reload orders on startup
 - clear candles
-- save all orders to db
-- multiple currencies
 - sell strategy
+- multiple currencies
 - use stochD as on trading view

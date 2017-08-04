@@ -76,13 +76,13 @@ public class TradeCalculator {
         return getTotal(price, amount, true);
     }
 
-        public static BigDecimal getTotal(BigDecimal price, BigDecimal amount, boolean scale) {
+    public static BigDecimal getTotal(BigDecimal price, BigDecimal amount, boolean scale) {
         BigDecimal result = price.multiply(amount);
         return scale ? CalculationsUtils.setCryptoScale(result) : result;
     }
 
     public static BigDecimal getResultRate(List<ResultTrade> resultTrades, BigDecimal defaultRate) {
-        BigDecimal rate = resultTrades.isEmpty() ? resultTrades.get(0).getRate() : defaultRate;
+        BigDecimal rate = resultTrades.isEmpty() ? defaultRate : resultTrades.get(0).getRate();
         if (resultTrades.size() > 1) {
             BigDecimal spent = resultTrades.stream()
                     .map(ResultTrade::getTotal)

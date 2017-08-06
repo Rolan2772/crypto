@@ -163,6 +163,7 @@ public class ExportHelper {
     private Profit getTradingRecordProfit(PoloniexTradingRecord tradingRecord, BigDecimal volume) {
         Profit profit = new Profit();
         profit.accumulateVolume(volume);
+        profit.accumulateTradesCount(tradingRecord.getTradingRecord().getTradeCount());
         List<PoloniexOrder> orders = tradingRecord.getOrders();
         if (orders.size() > 1) {
             for (int index = 1; index < orders.size(); index += 2) {
@@ -177,23 +178,25 @@ public class ExportHelper {
     }
 
     private BinaryOperator<Profit> profitAccumulator() {
-        return (profit1, profit2) -> {
-            profit1.accumulate(profit2.getBuySpent(),
-                    profit2.getNetSellGain(),
-                    profit2.getGrossSellGain());
-            profit1.accumulateVolume(profit2.getVolume());
-            return profit1;
+        return (p1, p2) -> {
+            p1.accumulate(p2.getBuySpent(),
+                    p2.getNetSellGain(),
+                    p2.getGrossSellGain());
+            p1.accumulateVolume(p2.getVolume());
+            p1.accumulateTradesCount(p2.getTradesCount());
+            return p1;
         };
     }
 
     private String convertProfit(String name, Profit profit) {
-        return name + "," +
-                profit.getGrossProfit() +
-                "," +
-                profit.getNetProfit() +
-                "," +
-                profit.getGrossPercent() +
-                "," +
-                profit.getNetPercent();
+        return Stream.of(name,
+                profit.getTradesCount(),
+                profit.getVolume(),
+                profit.getGrossProfit(),
+                profit.getNetProfit(),
+                profit.getGrossPercent(),
+                profit.getNetPercent())
+                .map(Object::toString)
+                .collect(Collectors.joining(","));
     }
 }

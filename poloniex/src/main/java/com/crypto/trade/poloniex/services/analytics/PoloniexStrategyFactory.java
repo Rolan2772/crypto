@@ -71,7 +71,7 @@ public class PoloniexStrategyFactory {
         return Collections.singletonList(timeFrameStorage);
     }
 
-    public List<TimeFrameStorage> createTestprofitCalculationsStrategy(CurrencyPair currencyPair) {
+    public List<TimeFrameStorage> createTestProfitCalculationsStrategy(CurrencyPair currencyPair) {
         TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
         TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
         String shortBuyName = "profit-test-short-buy-1";
@@ -106,7 +106,7 @@ public class PoloniexStrategyFactory {
                 new ExportedPoloniexOrder(shortBuyName1 + "-tr-1", 323348216260L, 0, "0.0790100000", "0.00379698", TradingAction.ENTERED),
                 new ExportedPoloniexOrder(shortBuyName1 + "-tr-1", 323446507870L, 0, "0.0798445800", "0.00378749", TradingAction.EXITED))
                 .collect(Collectors.toList());
-        PoloniexTradingRecord poloniexTradingRecord2 = createTratingRecordWithOrders(2, shortBuyName1, exportedOrders2);
+        PoloniexTradingRecord poloniexTradingRecord2 = createTratingRecordWithOrders(1, shortBuyName1, exportedOrders2);
 
         poloniexStrategy1.addTradingRecord(poloniexTradingRecord2);
         timeFrameStorage.addStrategy(poloniexStrategy1);
@@ -114,7 +114,7 @@ public class PoloniexStrategyFactory {
         return Collections.singletonList(timeFrameStorage);
     }
 
-    public List<TimeFrameStorage> createSimpleShortBuyStrategyWithInitalOrders(CurrencyPair currencyPair) {
+    public List<TimeFrameStorage> createSimpleShortBuyStrategyWithInitialOrders(CurrencyPair currencyPair) {
         TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
         TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
         String shortBuyName = "initial-orders-short-buy";

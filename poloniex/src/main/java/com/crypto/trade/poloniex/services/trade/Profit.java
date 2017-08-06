@@ -12,6 +12,7 @@ public class Profit {
     BigDecimal netSellGain = BigDecimal.ZERO;
     BigDecimal grossSellGain = BigDecimal.ZERO;
     BigDecimal volume = BigDecimal.ZERO;
+    Integer tradesCount = 0;
 
     // @TODO: move to lamda's
     public void accumulate(BigDecimal buySpent, BigDecimal netSellGain, BigDecimal grossSellGain) {
@@ -22,6 +23,10 @@ public class Profit {
 
     public void accumulateVolume(BigDecimal volume) {
         this.volume = this.volume.add(volume);
+    }
+
+    public void accumulateTradesCount(Integer tradesCount) {
+        this.tradesCount += tradesCount;
     }
 
     public BigDecimal getNetProfit() {

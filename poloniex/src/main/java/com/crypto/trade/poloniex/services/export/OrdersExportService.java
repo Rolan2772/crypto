@@ -40,24 +40,23 @@ public class OrdersExportService implements MemoryExportService<TimeFrameStorage
     public void exportMemoryData(CurrencyPair currencyPair, Collection<TimeFrameStorage> data) {
         data.forEach(timeFrameStorage -> {
             String name = createName(timeFrameStorage.getTimeFrame(), currencyPair);
-            csvFileWriter.write(new ExportData(currencyPair, name, convert(timeFrameStorage)));
             csvFileWriter.write(new ExportData(currencyPair, ManagementFactory.getRuntimeMXBean().getName() + "-" + name, convert(timeFrameStorage)));
+            csvFileWriter.write(new ExportData(currencyPair, name, convert(timeFrameStorage)));
         });
     }
 
     @Override
     public StringBuilder convert(TimeFrameStorage timeFrameStorage) {
-        StringBuilder profit = new StringBuilder("\ndescription,profit,netProfit,profit%,netProfit%\n");
+        StringBuilder profit = new StringBuilder("\ndescription,grossProfit,netProfit,grossProfit%,netProfit%\n");
         StringBuilder orders = new StringBuilder("name,id,tradeTime,index,price,amount,fee,boughtAmount,soldTotal,buySpent/sellGained,type\n");
         timeFrameStorage.getActiveStrategies().forEach(poloniexStrategy -> {
             poloniexStrategy.getTradingRecords().forEach(tradingRecord -> {
                 String trName = ExportUtils.getTradingRecordName(tradingRecord);
                 tradingRecord.getOrders().forEach(poloniexOrder -> orders.append(exportHelper.convertOrder(trName, poloniexOrder)).append("\n"));
-                profit.append(exportHelper.convertTradingRecordProfit(tradingRecord)).append("\n");
+                profit.append(exportHelper.convertTradingRecordProfit(tradingRecord, poloniexStrategy.getTradeVolume())).append("\n");
             });
             profit.append(exportHelper.convertStrategyProfit(poloniexStrategy)).append("\n");
         });
-
         profit.append(exportHelper.convertTotalProfit(timeFrameStorage)).append("\n");
         return orders.append(profit);
     }

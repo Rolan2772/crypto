@@ -19,66 +19,45 @@ public class TradeCalculator {
 
     public static BigDecimal getExpectedProfit(Order entryOrder, BigDecimal sellPrice) {
         BigDecimal buySpent = getTotal(entryOrder);
-        BigDecimal boughtAmount = getAmountWithFee(entryOrder);
-        BigDecimal sellGain = getTotal(sellPrice, boughtAmount);
-        log.debug("Sell price: {}, entry order: {}, bought amount: {}, sell gain (no fee): {}", sellPrice, entryOrder, boughtAmount, sellGain);
+        BigDecimal sellGain = getTotal(sellPrice, CalculationsUtils.toBigDecimal(entryOrder.getAmount()));
+        log.debug("Sell price: {}, entry order: {}, bury spent: {}, sell gain: {}", sellPrice, entryOrder, buySpent, sellGain);
         return CalculationsUtils.divide(sellGain, buySpent);
     }
 
     public static BigDecimal getAmountWithFee(Order order) {
-        BigDecimal result = applyFee(CalculationsUtils.toBigDecimal(order.getAmount()));
-        return CalculationsUtils.setCryptoScale(result);
+        return subtractFee(CalculationsUtils.toBigDecimal(order.getAmount()));
     }
 
-    public static BigDecimal applyFee(BigDecimal value) {
-        return value.multiply(CalculationsUtils.AFTER_FEE_PERCENT);
+    public static BigDecimal subtractFee(BigDecimal value) {
+        BigDecimal fee = CalculationsUtils.setCryptoScale(value.multiply(CalculationsUtils.FEE_PERCENT));
+        return value.subtract(fee);
     }
 
-    public static BigDecimal getResultProfit(Order entryOrder, Order exitOrder) {
-        BigDecimal buySpent = getTotal(entryOrder);
-        BigDecimal sellGain = getTotal(exitOrder);
-        return sellGain.subtract(buySpent);
+    public static BigDecimal getGrossSellGain(Order entryOrder, Order exitOrder) {
+        return getTotal(CalculationsUtils.toBigDecimal(exitOrder.getPrice()),
+                CalculationsUtils.toBigDecimal(entryOrder.getAmount()));
     }
 
-    public static BigDecimal getNetResultProfit(Order entryOrder, Order exitOrder) {
-        BigDecimal buySpent = getTotal(entryOrder);
-        BigDecimal sellGain = getTotalWithFee(exitOrder);
-        return sellGain.subtract(buySpent);
+    public static BigDecimal getBuySpent(Order entryOrder) {
+        return getTotal(entryOrder);
     }
 
-    public static BigDecimal getResultPercent(Order entryOrder, Order exitOrder) {
-        BigDecimal buySpent = getTotal(entryOrder);
-        BigDecimal sellGain = getTotal(exitOrder);
-        return CalculationsUtils.divide(sellGain, buySpent).subtract(BigDecimal.ONE);
-    }
-
-    public static BigDecimal getNetResultPercent(Order entryOrder, Order exitOrder) {
-        BigDecimal buySpent = getTotal(entryOrder);
-        BigDecimal sellGain = getTotalWithFee(exitOrder);
-        return CalculationsUtils.divide(sellGain, buySpent).subtract(BigDecimal.ONE);
+    public static BigDecimal getNetSellGain(Order exitOrder) {
+        return subtractFee(getTotal(exitOrder));
     }
 
     public static BigDecimal getTotalWithFee(Order order) {
-        return CalculationsUtils.setCryptoScale(applyFee(getTotal(order, false)));
+        return subtractFee(getTotal(order));
     }
 
     public static BigDecimal getTotal(Order order) {
-        return getTotal(order, true);
-    }
-
-    public static BigDecimal getTotal(Order order, boolean scale) {
         return getTotal(CalculationsUtils.toBigDecimal(order.getPrice()),
-                CalculationsUtils.toBigDecimal(order.getAmount()),
-                scale);
+                CalculationsUtils.toBigDecimal(order.getAmount()));
     }
 
     public static BigDecimal getTotal(BigDecimal price, BigDecimal amount) {
-        return getTotal(price, amount, true);
-    }
-
-    public static BigDecimal getTotal(BigDecimal price, BigDecimal amount, boolean scale) {
         BigDecimal result = price.multiply(amount);
-        return scale ? CalculationsUtils.setCryptoScale(result) : result;
+        return CalculationsUtils.setCryptoScale(result);
     }
 
     public static BigDecimal getResultRate(List<ResultTrade> resultTrades, BigDecimal defaultRate) {

@@ -11,7 +11,11 @@ public class CalculationsUtils {
     // @TODO: Both BUY/SELL can have 0.25% fee
     public static final BigDecimal FEE_PERCENT = new BigDecimal("0.0025");
     public static final BigDecimal AFTER_FEE_PERCENT = BigDecimal.ONE.subtract(FEE_PERCENT);
+    // Value shouldn't be less than maximum fee buy 0,0025 + sell 0,0025
     public static final BigDecimal MIN_PROFIT_PERCENT = new BigDecimal("1.01");
+
+    private CalculationsUtils() {
+    }
 
     public static BigDecimal setCryptoScale(BigDecimal value) {
         return value.setScale(CalculationsUtils.CRYPTO_SCALE, CRYPTO_ROUNDING_MODE);
@@ -27,8 +31,5 @@ public class CalculationsUtils {
 
     public static Decimal toDecimal(BigDecimal bigDecimal) {
         return Decimal.valueOf(bigDecimal.toString());
-    }
-
-    private CalculationsUtils() {
     }
 }

@@ -2,6 +2,7 @@ package com.crypto.trade.poloniex.services.export;
 
 import com.crypto.trade.poloniex.services.analytics.AnalyticsService;
 import com.crypto.trade.poloniex.services.analytics.TradingAction;
+import com.crypto.trade.poloniex.services.trade.Profit;
 import com.crypto.trade.poloniex.services.trade.TradeCalculator;
 import com.crypto.trade.poloniex.services.utils.CalculationsUtils;
 import com.crypto.trade.poloniex.services.utils.DateTimeUtils;
@@ -17,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import java.math.BigDecimal;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.function.BinaryOperator;
@@ -135,78 +137,63 @@ public class ExportHelper {
                 .collect(Collectors.joining(","));
     }
 
-    public String convertTradingRecordProfit(PoloniexTradingRecord tradingRecord) {
-        StringBuilder sb = new StringBuilder(ExportUtils.getTradingRecordName(tradingRecord));
-        ProfitAccumulator profitAccumulator = getTradingRecordProfit(tradingRecord);
-        sb.append(",")
-                .append(profitAccumulator.getCcyProfit())
-                .append(",")
-                .append(profitAccumulator.getNetCcyProfit())
-                .append(",")
-                .append(profitAccumulator.getPercentageProfit())
-                .append(",")
-                .append(profitAccumulator.getNetPercentageProfit());
-        return sb.toString();
+    public String convertTotalProfit(TimeFrameStorage timeFrameStorage) {
+        Profit totalProfit = timeFrameStorage.getActiveStrategies().stream()
+                .flatMap(strategy -> strategy.getTradingRecords()
+                        .stream()
+                        .map(tradingRecord -> getTradingRecordProfit(tradingRecord, strategy.getTradeVolume())))
+                .reduce(new Profit(), profitAccumulator());
+        return convertProfit("Total", totalProfit);
     }
 
     public String convertStrategyProfit(PoloniexStrategy strategy) {
-        StringBuilder sb = new StringBuilder();
-        ProfitAccumulator strategyProfit = strategy.getTradingRecords()
+        Profit strategyProfit = strategy.getTradingRecords()
                 .stream()
-                .map(this::getTradingRecordProfit)
-                .reduce(new ProfitAccumulator(), profitAccumulator());
-        sb.append(strategy.getName())
-                .append(",")
-                .append(strategyProfit.getCcyProfit())
-                .append(",")
-                .append(strategyProfit.getNetCcyProfit())
-                .append(",")
-                .append(strategyProfit.getPercentageProfit())
-                .append(",")
-                .append(strategyProfit.getNetPercentageProfit());
-        return sb.toString();
+                .map(tradingRecord -> getTradingRecordProfit(tradingRecord, strategy.getTradeVolume()))
+                .reduce(new Profit(), profitAccumulator());
+        return convertProfit(strategy.getName(), strategyProfit);
     }
 
-    public String convertTotalProfit(TimeFrameStorage timeFrameStorage) {
-        StringBuilder sb = new StringBuilder();
-        ProfitAccumulator totalProfit = timeFrameStorage.getAllTradingRecords()
-                .stream()
-                .map(this::getTradingRecordProfit)
-                .reduce(new ProfitAccumulator(), profitAccumulator());
-
-        sb.append("Total")
-                .append(",")
-                .append(totalProfit.getCcyProfit())
-                .append(",")
-                .append(totalProfit.getNetCcyProfit())
-                .append(",")
-                .append(totalProfit.getPercentageProfit())
-                .append(",")
-                .append(totalProfit.getNetPercentageProfit());
-        return sb.toString();
+    public String convertTradingRecordProfit(PoloniexTradingRecord tradingRecord, BigDecimal volume) {
+        String name = ExportUtils.getTradingRecordName(tradingRecord);
+        Profit profit = getTradingRecordProfit(tradingRecord, volume);
+        return convertProfit(name, profit);
     }
 
-    private BinaryOperator<ProfitAccumulator> profitAccumulator() {
-        return (profitAccumulator1, profitAccumulator2) -> {
-            profitAccumulator1.addCcyProfit(profitAccumulator2.getCcyProfit(), profitAccumulator2.getNetCcyProfit());
-            profitAccumulator1.addPercentageProfit(profitAccumulator2.getPercentageProfit(), profitAccumulator2.getNetPercentageProfit());
-            return profitAccumulator1;
-        };
-    }
-
-    private ProfitAccumulator getTradingRecordProfit(PoloniexTradingRecord tradingRecord) {
-        ProfitAccumulator profit = new ProfitAccumulator();
+    private Profit getTradingRecordProfit(PoloniexTradingRecord tradingRecord, BigDecimal volume) {
+        Profit profit = new Profit();
         List<PoloniexOrder> orders = tradingRecord.getOrders();
         if (orders.size() > 1) {
             for (int index = 1; index < orders.size(); index += 2) {
-                PoloniexOrder entryOrder = orders.get(index - 1);
-                PoloniexOrder exitOrder = orders.get(index);
-                profit.addCcyProfit(TradeCalculator.getResultProfit(entryOrder.getSourceOrder(), exitOrder.getSourceOrder()),
-                        TradeCalculator.getNetResultProfit(entryOrder.getSourceOrder(), exitOrder.getSourceOrder()));
-                profit.addPercentageProfit(TradeCalculator.getResultPercent(entryOrder.getSourceOrder(), exitOrder.getSourceOrder()),
-                        TradeCalculator.getNetResultPercent(entryOrder.getSourceOrder(), exitOrder.getSourceOrder()));
+                Order entryOrder = orders.get(index - 1).getSourceOrder();
+                Order exitOrder = orders.get(index).getSourceOrder();
+                profit.accumulate(TradeCalculator.getBuySpent(entryOrder),
+                        TradeCalculator.getNetSellGain(exitOrder),
+                        TradeCalculator.getGrossSellGain(entryOrder, exitOrder));
             }
+            profit.accumulateVolume(volume);
         }
         return profit;
+    }
+
+    private BinaryOperator<Profit> profitAccumulator() {
+        return (profit1, profit2) -> {
+            profit1.accumulate(profit2.getBuySpent(),
+                    profit2.getNetSellGain(),
+                    profit2.getGrossSellGain());
+            profit1.accumulateVolume(profit2.getVolume());
+            return profit1;
+        };
+    }
+
+    private String convertProfit(String name, Profit profit) {
+        return name + "," +
+                profit.getGrossProfit() +
+                "," +
+                profit.getNetProfit() +
+                "," +
+                profit.getGrossPercent() +
+                "," +
+                profit.getNetPercent();
     }
 }

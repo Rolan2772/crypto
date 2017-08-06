@@ -78,6 +78,7 @@ public class NewCandleSupplier implements Supplier<Tick> {
                 log.debug("Strategy {}/{} trading record {} analytics result {}, processing: {}.", timeFrame, poloniexStrategy.getName(), trIndex, action, poloniexTradingRecord.getProcessing().get());
                 if (TradingAction.shouldPlaceOrder(action)) {
                     try {
+                        // @TODO: try lock can be used instead of set processing
                         boolean canTrade = (TradingAction.SHOULD_ENTER != action || !onceEntered) && poloniexTradingRecord.getProcessing().compareAndSet(false, true);
                         log.debug("Strategy '{}' canTrade: {}, onceEntered: {}, processing: {}", poloniexStrategy.getName(), canTrade, onceEntered, poloniexTradingRecord.getProcessing().get());
                         Optional<PoloniexOrder> resultOrder = Optional.empty();

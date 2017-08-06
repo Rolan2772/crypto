@@ -162,6 +162,7 @@ public class ExportHelper {
 
     private Profit getTradingRecordProfit(PoloniexTradingRecord tradingRecord, BigDecimal volume) {
         Profit profit = new Profit();
+        profit.accumulateVolume(volume);
         List<PoloniexOrder> orders = tradingRecord.getOrders();
         if (orders.size() > 1) {
             for (int index = 1; index < orders.size(); index += 2) {
@@ -171,7 +172,6 @@ public class ExportHelper {
                         TradeCalculator.getNetSellGain(exitOrder),
                         TradeCalculator.getGrossSellGain(entryOrder, exitOrder));
             }
-            profit.accumulateVolume(volume);
         }
         return profit;
     }

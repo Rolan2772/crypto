@@ -9,6 +9,7 @@ import eu.verdelhan.ta4j.TradingRecord;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -70,10 +71,53 @@ public class PoloniexStrategyFactory {
         return Collections.singletonList(timeFrameStorage);
     }
 
+    public List<TimeFrameStorage> createTestprofitCalculationsStrategy(CurrencyPair currencyPair) {
+        TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
+        TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
+        String shortBuyName = "profit-test-short-buy-1";
+        Strategy shortBuyStrategy = tradeStrategyFactory.createShortBuyStrategy(new TimeSeries(timeFrameStorage.getCandles()), TradeStrategyFactory.DEFAULT_TIME_FRAME);
+        PoloniexStrategy poloniexStrategy = new PoloniexStrategy(shortBuyName, shortBuyStrategy, timeFrame, BigDecimal.valueOf(0.0001));
+
+        List<ExportedPoloniexOrder> exportedOrders = Stream.of(
+                new ExportedPoloniexOrder(shortBuyName + "-tr-1", 323348216260L, 0, "0.0790100000", "0.00379698", TradingAction.ENTERED),
+                new ExportedPoloniexOrder(shortBuyName + "-tr-1", 323446507870L, 0, "0.0798445800", "0.00378749", TradingAction.EXITED))
+                .collect(Collectors.toList());
+        PoloniexTradingRecord poloniexTradingRecord = createTratingRecordWithOrders(1, shortBuyName, exportedOrders);
+        List<ExportedPoloniexOrder> exportedOrders1 = Stream.of(
+                new ExportedPoloniexOrder(shortBuyName + "-tr-2", 323348216260L, 0, "0.0790100000", "0.00379698", TradingAction.ENTERED),
+                new ExportedPoloniexOrder(shortBuyName + "-tr-2", 323446507870L, 0, "0.0798445800", "0.00378749", TradingAction.EXITED),
+                new ExportedPoloniexOrder(shortBuyName + "-tr-2", 323348216260L, 0, "0.0790100000", "0.00379698", TradingAction.ENTERED),
+                new ExportedPoloniexOrder(shortBuyName + "-tr-2", 323446507870L, 0, "0.0798445800", "0.00378749", TradingAction.EXITED))
+                .collect(Collectors.toList());
+        PoloniexTradingRecord poloniexTradingRecord1 = createTratingRecordWithOrders(2, shortBuyName, exportedOrders1);
+
+        poloniexStrategy.addTradingRecord(poloniexTradingRecord);
+        poloniexStrategy.addTradingRecord(poloniexTradingRecord1);
+        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(3, shortBuyName, new TradingRecord()));
+        timeFrameStorage.addStrategy(poloniexStrategy);
+
+        String shortBuyName1 = "profit-test-short-buy-2";
+        Strategy shortBuyStrategy1 = tradeStrategyFactory.createShortBuyStrategy(new TimeSeries(timeFrameStorage.getCandles()), TradeStrategyFactory.DEFAULT_TIME_FRAME);
+        PoloniexStrategy poloniexStrategy1 = new PoloniexStrategy(shortBuyName1, shortBuyStrategy1, timeFrame, BigDecimal.valueOf(0.0002));
+
+        List<ExportedPoloniexOrder> exportedOrders2 = Stream.of(
+                new ExportedPoloniexOrder(shortBuyName1 + "-tr-1", 323348216260L, 0, "0.0790100000", "0.00379698", TradingAction.ENTERED),
+                new ExportedPoloniexOrder(shortBuyName1 + "-tr-1", 323446507870L, 0, "0.0798445800", "0.00378749", TradingAction.EXITED),
+                new ExportedPoloniexOrder(shortBuyName1 + "-tr-1", 323348216260L, 0, "0.0790100000", "0.00379698", TradingAction.ENTERED),
+                new ExportedPoloniexOrder(shortBuyName1 + "-tr-1", 323446507870L, 0, "0.0798445800", "0.00378749", TradingAction.EXITED))
+                .collect(Collectors.toList());
+        PoloniexTradingRecord poloniexTradingRecord2 = createTratingRecordWithOrders(2, shortBuyName1, exportedOrders2);
+
+        poloniexStrategy1.addTradingRecord(poloniexTradingRecord2);
+        timeFrameStorage.addStrategy(poloniexStrategy1);
+
+        return Collections.singletonList(timeFrameStorage);
+    }
+
     public List<TimeFrameStorage> createSimpleShortBuyStrategyWithInitalOrders(CurrencyPair currencyPair) {
         TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
         TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
-        String shortBuyName = "new-short-buy";
+        String shortBuyName = "initial-orders-short-buy";
         Strategy shortBuyStrategy = tradeStrategyFactory.createShortBuyStrategy(new TimeSeries(timeFrameStorage.getCandles()), TradeStrategyFactory.DEFAULT_TIME_FRAME);
         PoloniexStrategy poloniexStrategy = new PoloniexStrategy(shortBuyName, shortBuyStrategy, timeFrame, properties.getTradeConfig().getMinBtcTradeAmount());
 

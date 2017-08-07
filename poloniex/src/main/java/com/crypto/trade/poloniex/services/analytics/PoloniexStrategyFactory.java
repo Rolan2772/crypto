@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -164,5 +165,23 @@ public class PoloniexStrategyFactory {
         poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(2, shortBuyName, new TradingRecord()));
         timeFrameStorage.addStrategy(poloniexStrategy);
         return Collections.singletonList(timeFrameStorage);
+    }
+
+    public List<TimeFrameStorage> createRealAmountConf1(CurrencyPair currencyPair) {
+        String strategyName = "real-shot-buy-conf-1";
+        return Stream.of(createStrategy(strategyName, TimeFrame.ONE_MINUTE, 10),
+                createStrategy(strategyName, TimeFrame.FIVE_MINUTES, 3))
+                .collect(Collectors.toList());
+    }
+
+    private TimeFrameStorage createStrategy(String strategyName, TimeFrame timeFrame, int recordsCount) {
+        TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
+        Strategy shortBuyStrategy = tradeStrategyFactory.createShortBuyStrategy(new TimeSeries(timeFrameStorage.getCandles()), TradeStrategyFactory.DEFAULT_TIME_FRAME);
+        PoloniexStrategy poloniexStrategy = new PoloniexStrategy(strategyName, shortBuyStrategy, timeFrame, properties.getTradeConfig().getRealBtcTradeAmount());
+        IntStream.rangeClosed(1, recordsCount).forEach(index -> {
+            poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(index, strategyName, new TradingRecord()));
+        });
+        timeFrameStorage.addStrategy(poloniexStrategy);
+        return timeFrameStorage;
     }
 }

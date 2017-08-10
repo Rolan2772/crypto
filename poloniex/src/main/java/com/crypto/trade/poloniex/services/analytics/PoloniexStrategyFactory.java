@@ -71,6 +71,22 @@ public class PoloniexStrategyFactory {
         return Collections.singletonList(timeFrameStorage);
     }
 
+    public List<TimeFrameStorage> createSimpleRisingTrendStrategy(CurrencyPair currencyPair) {
+        TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
+        TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
+        String shortBuyName = "rising-trend";
+        Strategy shortBuyStrategy = tradeStrategyFactory.createRisingTrendStrategy(new TimeSeries(timeFrameStorage.getCandles()));
+        PoloniexStrategy poloniexStrategy = new PoloniexStrategy(shortBuyName, shortBuyStrategy, timeFrame, properties.getTradeConfig().getMinBtcTradeAmount());
+
+        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(1, shortBuyName, new TradingRecord()));
+        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(2, shortBuyName, new TradingRecord()));
+        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(3, shortBuyName, new TradingRecord()));
+        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(4, shortBuyName, new TradingRecord()));
+        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(5, shortBuyName, new TradingRecord()));
+        timeFrameStorage.addStrategy(poloniexStrategy);
+        return Collections.singletonList(timeFrameStorage);
+    }
+
     public List<TimeFrameStorage> createTestProfitCalculationsStrategy(CurrencyPair currencyPair) {
         TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
         TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);

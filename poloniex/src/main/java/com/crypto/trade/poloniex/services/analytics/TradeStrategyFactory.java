@@ -1,6 +1,9 @@
 package com.crypto.trade.poloniex.services.analytics;
 
+import com.crypto.trade.poloniex.services.analytics.rules.FallingDownIndicatorRule;
+import com.crypto.trade.poloniex.services.analytics.rules.LowerRule;
 import com.crypto.trade.poloniex.services.analytics.rules.RisingUpIndicatorRule;
+import com.crypto.trade.poloniex.services.analytics.rules.UpperRule;
 import eu.verdelhan.ta4j.Decimal;
 import eu.verdelhan.ta4j.Rule;
 import eu.verdelhan.ta4j.Strategy;
@@ -44,24 +47,39 @@ public class TradeStrategyFactory {
 
     public Strategy createRisingTrendStrategy(TimeSeries timeSeries) {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-
         EMAIndicator ema5 = new EMAIndicator(closePrice, 5);
         EMAIndicator ema90 = new EMAIndicator(closePrice, 90);
         EMAIndicator ema100 = new EMAIndicator(closePrice, 100);
 
-        // Entry rule
-        // (A & B) & (C & D) & (C & D)
-        // ma90 rising or not moving (last two points) and ma05 > ma100 (last two points)
-        // or
-        // (A & B) & !(C & D) & (E & C)
-        // ma90[last] >= ma90[last - 1] and ma05>ma100 and !(ma90[1] >= ma90[2] and ma05[1]<ma100[1]) and (ma90[1] <= ma90[2] and ma05[1]<ma100[1])
-        Rule entryRule = new CrossedUpIndicatorRule(ema5, ema90)
-                .and(new RisingUpIndicatorRule(ema90));
+        // ema90[0] >= ema90[-1] and ma05 > ma100
+        Rule trendUp = new NotRule(new FallingDownIndicatorRule(ema90))
+                .and(new UpperRule(ema5, ema100));
+        // ema90[-1] >= ema90[-2] and ema05[-1] < ma100[-1]
+        Rule buySignal1 = new NotRule(new FallingDownIndicatorRule(ema90, 1))
+                .and(new LowerRule(ema5, ema100, 1));
+        // ema90[-1] <= ema90[-2] and ema05[-1] < ema100[-1]
+        Rule buySignal2 = new NotRule(new RisingUpIndicatorRule(ema90, 1))
+                .and(new LowerRule(ema5, ema100, 1));
+
+        Rule entry1 = trendUp.and(buySignal1);
+        Rule entry2 = trendUp.and(new NotRule(buySignal1)).and(buySignal2);
+
+        Rule entryRule = entry1.or(entry2);
 
         // Exit rule
-        // ((A & B) | (C & D)) & (E & F)
-        // ((change(ma90)<=0 and ma05<ma100) or (change(ma90)<0 and ma05>ma100)) and (ma90[1] >= ma90[2] and ma05[1]>ma100[1])
-        Rule exitRule = new CrossedDownIndicatorRule(ema5, ema90);
+        // ema90[0] <= ema90[-1] and ema05 < ema100
+        Rule trendDown = new NotRule(new RisingUpIndicatorRule(ema90))
+                .and(new LowerRule(ema5, ema100));
+        // ema90[0] < ema90[-1] and ema05 > ema100
+        Rule trendPreDown = new FallingDownIndicatorRule(ema90)
+                .and(new UpperRule(ema5, ema100));
+        // ema90[-1] >= ema90[-2] and ema05[-1] > ema100[-1]
+        Rule exit1 = new NotRule(new FallingDownIndicatorRule(ema90, 1))
+                .and(new UpperRule(ema5, ema100, 1));
+
+        Rule exitRule = new OrRule(trendDown, trendPreDown)
+                .and(exit1);
+
         Strategy strategy = new Strategy(entryRule, exitRule);
         strategy.setUnstablePeriod(100);
 

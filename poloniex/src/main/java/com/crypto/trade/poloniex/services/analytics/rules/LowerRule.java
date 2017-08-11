@@ -5,28 +5,30 @@ import eu.verdelhan.ta4j.Indicator;
 import eu.verdelhan.ta4j.TradingRecord;
 import eu.verdelhan.ta4j.trading.rules.AbstractRule;
 
-public class FallingDownIndicatorRule extends AbstractRule {
+public class LowerRule extends AbstractRule {
 
-    private Indicator<Decimal> indicator;
+    private Indicator<Decimal> first;
+    private Indicator<Decimal> second;
     private int depth;
 
-    public FallingDownIndicatorRule(Indicator<Decimal> indicator) {
-        this.indicator = indicator;
+    public LowerRule(Indicator<Decimal> first, Indicator<Decimal> second) {
+        this.first = first;
+        this.second = second;
         this.depth = 0;
     }
 
-    public FallingDownIndicatorRule(Indicator<Decimal> indicator, int depth) {
-        this.indicator = indicator;
+    public LowerRule(Indicator<Decimal> first, Indicator<Decimal> second, int depth) {
+        this.first = first;
+        this.second = second;
         this.depth = depth;
     }
 
     @Override
     public boolean isSatisfied(int index, TradingRecord tradingRecord) {
         boolean satisfied = false;
-        int prevIndex = index - depth - 1;
         int currIndex = index - depth;
-        if (prevIndex > -1) {
-            satisfied = indicator.getValue(prevIndex).isGreaterThan(indicator.getValue(currIndex));
+        if (currIndex > -1) {
+            satisfied = first.getValue(currIndex).isLessThan(second.getValue(currIndex));
         }
         traceIsSatisfied(currIndex, satisfied);
         return satisfied;

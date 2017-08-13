@@ -64,7 +64,7 @@ public class TradeCalculator {
         BigDecimal rate = resultTrades.isEmpty() ? defaultRate : resultTrades.get(0).getRate();
         if (resultTrades.size() > 1) {
             BigDecimal spent = resultTrades.stream()
-                    .map(ResultTrade::getTotal)
+                    .map(resultTrade -> resultTrade.getAmount().multiply(resultTrade.getRate()))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
             rate = CalculationsUtils.divide(spent, getResultAmount(resultTrades, BigDecimal.ONE));
         }

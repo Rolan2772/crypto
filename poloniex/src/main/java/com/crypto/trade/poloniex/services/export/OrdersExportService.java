@@ -47,17 +47,14 @@ public class OrdersExportService implements MemoryExportService<TimeFrameStorage
 
     @Override
     public StringBuilder convert(TimeFrameStorage timeFrameStorage) {
-        StringBuilder profit = new StringBuilder("\ndescription,tradesCount,volume,grossProfit,netProfit,grossProfit%,netProfit%\n");
         StringBuilder orders = new StringBuilder("name,id,tradeTime,index,price,amount,fee,boughtAmount,soldTotal,buySpent/sellGained,type\n");
         timeFrameStorage.getActiveStrategies().forEach(poloniexStrategy -> {
             poloniexStrategy.getTradingRecords().forEach(tradingRecord -> {
                 String trName = ExportUtils.getTradingRecordName(tradingRecord);
                 tradingRecord.getOrders().forEach(poloniexOrder -> orders.append(exportHelper.convertOrder(trName, poloniexOrder)).append("\n"));
-                profit.append(exportHelper.convertTradingRecordProfit(tradingRecord, poloniexStrategy.getTradeVolume())).append("\n");
             });
-            profit.append(exportHelper.convertStrategyProfit(poloniexStrategy)).append("\n");
         });
-        profit.append(exportHelper.convertTotalProfit(timeFrameStorage)).append("\n");
+        String profit = exportHelper.convertProfit(timeFrameStorage.getActiveStrategies());
         return orders.append(profit);
     }
 

@@ -6,7 +6,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 @Data
-public class Profit {
+public class TradeResult {
 
     BigDecimal buySpent = BigDecimal.ZERO;
     BigDecimal netSellGain = BigDecimal.ZERO;
@@ -29,28 +29,6 @@ public class Profit {
         this.tradesCount += tradesCount;
     }
 
-    public BigDecimal getNetProfit() {
-        return netSellGain.subtract(buySpent);
-    }
 
-    public BigDecimal getGrossProfit() {
-        return grossSellGain.subtract(buySpent);
-    }
 
-    // @TODO: move to utils
-    public BigDecimal getNetPercent() {
-        BigDecimal netProfit = getNetProfit();
-        boolean hasNetProfit = netProfit.compareTo(BigDecimal.ZERO) != 0;
-        return hasNetProfit
-                ? CalculationsUtils.divide(netProfit, volume)
-                : BigDecimal.ZERO;
-    }
-
-    public BigDecimal getGrossPercent() {
-        BigDecimal grossProfit = getGrossProfit();
-        boolean hasGrossProfit = grossProfit.compareTo(BigDecimal.ZERO) != 0;
-        return hasGrossProfit
-                ? CalculationsUtils.divide(grossProfit, volume)
-                : grossProfit;
-    }
 }

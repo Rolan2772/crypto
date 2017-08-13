@@ -81,11 +81,11 @@ public class AnalyticsExportService implements MemoryExportService<TimeFrameStor
         sb.append('\n');
         sb.append("History analytics: ");
         sb.append('\n');
-        sb.append(exportHelper.createResultAnalytics(timeSeries, strategiesCopy));
+        sb.append(exportHelper.convertProfit(strategiesCopy));
         sb.append('\n');
         sb.append("Real trades: ");
         sb.append('\n');
-        sb.append(exportHelper.createResultAnalytics(timeSeries, poloniexStrategies));
+        sb.append(exportHelper.convertProfit(poloniexStrategies));
         return sb;
     }
 

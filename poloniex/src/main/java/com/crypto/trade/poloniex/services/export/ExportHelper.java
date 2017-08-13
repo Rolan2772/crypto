@@ -2,15 +2,15 @@ package com.crypto.trade.poloniex.services.export;
 
 import com.crypto.trade.poloniex.services.analytics.AnalyticsService;
 import com.crypto.trade.poloniex.services.analytics.TradingAction;
-import com.crypto.trade.poloniex.services.trade.Profit;
+import com.crypto.trade.poloniex.services.trade.ProfitCalculator;
 import com.crypto.trade.poloniex.services.trade.TradeCalculator;
+import com.crypto.trade.poloniex.services.trade.TradeResult;
 import com.crypto.trade.poloniex.services.utils.CalculationsUtils;
 import com.crypto.trade.poloniex.services.utils.DateTimeUtils;
 import com.crypto.trade.poloniex.services.utils.ExportUtils;
 import com.crypto.trade.poloniex.storage.PoloniexOrder;
 import com.crypto.trade.poloniex.storage.PoloniexStrategy;
 import com.crypto.trade.poloniex.storage.PoloniexTradingRecord;
-import com.crypto.trade.poloniex.storage.TimeFrameStorage;
 import eu.verdelhan.ta4j.*;
 import eu.verdelhan.ta4j.analysis.criteria.LinearTransactionCostCriterion;
 import eu.verdelhan.ta4j.analysis.criteria.TotalProfitCriterion;
@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import java.math.BigDecimal;
 import java.util.AbstractMap;
 import java.util.List;
-import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -31,6 +30,8 @@ public class ExportHelper {
     @Qualifier("historyAnalyticsService")
     @Autowired
     private AnalyticsService analyticsService;
+    @Autowired
+    private ProfitCalculator profitCalculator;
 
     public String createStrategiesHeaders(List<PoloniexTradingRecord> tradingRecords, String type) {
         return tradingRecords.stream()
@@ -137,65 +138,42 @@ public class ExportHelper {
                 .collect(Collectors.joining(","));
     }
 
-    public String convertTotalProfit(TimeFrameStorage timeFrameStorage) {
-        Profit totalProfit = timeFrameStorage.getActiveStrategies().stream()
-                .flatMap(strategy -> strategy.getTradingRecords()
-                        .stream()
-                        .map(tradingRecord -> getTradingRecordProfit(tradingRecord, strategy.getTradeVolume())))
-                .reduce(new Profit(), profitAccumulator());
-        return convertProfit("Total", totalProfit);
+    public String convertProfit(List<PoloniexStrategy> strategies) {
+        StringBuilder profit = new StringBuilder("description,tradesCount,volume,grossProfit,netProfit,grossProfit%,netProfit%\n");
+        strategies.forEach(poloniexStrategy -> {
+            poloniexStrategy.getTradingRecords().forEach(tradingRecord -> {
+                profit.append(convertTradingRecordProfit(tradingRecord, poloniexStrategy.getTradeVolume())).append("\n");
+            });
+            profit.append(convertStrategyProfit(poloniexStrategy)).append("\n");
+        });
+        profit.append(convertTotalProfit(strategies)).append("\n");
+        return profit.toString();
+    }
+
+    public String convertTotalProfit(List<PoloniexStrategy> strategies) {
+        TradeResult totalTradeResult = profitCalculator.getTotalTradeResult(strategies);
+        return convertProfit("Total", totalTradeResult);
     }
 
     public String convertStrategyProfit(PoloniexStrategy strategy) {
-        Profit strategyProfit = strategy.getTradingRecords()
-                .stream()
-                .map(tradingRecord -> getTradingRecordProfit(tradingRecord, strategy.getTradeVolume()))
-                .reduce(new Profit(), profitAccumulator());
-        return convertProfit(strategy.getName(), strategyProfit);
+        TradeResult strategyTradeResult = profitCalculator.getStrategyTradeResult(strategy);
+        return convertProfit(strategy.getName(), strategyTradeResult);
     }
 
     public String convertTradingRecordProfit(PoloniexTradingRecord tradingRecord, BigDecimal volume) {
         String name = ExportUtils.getTradingRecordName(tradingRecord);
-        Profit profit = getTradingRecordProfit(tradingRecord, volume);
-        return convertProfit(name, profit);
+        TradeResult tradeResult = profitCalculator.getTradingRecordTradeResult(tradingRecord, volume);
+        return convertProfit(name, tradeResult);
     }
 
-    private Profit getTradingRecordProfit(PoloniexTradingRecord tradingRecord, BigDecimal volume) {
-        Profit profit = new Profit();
-        profit.accumulateVolume(volume);
-        profit.accumulateTradesCount(tradingRecord.getTradingRecord().getTradeCount());
-        List<PoloniexOrder> orders = tradingRecord.getOrders();
-        if (orders.size() > 1) {
-            for (int index = 1; index < orders.size(); index += 2) {
-                Order entryOrder = orders.get(index - 1).getSourceOrder();
-                Order exitOrder = orders.get(index).getSourceOrder();
-                profit.accumulate(TradeCalculator.getBuySpent(entryOrder),
-                        TradeCalculator.getNetSellGain(exitOrder),
-                        TradeCalculator.getGrossSellGain(entryOrder, exitOrder));
-            }
-        }
-        return profit;
-    }
-
-    private BinaryOperator<Profit> profitAccumulator() {
-        return (p1, p2) -> {
-            p1.accumulate(p2.getBuySpent(),
-                    p2.getNetSellGain(),
-                    p2.getGrossSellGain());
-            p1.accumulateVolume(p2.getVolume());
-            p1.accumulateTradesCount(p2.getTradesCount());
-            return p1;
-        };
-    }
-
-    private String convertProfit(String name, Profit profit) {
+    private String convertProfit(String name, TradeResult tradeResult) {
         return Stream.of(name,
-                profit.getTradesCount(),
-                profit.getVolume(),
-                profit.getGrossProfit(),
-                profit.getNetProfit(),
-                profit.getGrossPercent(),
-                profit.getNetPercent())
+                tradeResult.getTradesCount(),
+                tradeResult.getVolume(),
+                profitCalculator.getGrossProfit(tradeResult),
+                profitCalculator.getNetProfit(tradeResult),
+                profitCalculator.getGrossPercent(tradeResult),
+                profitCalculator.getNetPercent(tradeResult))
                 .map(Object::toString)
                 .collect(Collectors.joining(","));
     }

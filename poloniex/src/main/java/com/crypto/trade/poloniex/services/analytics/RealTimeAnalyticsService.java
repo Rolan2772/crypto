@@ -6,12 +6,14 @@ import eu.verdelhan.ta4j.TradingRecord;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 @Slf4j
 @Service
 public class RealTimeAnalyticsService implements AnalyticsService {
 
     @Override
-    public TradingAction analyzeTick(Strategy strategy, Tick lastTick, int index, int historyIndex, boolean analyzeHistory, TradingRecord tradingRecord) {
+    public TradingAction analyzeTick(Strategy strategy, Tick lastTick, int index, int historyIndex, boolean analyzeHistory, TradingRecord tradingRecord, BigDecimal volume) {
         TradingAction action = TradingAction.NO_ACTION;
         if (tradingRecord.getCurrentTrade().isNew() && strategy.shouldEnter(index, tradingRecord)) {
             log.debug("Strategy should ENTER on {} with price: {}", index, lastTick.getClosePrice());

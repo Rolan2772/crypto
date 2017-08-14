@@ -33,9 +33,9 @@ public class SimplePoloniexBot {
     public void postConstruct() throws IOException, DeploymentException {
         CurrencyPair btcEth = CurrencyPair.BTC_ETH;
         tradesStorage.initCurrency(btcEth);
-        candlesStorage.initCurrency(btcEth, poloniexStrategyFactory.createSimpleShortBuyStrategyWithInitialOrders(btcEth));
+        candlesStorage.initCurrency(btcEth, poloniexStrategyFactory.experimentOneStrategy(btcEth));
         wsConnector.connect();
-        tradesStorage.addTradesHistory(btcEth, historyService.loadTradesHistory(btcEth, Duration.ofHours(24)));
+        tradesStorage.addTradesHistory(btcEth, historyService.loadTradesHistory(btcEth, Duration.ofDays(2)));
     }
 
     @PreDestroy

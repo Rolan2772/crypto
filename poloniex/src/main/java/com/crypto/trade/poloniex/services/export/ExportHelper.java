@@ -66,14 +66,18 @@ public class ExportHelper {
     public String createHistoryTradesAnalytics(List<PoloniexStrategy> strategies, TimeSeries timeSeries, int index, int historyIndex) {
         Tick tick = timeSeries.getTick(index);
         return strategies.stream()
-                .flatMap(strategy -> strategy.getTradingRecords()
-                        .stream()
-                        .map(tradingRecord -> analyticsService.analyzeTick(strategy.getStrategy(),
-                                tick,
-                                index,
-                                historyIndex,
-                                false,
-                                tradingRecord.getTradingRecord())))
+                .flatMap(strategy -> {
+                    BigDecimal volume = strategy.getTradeVolume();
+                    return strategy.getTradingRecords()
+                            .stream()
+                            .map(tradingRecord -> analyticsService.analyzeTick(strategy.getStrategy(),
+                                    tick,
+                                    index,
+                                    historyIndex,
+                                    false,
+                                    tradingRecord.getTradingRecord(),
+                                    volume));
+                })
                 .map(Object::toString)
                 .collect(Collectors.joining(","));
     }
@@ -141,9 +145,7 @@ public class ExportHelper {
     public String convertProfit(List<PoloniexStrategy> strategies) {
         StringBuilder profit = new StringBuilder("description,tradesCount,volume,grossProfit,netProfit,grossProfit%,netProfit%\n");
         strategies.forEach(poloniexStrategy -> {
-            poloniexStrategy.getTradingRecords().forEach(tradingRecord -> {
-                profit.append(convertTradingRecordProfit(tradingRecord, poloniexStrategy.getTradeVolume())).append("\n");
-            });
+            poloniexStrategy.getTradingRecords().forEach(tradingRecord -> profit.append(convertTradingRecordProfit(tradingRecord, poloniexStrategy.getTradeVolume())).append("\n"));
             profit.append(convertStrategyProfit(poloniexStrategy)).append("\n");
         });
         profit.append(convertTotalProfit(strategies)).append("\n");

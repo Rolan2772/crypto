@@ -45,6 +45,48 @@ public class TradeStrategyFactory {
         return strategy;
     }
 
+    public Strategy createShortBuyEma90RisingTrendStrategy(TimeSeries timeSeries) {
+        ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
+        EMAIndicator ema90 = new EMAIndicator(closePrice, 90);
+        RSIIndicator rsi = new RSIIndicator(closePrice, 14);
+        StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, 14);
+        StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
+
+        // Entry rule
+        Rule entryRule = new UnderIndicatorRule(rsi, Decimal.valueOf(20)) // RSI < 20
+                .and(new UnderIndicatorRule(stochK, Decimal.valueOf(20))) // StochasticK < 20
+                .and(new CrossedUpIndicatorRule(stochK, stochD)) // K cross D from the bottom
+                .and(new RisingUpIndicatorRule(ema90)); // Rising trend
+
+        // Exit rule
+        Rule exitRule = new StopGainRule(closePrice, Decimal.valueOf(1));
+        Strategy strategy = new Strategy(entryRule, exitRule);
+        strategy.setUnstablePeriod(90);
+
+        return strategy;
+    }
+
+    public Strategy createShortBuyEma90NotFallingTrendStrategy(TimeSeries timeSeries) {
+        ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
+        EMAIndicator ema90 = new EMAIndicator(closePrice, 90);
+        RSIIndicator rsi = new RSIIndicator(closePrice, 14);
+        StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, 14);
+        StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
+
+        // Entry rule
+        Rule entryRule = new UnderIndicatorRule(rsi, Decimal.valueOf(20)) // RSI < 20
+                .and(new UnderIndicatorRule(stochK, Decimal.valueOf(20))) // StochasticK < 20
+                .and(new CrossedUpIndicatorRule(stochK, stochD)) // K cross D from the bottom
+                .and(new NotRule(new FallingDownIndicatorRule(ema90))); // Rising trend
+
+        // Exit rule
+        Rule exitRule = new StopGainRule(closePrice, Decimal.valueOf(1));
+        Strategy strategy = new Strategy(entryRule, exitRule);
+        strategy.setUnstablePeriod(90);
+
+        return strategy;
+    }
+
     public Strategy createRisingTrendStrategy(TimeSeries timeSeries) {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
         EMAIndicator ema5 = new EMAIndicator(closePrice, 5);

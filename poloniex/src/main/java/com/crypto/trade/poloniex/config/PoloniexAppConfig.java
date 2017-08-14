@@ -6,6 +6,7 @@ import com.crypto.trade.poloniex.services.analytics.TradeStrategyFactory;
 import com.crypto.trade.poloniex.services.export.ExportHelper;
 import com.crypto.trade.poloniex.services.trade.PoloniexRequestHelper;
 import com.crypto.trade.poloniex.services.trade.ProfitCalculator;
+import com.crypto.trade.poloniex.services.utils.SyncUtils;
 import com.crypto.trade.poloniex.storage.CandlesStorage;
 import com.crypto.trade.poloniex.storage.TradesStorage;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -43,6 +44,11 @@ public class PoloniexAppConfig {
     @Bean
     public PoloniexRequestHelper poloniexRequestUtils() {
         return new PoloniexRequestHelper();
+    }
+
+    @Bean
+    public SyncUtils syncUtils() {
+        return new SyncUtils();
     }
 
     @Bean

@@ -74,7 +74,7 @@ public class NewCandleSupplier implements Supplier<Tick> {
             for (int trIndex = 0; trIndex < tradingRecords.size(); trIndex++) {
                 PoloniexTradingRecord poloniexTradingRecord = tradingRecords.get(trIndex);
                 TradingRecord tradingRecord = poloniexTradingRecord.getTradingRecord();
-                TradingAction action = realTimeAnalyticsService.analyzeTick(poloniexStrategy.getStrategy(), builtCandle, index, timeFrameStorage.getHistoryIndex(), false, tradingRecord);
+                TradingAction action = realTimeAnalyticsService.analyzeTick(poloniexStrategy.getStrategy(), builtCandle, index, timeFrameStorage.getHistoryIndex(), false, tradingRecord, poloniexStrategy.getTradeVolume());
                 log.debug("Strategy {}/{} trading record {} analytics result {}, processing: {}.", timeFrame, poloniexStrategy.getName(), trIndex, action, poloniexTradingRecord.getProcessing().get());
                 if (TradingAction.shouldPlaceOrder(action)) {
                     try {

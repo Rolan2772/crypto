@@ -24,6 +24,10 @@ public class TradeCalculator {
         return CalculationsUtils.divide(sellGain, buySpent);
     }
 
+    public static BigDecimal getAmount(BigDecimal volume, BigDecimal rate) {
+        return CalculationsUtils.divide(volume, rate);
+    }
+
     public static BigDecimal getAmountWithFee(Order order) {
         return subtractFee(CalculationsUtils.toBigDecimal(order.getAmount()));
     }

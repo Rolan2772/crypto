@@ -21,13 +21,17 @@ public class CsvFileWriter {
 
     public void write(ExportData exportData, boolean append) {
         String path = exportData.getCurrencyPair() + "/" + exportData.getNamePrefix() + ".csv";
+        write(exportData.getData(), path, append);
+    }
+
+    public void write(String data, String path, boolean append) {
         try {
             Path pathToFile = Paths.get(path);
             Files.createDirectories(pathToFile.getParent());
 
             try (FileWriter fileWriter = new FileWriter(pathToFile.toFile(), append);
                  BufferedWriter bufferedWriter = new BufferedWriter(fileWriter)) {
-                bufferedWriter.write(exportData.getData());
+                bufferedWriter.write(data);
             }
 
         } catch (IOException e) {

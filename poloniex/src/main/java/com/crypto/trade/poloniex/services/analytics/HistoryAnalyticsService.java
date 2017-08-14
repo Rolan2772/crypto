@@ -1,7 +1,11 @@
 package com.crypto.trade.poloniex.services.analytics;
 
+import com.crypto.trade.poloniex.services.trade.TradeCalculator;
 import com.crypto.trade.poloniex.services.utils.CalculationsUtils;
-import eu.verdelhan.ta4j.*;
+import eu.verdelhan.ta4j.Order;
+import eu.verdelhan.ta4j.Strategy;
+import eu.verdelhan.ta4j.Tick;
+import eu.verdelhan.ta4j.TradingRecord;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +19,7 @@ public class HistoryAnalyticsService implements AnalyticsService {
     public TradingAction analyzeTick(Strategy strategy, Tick lastTick, int index, int historyIndex, boolean analyzeHistory, TradingRecord tradingRecord, BigDecimal volume) {
         TradingAction action = TradingAction.NO_ACTION;
         boolean shouldAnalyze = analyzeHistory || index >= historyIndex;
-        BigDecimal amount = CalculationsUtils.divide(volume, CalculationsUtils.toBigDecimal(lastTick.getClosePrice()));
+        BigDecimal amount = TradeCalculator.getAmount(volume, CalculationsUtils.toBigDecimal(lastTick.getClosePrice()));
         if (shouldAnalyze) {
             if (strategy.shouldEnter(index, tradingRecord)) {
                 log.trace("Strategy should ENTER on {}", index);
@@ -29,7 +33,8 @@ public class HistoryAnalyticsService implements AnalyticsService {
             } else if (strategy.shouldExit(index, tradingRecord)) {
                 log.trace("Strategy should EXIT on {}", index);
                 action = TradingAction.SHOULD_EXIT;
-                boolean exited = tradingRecord.exit(index, lastTick.getClosePrice(), CalculationsUtils.toDecimal(amount));
+                BigDecimal amountToSell = TradeCalculator.getAmountWithFee(tradingRecord.getCurrentTrade().getEntry());
+                boolean exited = tradingRecord.exit(index, lastTick.getClosePrice(), CalculationsUtils.toDecimal(amountToSell));
                 if (exited) {
                     Order exit = tradingRecord.getLastExit();
                     action = TradingAction.EXITED;

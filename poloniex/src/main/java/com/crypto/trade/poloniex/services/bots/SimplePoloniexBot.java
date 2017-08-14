@@ -7,6 +7,7 @@ import com.crypto.trade.poloniex.services.ws.WsConnector;
 import com.crypto.trade.poloniex.storage.CandlesStorage;
 import com.crypto.trade.poloniex.storage.TradesStorage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -18,6 +19,7 @@ import java.time.Duration;
 @Service
 public class SimplePoloniexBot {
 
+    @Qualifier("fileTradesHistoryService")
     @Autowired
     private HistoryService historyService;
     @Autowired
@@ -34,8 +36,8 @@ public class SimplePoloniexBot {
         CurrencyPair btcEth = CurrencyPair.BTC_ETH;
         tradesStorage.initCurrency(btcEth);
         candlesStorage.initCurrency(btcEth, poloniexStrategyFactory.experimentOneStrategy(btcEth));
-        wsConnector.connect();
-        tradesStorage.addTradesHistory(btcEth, historyService.loadTradesHistory(btcEth, Duration.ofDays(2)));
+        //wsConnector.connect();
+        tradesStorage.addTradesHistory(btcEth, historyService.loadTradesHistory(btcEth, Duration.ofDays(7)));
     }
 
     @PreDestroy

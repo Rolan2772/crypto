@@ -57,7 +57,7 @@ public class TradingService {
         BigDecimal rate = real
                 ? lastTrade
                 : CalculationsUtils.divide(lastTrade, BigDecimal.valueOf(2));
-        BigDecimal amount = CalculationsUtils.divide(volume, rate);
+        BigDecimal amount = TradeCalculator.getAmount(volume, rate);
 
         Map<String, Object> params = new HashMap<>();
         params.put("command", "buy");

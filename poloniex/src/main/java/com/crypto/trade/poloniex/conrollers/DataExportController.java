@@ -38,7 +38,7 @@ public class DataExportController {
         SortedSet<PoloniexTrade> trades = tradesStorage.getTrades(currencyPair);
         tradesExportService.exportMemoryData(currencyPair, trades);
         List<TimeFrameStorage> candlesData = candlesStorage.getData(currencyPair);
-        candlesExportService.exportMemoryData(currencyPair, candlesData);
+        //candlesExportService.exportMemoryData(currencyPair, candlesData);
         analyticsExportService.exportMemoryData(currencyPair, candlesData);
         ordersExportService.exportMemoryData(currencyPair, candlesData);
     }
@@ -49,7 +49,7 @@ public class DataExportController {
         SortedSet<PoloniexTrade> trades = tradesStorage.getTrades(currencyPair);
         tradesExportService.exportMemoryData(currencyPair, trades, type);
         List<TimeFrameStorage> candlesData = candlesStorage.getData(currencyPair);
-        candlesExportService.exportMemoryData(currencyPair, candlesData, type);
+        //candlesExportService.exportMemoryData(currencyPair, candlesData, type);
         analyticsExportService.exportMemoryData(currencyPair, candlesData, type);
         ordersExportService.exportMemoryData(currencyPair, candlesData, type);
     }

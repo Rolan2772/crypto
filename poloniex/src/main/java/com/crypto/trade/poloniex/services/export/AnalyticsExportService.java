@@ -64,8 +64,8 @@ public class AnalyticsExportService implements MemoryExportService<TimeFrameStor
         StringBuilder sb = new StringBuilder("timestamp,close,rsi,stochK,stochD,sma,ema5,ema90,ema100")
                 .append(",")
                 .append(exportHelper.createStrategiesHeaders(tradingRecords, "sim"))
-                .append(",")
-                .append(exportHelper.createStrategiesHeaders(tradingRecords, "real"))
+                //.append(",")
+                //.append(exportHelper.createStrategiesHeaders(tradingRecords, "real"))
                 .append("\n");
 
         int count = timeFrameStorage.getCandles().size();
@@ -74,18 +74,18 @@ public class AnalyticsExportService implements MemoryExportService<TimeFrameStor
         IntStream.range(0, count).forEach(index -> sb.append(exportHelper.convertIndicators(timeSeries, indicators, index))
                 .append(",")
                 .append(exportHelper.createHistoryTradesAnalytics(strategiesCopy, timeSeries, index, timeFrameStorage.getHistoryIndex()))
-                .append(",")
-                .append(exportHelper.convertRealTrades(tradingRecords, index))
+                //.append(",")
+                //.append(exportHelper.convertRealTrades(tradingRecords, index))
                 .append("\n"));
 
         sb.append('\n');
         sb.append("History analytics: ");
         sb.append('\n');
         sb.append(exportHelper.convertProfit(strategiesCopy));
-        sb.append('\n');
-        sb.append("Real trades: ");
-        sb.append('\n');
-        sb.append(exportHelper.convertProfit(poloniexStrategies));
+        //sb.append('\n');
+        //sb.append("Real trades: ");
+        //sb.append('\n');
+        //sb.append(exportHelper.convertProfit(poloniexStrategies));
         return sb;
     }
 

@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -29,7 +30,7 @@ public class PoloniexStrategyFactory {
         TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
         TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
         String shortBuyName = "test-short-buy";
-        Strategy shortBuyStrategy = tradeStrategyFactory.createTestStrategy(new TimeSeries(timeFrameStorage.getCandles()), TradeStrategyFactory.DEFAULT_TIME_FRAME);
+        Strategy shortBuyStrategy = tradeStrategyFactory.createTestStrategy(new TimeSeries(timeFrameStorage.getCandles()));
         PoloniexStrategy poloniexStrategy = new PoloniexStrategy(shortBuyName, shortBuyStrategy, timeFrame, properties.getTradeConfig().getMinBtcTradeAmount());
         poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(1, shortBuyName, new TradingRecord()));
         poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(2, shortBuyName, new TradingRecord()));
@@ -44,7 +45,7 @@ public class PoloniexStrategyFactory {
         return Arrays.stream(TimeFrame.values()).map(timeFrame -> {
             TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
             String shortBuyName = "short-buy";
-            Strategy shortBuyStrategy = tradeStrategyFactory.createShortBuyStrategy(new TimeSeries(timeFrameStorage.getCandles()), TradeStrategyFactory.DEFAULT_TIME_FRAME);
+            Strategy shortBuyStrategy = tradeStrategyFactory.createShortBuyStrategy(new TimeSeries(timeFrameStorage.getCandles()));
             PoloniexStrategy poloniexStrategy = new PoloniexStrategy(shortBuyName, shortBuyStrategy, timeFrame, properties.getTradeConfig().getMinBtcTradeAmount());
             poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(1, shortBuyName, new TradingRecord()));
             poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(2, shortBuyName, new TradingRecord()));
@@ -60,7 +61,7 @@ public class PoloniexStrategyFactory {
         TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
         TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
         String shortBuyName = "new-short-buy";
-        Strategy shortBuyStrategy = tradeStrategyFactory.createShortBuyStrategy(new TimeSeries(timeFrameStorage.getCandles()), TradeStrategyFactory.DEFAULT_TIME_FRAME);
+        Strategy shortBuyStrategy = tradeStrategyFactory.createShortBuyStrategy(new TimeSeries(timeFrameStorage.getCandles()));
         PoloniexStrategy poloniexStrategy = new PoloniexStrategy(shortBuyName, shortBuyStrategy, timeFrame, properties.getTradeConfig().getMinBtcTradeAmount());
 
         poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(1, shortBuyName, new TradingRecord()));
@@ -92,7 +93,7 @@ public class PoloniexStrategyFactory {
         TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
         TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
         String shortBuyName = "profit-test-short-buy-1";
-        Strategy shortBuyStrategy = tradeStrategyFactory.createShortBuyStrategy(new TimeSeries(timeFrameStorage.getCandles()), TradeStrategyFactory.DEFAULT_TIME_FRAME);
+        Strategy shortBuyStrategy = tradeStrategyFactory.createShortBuyStrategy(new TimeSeries(timeFrameStorage.getCandles()));
         PoloniexStrategy poloniexStrategy = new PoloniexStrategy(shortBuyName, shortBuyStrategy, timeFrame, BigDecimal.valueOf(0.0001));
 
         List<ExportedPoloniexOrder> exportedOrders = Stream.of(
@@ -114,7 +115,7 @@ public class PoloniexStrategyFactory {
         timeFrameStorage.addStrategy(poloniexStrategy);
 
         String shortBuyName1 = "profit-test-short-buy-2";
-        Strategy shortBuyStrategy1 = tradeStrategyFactory.createShortBuyStrategy(new TimeSeries(timeFrameStorage.getCandles()), TradeStrategyFactory.DEFAULT_TIME_FRAME);
+        Strategy shortBuyStrategy1 = tradeStrategyFactory.createShortBuyStrategy(new TimeSeries(timeFrameStorage.getCandles()));
         PoloniexStrategy poloniexStrategy1 = new PoloniexStrategy(shortBuyName1, shortBuyStrategy1, timeFrame, BigDecimal.valueOf(0.0002));
 
         List<ExportedPoloniexOrder> exportedOrders2 = Stream.of(
@@ -135,7 +136,7 @@ public class PoloniexStrategyFactory {
         TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
         TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
         String shortBuyName = "initial-orders-short-buy";
-        Strategy shortBuyStrategy = tradeStrategyFactory.createShortBuyStrategy(new TimeSeries(timeFrameStorage.getCandles()), TradeStrategyFactory.DEFAULT_TIME_FRAME);
+        Strategy shortBuyStrategy = tradeStrategyFactory.createShortBuyStrategy(new TimeSeries(timeFrameStorage.getCandles()));
         PoloniexStrategy poloniexStrategy = new PoloniexStrategy(shortBuyName, shortBuyStrategy, timeFrame, properties.getTradeConfig().getMinBtcTradeAmount());
 
         List<ExportedPoloniexOrder> exportedOrders = Stream.of(
@@ -171,28 +172,99 @@ public class PoloniexStrategyFactory {
         return poloniexTradingRecord;
     }
 
-    public List<TimeFrameStorage> experimentOneStrategy(CurrencyPair currencyPair) {
-        TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
+    public List<TimeFrameStorage> createRealAmountConf1(CurrencyPair currencyPair) {
+        String strategyName = "real-shot-buy-conf-1";
+        return Stream.of(createStrategy(strategyName, TimeFrame.ONE_MINUTE, 10),
+                createStrategy(strategyName, TimeFrame.FIVE_MINUTES, 3))
+                .collect(Collectors.toList());
+    }
+
+    private TimeFrameStorage createStrategy(String strategyName, TimeFrame timeFrame, int recordsCount) {
         TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
-
-        String name1 = "short-buy-rising-ema90";
-        Strategy shortBuyStrategy = tradeStrategyFactory.createShortBuyEma90RisingTrendStrategy(new TimeSeries(timeFrameStorage.getCandles()));
-        PoloniexStrategy poloniexStrategy = new PoloniexStrategy(name1, shortBuyStrategy, timeFrame, properties.getTradeConfig().getMinBtcTradeAmount());
-        IntStream.range(1, 6).forEach(index -> poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(index, name1, new TradingRecord())));
+        Strategy shortBuyStrategy = tradeStrategyFactory.createShortBuyStrategy(new TimeSeries(timeFrameStorage.getCandles()));
+        PoloniexStrategy poloniexStrategy = new PoloniexStrategy(strategyName, shortBuyStrategy, timeFrame, properties.getTradeConfig().getRealBtcTradeAmount());
+        IntStream.rangeClosed(1, recordsCount).forEach(index -> {
+            poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(index, strategyName, new TradingRecord()));
+        });
         timeFrameStorage.addStrategy(poloniexStrategy);
+        return timeFrameStorage;
+    }
 
-        String name2 = "short-buy-non-falling-ema90";
-        Strategy shortBuyStrategy1 = tradeStrategyFactory.createShortBuyEma90NotFallingTrendStrategy(new TimeSeries(timeFrameStorage.getCandles()));
-        PoloniexStrategy poloniexStrategy1 = new PoloniexStrategy(name2, shortBuyStrategy1, timeFrame, properties.getTradeConfig().getMinBtcTradeAmount());
-        IntStream.range(1, 6).forEach(index -> poloniexStrategy1.addTradingRecord(new PoloniexTradingRecord(index, name2, new TradingRecord())));
-        timeFrameStorage.addStrategy(poloniexStrategy1);
+    public List<TimeFrameStorage> experimentOneStrategy(CurrencyPair currencyPair) {
+        TimeFrameStorage timeFrameStorage = new TimeFrameStorage(TimeFrame.ONE_MINUTE);
 
-        String name3 = "short-buy";
-        Strategy shortBuyStrategy2 = tradeStrategyFactory.createShortBuyStrategy(new TimeSeries(timeFrameStorage.getCandles()), 14);
-        PoloniexStrategy poloniexStrategy2 = new PoloniexStrategy(name3, shortBuyStrategy2, timeFrame, properties.getTradeConfig().getMinBtcTradeAmount());
-        IntStream.range(1, 6).forEach(index -> poloniexStrategy2.addTradingRecord(new PoloniexTradingRecord(index, name3, new TradingRecord())));
-        timeFrameStorage.addStrategy(poloniexStrategy2);
-        return Collections.singletonList(timeFrameStorage);
+        BigDecimal minVolume = properties.getTradeConfig().getMinBtcTradeAmount();
+        BigDecimal realVolume = properties.getTradeConfig().getRealBtcTradeAmount();
+
+        initStrategy("short-buy-rising-ema90",
+                timeFrameStorage,
+                minVolume,
+                ticks -> tradeStrategyFactory.createShortBuyEma90RisingTrendStrategy(ticks));
+        initStrategy("modified1-buy-rising-ema90",
+                timeFrameStorage,
+                minVolume,
+                ticks -> tradeStrategyFactory.createModifiedShortBuyEma90RisingTrendStrategy1(ticks));
+        initStrategy("modified2-buy-rising-ema90",
+                timeFrameStorage,
+                minVolume,
+                ticks -> tradeStrategyFactory.createModifiedShortBuyEma90RisingTrendStrategy2(ticks));
+        initStrategy("modified3-buy-rising-ema90",
+                timeFrameStorage,
+                minVolume,
+                ticks -> tradeStrategyFactory.createModifiedShortBuyEma90RisingTrendStrategy3(ticks));
+        initStrategy("modified4-buy-rising-ema90",
+                timeFrameStorage,
+                minVolume,
+                ticks -> tradeStrategyFactory.createModifiedShortBuyEma90RisingTrendStrategy4(ticks));
+        initStrategy("modified1-short-buy",
+                timeFrameStorage,
+                minVolume,
+                ticks -> tradeStrategyFactory.createModifiedShortBuyStrategy1(ticks));
+        initStrategy("modified2-short-buy",
+                timeFrameStorage,
+                minVolume,
+                ticks -> tradeStrategyFactory.createModifiedShortBuyStrategy2(ticks));
+        initStrategy("real-short-buy",
+                timeFrameStorage,
+                realVolume,
+                ticks -> tradeStrategyFactory.createShortBuyStrategy(ticks));
+        initStrategy("rising-trend",
+                timeFrameStorage,
+                minVolume,
+                ticks -> tradeStrategyFactory.createRisingTrendStrategy(ticks));
+        initStrategy("rising-trend-modified",
+                timeFrameStorage,
+                minVolume,
+                ticks -> tradeStrategyFactory.createModifiedRisingTrendStrategy(ticks));
+
+        return Arrays.asList(timeFrameStorage);
+    }
+
+    public List<TimeFrameStorage> bigDataStrategies(CurrencyPair currencyPair) {
+        TimeFrameStorage timeFrameStorage = new TimeFrameStorage(TimeFrame.ONE_MINUTE);
+
+        BigDecimal minVolume = properties.getTradeConfig().getMinBtcTradeAmount();
+        initStrategy("modified2-buy-rising-ema90",
+                timeFrameStorage,
+                minVolume,
+                ticks -> tradeStrategyFactory.createModifiedShortBuyEma90RisingTrendStrategy2(ticks));
+        initStrategy("modified3-buy-rising-ema90",
+                timeFrameStorage,
+                minVolume,
+                ticks -> tradeStrategyFactory.createModifiedShortBuyEma90RisingTrendStrategy3(ticks));
+        initStrategy("rising-trend",
+                timeFrameStorage,
+                minVolume,
+                ticks -> tradeStrategyFactory.createRisingTrendStrategy(ticks));
+        return Arrays.asList(timeFrameStorage);
+    }
+
+    private void initStrategy(String name, TimeFrameStorage timeFrameStorage, BigDecimal volume, Function<TimeSeries, Strategy> strategyFunction) {
+        TimeFrame timeFrame = timeFrameStorage.getTimeFrame();
+        Strategy strategy = strategyFunction.apply(new TimeSeries(timeFrameStorage.getCandles()));
+        PoloniexStrategy poloniexStrategy = new PoloniexStrategy(name, strategy, timeFrame, volume);
+        IntStream.range(1, 2).forEach(index -> poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(index, name, new TradingRecord())));
+        timeFrameStorage.addStrategy(poloniexStrategy);
     }
 
 }

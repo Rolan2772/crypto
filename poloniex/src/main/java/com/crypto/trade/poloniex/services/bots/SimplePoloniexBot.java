@@ -20,6 +20,7 @@ import java.time.Duration;
 public class SimplePoloniexBot {
 
     @Qualifier("fileTradesHistoryService")
+//    @Qualifier("copyTradesHistoryService")
     @Autowired
     private HistoryService historyService;
     @Autowired
@@ -37,7 +38,7 @@ public class SimplePoloniexBot {
         tradesStorage.initCurrency(btcEth);
         candlesStorage.initCurrency(btcEth, poloniexStrategyFactory.experimentOneStrategy(btcEth));
         //wsConnector.connect();
-        tradesStorage.addTradesHistory(btcEth, historyService.loadTradesHistory(btcEth, Duration.ofDays(7)));
+        tradesStorage.addTradesHistory(btcEth, historyService.loadTradesHistory(btcEth, Duration.ofHours(6)));
     }
 
     @PreDestroy

@@ -33,7 +33,8 @@ public class HistoryAnalyticsService implements AnalyticsService {
             } else if (strategy.shouldExit(index, tradingRecord)) {
                 log.trace("Strategy should EXIT on {}", index);
                 action = TradingAction.SHOULD_EXIT;
-                BigDecimal amountToSell = TradeCalculator.getAmountWithFee(tradingRecord.getCurrentTrade().getEntry());
+                Order entry = tradingRecord.getCurrentTrade().getEntry();
+                BigDecimal amountToSell = entry == null ? amount : TradeCalculator.getAmountWithFee(tradingRecord.getCurrentTrade().getEntry());
                 boolean exited = tradingRecord.exit(index, lastTick.getClosePrice(), CalculationsUtils.toDecimal(amountToSell));
                 if (exited) {
                     Order exit = tradingRecord.getLastExit();

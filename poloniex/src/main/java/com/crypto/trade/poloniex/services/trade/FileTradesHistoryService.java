@@ -24,14 +24,19 @@ public class FileTradesHistoryService implements HistoryService {
 
     @Override
     public List<PoloniexHistoryTrade> loadTradesHistory(CurrencyPair currencyPair, Duration historyDuration) {
-        Path historyPath = Paths.get("analytics/poloniex.json");
         List<PoloniexHistoryTrade> trades = new ArrayList<>();
-
-        try {
-            trades.addAll(jsonMapper.readValue(historyPath.toFile(), new TypeReference<List<PoloniexHistoryTrade>>() {
-            }));
-        } catch (IOException e) {
-            log.error("Failed to read history.", e);
+        String fileName = "analytics/poloniex.json";
+        int index = 0;
+        Path historyPath = Paths.get(fileName);
+        while (historyPath.toFile().exists()) {
+            try {
+                trades.addAll(jsonMapper.readValue(historyPath.toFile(), new TypeReference<List<PoloniexHistoryTrade>>() {
+                }));
+            } catch (IOException e) {
+                log.error("Failed to read history.", e);
+            }
+            index += 1;
+            historyPath = Paths.get(fileName + "." + index);
         }
         return trades;
     }

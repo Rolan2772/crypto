@@ -76,12 +76,8 @@ public class TradeCalculator {
     }
 
     public static BigDecimal getResultAmount(List<ResultTrade> resultTrades, BigDecimal defaultAmount) {
-        BigDecimal result = resultTrades.isEmpty() ? defaultAmount : resultTrades.get(0).getAmount();
-        if (resultTrades.size() > 1) {
-            result = resultTrades.stream()
-                    .map(ResultTrade::getAmount)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-        }
-        return result;
+        return resultTrades.isEmpty()
+                ? defaultAmount
+                : resultTrades.stream().map(ResultTrade::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

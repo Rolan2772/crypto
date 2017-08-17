@@ -55,6 +55,6 @@ public class TradesExportService implements MemoryExportService<PoloniexTrade>, 
     @PreDestroy
     public void preDestroy() {
         SortedSet<PoloniexTrade> poloniexTrades = tradesStorage.getTrades(CurrencyPair.BTC_ETH);
-        exportExcessData(STALE_TRADES_FILE_NAME + CurrencyPair.BTC_ETH, poloniexTrades);
+        //exportExcessData(STALE_TRADES_FILE_NAME + CurrencyPair.BTC_ETH, poloniexTrades);
     }
 }

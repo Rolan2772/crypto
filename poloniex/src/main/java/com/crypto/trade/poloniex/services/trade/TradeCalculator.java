@@ -24,12 +24,16 @@ public class TradeCalculator {
         return CalculationsUtils.divide(sellGain, buySpent);
     }
 
-    public static BigDecimal getAmount(BigDecimal volume, BigDecimal rate) {
-        return CalculationsUtils.divide(volume, rate);
+    public static BigDecimal getEntryAmount(BigDecimal volume, BigDecimal rate, Order.OrderType direction) {
+        return direction == Order.OrderType.BUY
+                ? CalculationsUtils.divide(volume, rate)
+                : volume;
     }
 
-    public static BigDecimal getAmountWithFee(Order order) {
-        return subtractFee(CalculationsUtils.toBigDecimal(order.getAmount()));
+    public static BigDecimal getExitAmount(Order entryOrder, BigDecimal rate) {
+        return entryOrder.getType() == Order.OrderType.BUY
+                ? subtractFee(CalculationsUtils.toBigDecimal(entryOrder.getAmount()))
+                : CalculationsUtils.divide(subtractFee(getTotal(entryOrder)), rate);
     }
 
     public static BigDecimal subtractFee(BigDecimal value) {
@@ -37,17 +41,24 @@ public class TradeCalculator {
         return value.subtract(fee);
     }
 
-    public static BigDecimal getGrossSellGain(Order entryOrder, Order exitOrder) {
-        return getTotal(CalculationsUtils.toBigDecimal(exitOrder.getPrice()),
-                CalculationsUtils.toBigDecimal(entryOrder.getAmount()));
+    public static BigDecimal getEntrySpent(Order entryOrder) {
+        return entryOrder.getType() == Order.OrderType.BUY
+                ? getTotal(entryOrder)
+                : CalculationsUtils.toBigDecimal(entryOrder.getAmount());
     }
 
-    public static BigDecimal getBuySpent(Order entryOrder) {
-        return getTotal(entryOrder);
+    public static BigDecimal getGrossExitGain(Order entryOrder, Order exitOrder) {
+        BigDecimal exitPrice = CalculationsUtils.toBigDecimal(exitOrder.getPrice());
+        BigDecimal entryAmount = CalculationsUtils.toBigDecimal(entryOrder.getAmount());
+        return entryOrder.getType() == Order.OrderType.BUY
+                ? getTotal(exitPrice, entryAmount)
+                : CalculationsUtils.toBigDecimal(exitOrder.getAmount());
     }
 
-    public static BigDecimal getNetSellGain(Order exitOrder) {
-        return subtractFee(getTotal(exitOrder));
+    public static BigDecimal getNetExitGain(Order entryOrder, Order exitOrder) {
+        return entryOrder.getType() == Order.OrderType.BUY
+                ? subtractFee(getTotal(exitOrder))
+                : subtractFee(CalculationsUtils.toBigDecimal(exitOrder.getAmount()));
     }
 
     public static BigDecimal getTotalWithFee(Order order) {

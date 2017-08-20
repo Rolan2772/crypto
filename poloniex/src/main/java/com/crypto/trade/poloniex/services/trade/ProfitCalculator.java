@@ -9,77 +9,82 @@ import eu.verdelhan.ta4j.Trade;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.function.BinaryOperator;
+import java.util.function.Function;
 
 public class ProfitCalculator {
 
-    private BinaryOperator<TradeResult> tradesAccumulator = (t1, t2) -> {
-        t1.accumulate(t2.getBuySpent(),
-                t2.getNetSellGain(),
-                t2.getGrossSellGain());
-        t1.accumulateVolume(t2.getVolume());
-        t1.accumulateTradesCount(t2.getTradesCount());
-        return t1;
+    private BinaryOperator<TradeResult> tradesResultAccumulator = (t1, t2) -> {
+        if (t1.getDirection() != t2.getDirection()) {
+            throw new IllegalStateException("Trade result from opposite direction cannot be aggreagted");
+        }
+        return new TradeResult(t1.getEntrySpent().add(t2.getEntrySpent()),
+                t1.getNetExitGain().add(t2.getNetExitGain()),
+                t1.getGrossExitGain().add(t2.getGrossExitGain()),
+                t1.getDirection(),
+                t1.getVolume().add(t2.getVolume()),
+                t1.getTradesCount() + t2.getTradesCount());
     };
 
     public BigDecimal getNetPercent(TradeResult tradeResult) {
         BigDecimal netProfit = getNetProfit(tradeResult);
-        return tradeResult.getVolume().compareTo(BigDecimal.ZERO) != 0
+        return hasVolume(tradeResult)
                 ? CalculationsUtils.divide(netProfit, tradeResult.getVolume())
                 : BigDecimal.ZERO;
     }
 
+    private boolean hasVolume(TradeResult tradeResult) {
+        return tradeResult.getVolume().compareTo(BigDecimal.ZERO) != 0;
+    }
+
     public BigDecimal getGrossPercent(TradeResult tradeResult) {
         BigDecimal grossProfit = getGrossProfit(tradeResult);
-        return tradeResult.getVolume().compareTo(BigDecimal.ZERO) != 0
+        return hasVolume(tradeResult)
                 ? CalculationsUtils.divide(grossProfit, tradeResult.getVolume())
                 : grossProfit;
     }
 
     public BigDecimal getNetProfit(TradeResult tradeResult) {
-        return tradeResult.getNetSellGain().subtract(tradeResult.getBuySpent());
+        return tradeResult.getNetExitGain().subtract(tradeResult.getEntrySpent());
     }
 
     public BigDecimal getGrossProfit(TradeResult tradeResult) {
-        return tradeResult.getGrossSellGain().subtract(tradeResult.getBuySpent());
+        return tradeResult.getGrossExitGain().subtract(tradeResult.getEntrySpent());
     }
 
-    public TradeResult getTotalTradeResult(List<PoloniexStrategy> strategies) {
+    public TradeResult getTotalTradeResult(List<PoloniexStrategy> strategies, Order.OrderType direction) {
         return strategies.stream()
+                .filter(strategy -> strategy.getDirection() == direction)
                 .map(this::getStrategyTradeResult)
-                .reduce(new TradeResult(), tradesAccumulator);
+                .reduce(new TradeResult(direction), tradesResultAccumulator);
     }
 
     public TradeResult getStrategyTradeResult(PoloniexStrategy strategy) {
         return strategy.getTradingRecords()
                 .stream()
-                .map(tradingRecord -> getTradingRecordTradeResult(tradingRecord, strategy.getTradeVolume()))
-                .reduce(new TradeResult(), tradesAccumulator);
+                .map(tradingRecord -> getTradingRecordProfit(tradingRecord, strategy.getDirection(), strategy.getTradeVolume()))
+                .reduce(new TradeResult(strategy.getDirection()), tradesResultAccumulator);
     }
 
-    public TradeResult getTradingRecordTradeResult(PoloniexTradingRecord tradingRecord, BigDecimal volume) {
-        TradeResult tradeResult = new TradeResult();
-        tradeResult.accumulateVolume(volume);
-        tradeResult.accumulateTradesCount(tradingRecord.getTradingRecord().getTradeCount());
-        List<Trade> trades = tradingRecord.getTradingRecord().getTrades();
-        for (Trade trade : trades) {
-            if (trade.isClosed()) {
-                Order entryOrder = trade.getEntry();
-                Order exitOrder = trade.getExit();
-                tradeResult.accumulate(TradeCalculator.getBuySpent(entryOrder),
-                        TradeCalculator.getNetSellGain(exitOrder),
-                        TradeCalculator.getGrossSellGain(entryOrder, exitOrder));
-            }
-        }
-        /*List<PoloniexOrder> orders = tradingRecord.getOrders();
-        if (orders.size() > 1) {
-            for (int index = 1; index < orders.size(); index += 2) {
-                Order entryOrder = orders.get(index - 1).getSourceOrder();
-                Order exitOrder = orders.get(index).getSourceOrder();
-                tradeResult.accumulate(TradeCalculator.getBuySpent(entryOrder),
-                        TradeCalculator.getNetSellGain(exitOrder),
-                        TradeCalculator.getGrossSellGain(entryOrder, exitOrder));
-            }
-        }*/
-        return tradeResult;
+    public TradeResult getTradingRecordProfit(PoloniexTradingRecord poloniexTradingRecord, Order.OrderType direction, BigDecimal volume) {
+        return poloniexTradingRecord.getTradingRecord()
+                .getTrades()
+                .stream()
+                .filter(Trade::isClosed)
+                .map(tradeResultMapper(direction))
+                .reduce(new TradeResult(direction, volume), tradesResultAccumulator);
+
+    }
+
+    private Function<Trade, TradeResult> tradeResultMapper(Order.OrderType direction) {
+        return trade -> {
+            Order entryOrder = trade.getEntry();
+            Order exitOrder = trade.getExit();
+            return new TradeResult(TradeCalculator.getEntrySpent(entryOrder),
+                    TradeCalculator.getNetExitGain(entryOrder, exitOrder),
+                    TradeCalculator.getGrossExitGain(entryOrder, exitOrder),
+                    direction,
+                    BigDecimal.ZERO,
+                    1);
+        };
     }
 }

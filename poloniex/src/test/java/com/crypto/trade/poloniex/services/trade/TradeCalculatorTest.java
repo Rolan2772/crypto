@@ -1,6 +1,7 @@
 package com.crypto.trade.poloniex.services.trade;
 
 import com.crypto.trade.poloniex.dto.ResultTrade;
+import com.crypto.trade.poloniex.services.utils.CalculationsUtils;
 import com.crypto.trade.utils.TestOrderUtils;
 import eu.verdelhan.ta4j.Decimal;
 import eu.verdelhan.ta4j.Order;
@@ -12,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class TradeCalculatorTest {
 
@@ -41,31 +43,48 @@ public class TradeCalculatorTest {
     }
 
     @Test
-    public void amount() {
-        assertEquals(BigDecimal.valueOf(0.11237875),
-                TradeCalculator.getAmount(BigDecimal.valueOf(0.01011364), BigDecimal.valueOf(0.08999601)));
+    public void entryAmount() {
+        assertEquals(BigDecimal.valueOf(0.00116671),
+                TradeCalculator.getEntryAmount(BigDecimal.valueOf(0.000105), BigDecimal.valueOf(0.08999601), Order.OrderType.BUY));
+        assertEquals(BigDecimal.valueOf(0.005),
+                TradeCalculator.getEntryAmount(BigDecimal.valueOf(0.005), BigDecimal.valueOf(0.08999601), Order.OrderType.SELL));
     }
 
     @Test
-    public void amountWithFee() {
+    public void buyExitAmount() {
         Order order = TestOrderUtils.createEntryOrder(Decimal.valueOf("0.08999601"), Decimal.valueOf("0.11237875"));
         assertEquals(BigDecimal.valueOf(0.11209781),
-                TradeCalculator.getAmountWithFee(order));
+                TradeCalculator.getExitAmount(order, BigDecimal.ONE));
+    }
+
+    @Test
+    public void sellExitAmount() {
+        BigDecimal entryAmount = BigDecimal.valueOf(0.11237875);
+        Order entryOrder = TestOrderUtils.createEntryOrder(Order.OrderType.SELL,
+                Decimal.valueOf("0.08999601"),
+                CalculationsUtils.toDecimal(entryAmount));
+
+        BigDecimal exitAmount = TradeCalculator.getExitAmount(entryOrder, BigDecimal.valueOf(0.07599601));
+        assertEquals(BigDecimal.valueOf(0.13274841), exitAmount);
+        assertTrue(exitAmount.compareTo(entryAmount) > 0);
     }
 
     @Test
     public void buySpent() {
         Order entryOrder = TestOrderUtils.createEntryOrder(Decimal.valueOf("0.08242652"), Decimal.valueOf("0.12132017"));
-        assertEquals(BigDecimal.valueOf(0.00999999), TradeCalculator.getBuySpent(entryOrder));
+        assertEquals(BigDecimal.valueOf(0.00999999), TradeCalculator.getEntrySpent(entryOrder));
     }
 
     @Test
     public void netSellGain() {
+        Order entryOrder = TestOrderUtils.createEntryOrder(Order.OrderType.BUY,
+                Decimal.valueOf("0.08199601"),
+                Decimal.valueOf("0.12209781"));
         Order exitOrder = TestOrderUtils.createEntryOrder(Order.OrderType.SELL,
                 Decimal.valueOf("0.09199601"),
                 Decimal.valueOf("0.11209781"));
 
-        assertEquals(BigDecimal.valueOf(0.01028677), TradeCalculator.getNetSellGain(exitOrder));
+        assertEquals(BigDecimal.valueOf(0.01028677), TradeCalculator.getNetExitGain(entryOrder, exitOrder));
     }
 
     @Test
@@ -77,7 +96,7 @@ public class TradeCalculatorTest {
                 Decimal.valueOf("0.09199601"),
                 Decimal.valueOf("0.11209781"));
 
-        assertEquals(BigDecimal.valueOf(0.01033833), TradeCalculator.getGrossSellGain(entryOrder, exitOrder));
+        assertEquals(BigDecimal.valueOf(0.01033833), TradeCalculator.getGrossExitGain(entryOrder, exitOrder));
     }
 
     @Test

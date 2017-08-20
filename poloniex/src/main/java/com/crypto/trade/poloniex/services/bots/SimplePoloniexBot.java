@@ -19,8 +19,9 @@ import java.time.Duration;
 @Service
 public class SimplePoloniexBot {
 
-    @Qualifier("fileTradesHistoryService")
+//    @Qualifier("fileTradesHistoryService")
 //    @Qualifier("copyTradesHistoryService")
+    @Qualifier("serverTradesHistoryService")
     @Autowired
     private HistoryService historyService;
     @Autowired
@@ -36,8 +37,8 @@ public class SimplePoloniexBot {
     public void postConstruct() throws IOException, DeploymentException {
         CurrencyPair btcEth = CurrencyPair.BTC_ETH;
         tradesStorage.initCurrency(btcEth);
-        candlesStorage.initCurrency(btcEth, poloniexStrategyFactory.experimentOneStrategy(btcEth));
-        //wsConnector.connect();
+        candlesStorage.initCurrency(btcEth, poloniexStrategyFactory.createTopPerformingStrategies(btcEth));
+        wsConnector.connect();
         tradesStorage.addTradesHistory(btcEth, historyService.loadTradesHistory(btcEth, Duration.ofHours(6)));
     }
 

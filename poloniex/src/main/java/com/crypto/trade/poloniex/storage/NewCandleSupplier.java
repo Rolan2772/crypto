@@ -35,7 +35,7 @@ public class NewCandleSupplier implements Supplier<Tick> {
         int lastIndex = candles.size() - 1;
 
         if (isHistoryTick) {
-            //timeFrameStorage.setHistoryIndex(lastIndex + 1);
+            timeFrameStorage.setHistoryIndex(lastIndex + 1);
         } else {
             trade(timeFrameStorage, lastIndex);
         }
@@ -74,7 +74,14 @@ public class NewCandleSupplier implements Supplier<Tick> {
             for (int trIndex = 0; trIndex < tradingRecords.size(); trIndex++) {
                 PoloniexTradingRecord poloniexTradingRecord = tradingRecords.get(trIndex);
                 TradingRecord tradingRecord = poloniexTradingRecord.getTradingRecord();
-                TradingAction action = realTimeAnalyticsService.analyzeTick(poloniexStrategy.getStrategy(), builtCandle, index, timeFrameStorage.getHistoryIndex(), false, tradingRecord, poloniexStrategy.getTradeVolume());
+                TradingAction action = realTimeAnalyticsService.analyzeTick(poloniexStrategy.getStrategy(),
+                        builtCandle,
+                        index,
+                        timeFrameStorage.getHistoryIndex(),
+                        false,
+                        tradingRecord,
+                        poloniexStrategy.getDirection(),
+                        poloniexStrategy.getTradeVolume());
                 log.debug("Strategy {}/{} trading record {} analytics result {}, processing: {}.", timeFrame, poloniexStrategy.getName(), trIndex, action, poloniexTradingRecord.getProcessing().get());
                 if (TradingAction.shouldPlaceOrder(action)) {
                     try {
@@ -82,10 +89,14 @@ public class NewCandleSupplier implements Supplier<Tick> {
                         boolean canTrade = (TradingAction.SHOULD_ENTER != action || !onceEntered) && poloniexTradingRecord.getProcessing().compareAndSet(false, true);
                         log.debug("Strategy '{}' canTrade: {}, onceEntered: {}, processing: {}", poloniexStrategy.getName(), canTrade, onceEntered, poloniexTradingRecord.getProcessing().get());
                         Optional<PoloniexOrder> resultOrder = Optional.empty();
-//                        if (canTrade) {
-//                            resultOrder = tradingService.placeOrder(tradingRecord, index, poloniexStrategy.getTradeVolume(), isRealPrice);
-//                            poloniexTradingRecord.setProcessed();
-//                        }
+                        if (canTrade) {
+                            resultOrder = tradingService.placeOrder(tradingRecord,
+                                    index,
+                                    poloniexStrategy.getDirection(),
+                                    poloniexStrategy.getTradeVolume(),
+                                    isRealPrice);
+                            poloniexTradingRecord.setProcessed();
+                        }
                         onceEntered |= TradingAction.SHOULD_ENTER == action && resultOrder.isPresent();
                         log.debug("Strategy '{}' onceEntered flag: {}", poloniexStrategy.getName(), onceEntered);
                         resultOrder.ifPresent(poloniexTradingRecord::addPoloniexOrder);

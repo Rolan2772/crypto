@@ -38,10 +38,10 @@ public class TradingService {
     @Autowired
     private PoloniexRequestHelper requestHelper;
 
-    public Optional<PoloniexOrder> placeOrder(TradingRecord tradingRecord, int index, BigDecimal volume, boolean real) {
+    public Optional<PoloniexOrder> placeOrder(TradingRecord tradingRecord, int index, Order.OrderType direction, BigDecimal volume, boolean real) {
         Optional<PoloniexOrder> poloniexOrder = Optional.empty();
         if (tradingRecord.getCurrentTrade().isNew()) {
-            poloniexOrder = buy(tradingRecord, index, volume, real);
+            poloniexOrder = buy(tradingRecord, index, direction, volume, real);
         } else if (tradingRecord.getCurrentTrade().isOpened()) {
             poloniexOrder = sell(tradingRecord, index, real);
         } else {
@@ -50,20 +50,20 @@ public class TradingService {
         return poloniexOrder;
     }
 
-    private Optional<PoloniexOrder> buy(TradingRecord tradingRecord, int index, BigDecimal volume, boolean real) {
+    private Optional<PoloniexOrder> buy(TradingRecord tradingRecord, int index, Order.OrderType direction, BigDecimal volume, boolean real) {
         log.info("Processing BUY request {} at index {}", tradingRecord.getCurrentTrade(), index);
         Optional<PoloniexOrder> result = Optional.empty();
         BigDecimal lastTrade = tradesStorage.getLastTrade(CurrencyPair.BTC_ETH);
         BigDecimal rate = real
                 ? lastTrade
                 : CalculationsUtils.divide(lastTrade, BigDecimal.valueOf(2));
-        BigDecimal amount = TradeCalculator.getAmount(volume, rate);
+        BigDecimal entryAmount = TradeCalculator.getEntryAmount(volume, rate, direction);
 
         Map<String, Object> params = new HashMap<>();
         params.put("command", "buy");
         params.put("currencyPair", CurrencyPair.BTC_ETH);
         params.put("rate", rate);
-        params.put("amount", amount);
+        params.put("amount", entryAmount);
         if (real) {
             params.put("fillOrKill", 1);
         }
@@ -78,11 +78,11 @@ public class TradingService {
                 PoloniexOrderResponse orderResponse = objectMapper.readValue(response.getBody(), PoloniexOrderResponse.class);
                 log.debug("Order response: {}", orderResponse);
                 BigDecimal resultRate = TradeCalculator.getResultRate(orderResponse.getResultingTrades(), rate);
-                BigDecimal resultAmount = TradeCalculator.getResultAmount(orderResponse.getResultingTrades(), amount);
+                BigDecimal resultAmount = TradeCalculator.getResultAmount(orderResponse.getResultingTrades(), entryAmount);
                 log.debug("Result rate = {}, result amount = {}", resultRate, resultAmount);
                 boolean entered = tradingRecord.enter(index, CalculationsUtils.toDecimal(resultRate), CalculationsUtils.toDecimal(resultAmount));
                 if (!entered) {
-                    log.warn("Trading record entering error at index={}, rate={}, amount={}, fee={}", index, rate, amount, CalculationsUtils.FEE_PERCENT);
+                    log.warn("Trading record entering error at index={}, rate={}, amount={}, fee={}", index, rate, entryAmount, CalculationsUtils.FEE_PERCENT);
                 }
                 PoloniexOrder poloniexOrder = new PoloniexOrder(orderResponse.getOrderId(), tradingRecord.getLastOrder(), index, TradingAction.ENTERED);
                 log.debug("Poloniex order: {}", poloniexOrder);
@@ -106,13 +106,13 @@ public class TradingService {
         }
 
         if (TradeCalculator.canSell(entryOrder, rate)) {
-            BigDecimal amountToSell = TradeCalculator.getAmountWithFee(entryOrder);
+            BigDecimal exitAmount = TradeCalculator.getExitAmount(entryOrder, rate);
 
             Map<String, Object> params = new HashMap<>();
             params.put("command", "sell");
             params.put("currencyPair", CurrencyPair.BTC_ETH);
             params.put("rate", rate);
-            params.put("amount", amountToSell);
+            params.put("amount", exitAmount);
             if (real) {
                 params.put("fillOrKill", 1);
             }
@@ -127,7 +127,7 @@ public class TradingService {
                     PoloniexOrderResponse orderResponse = objectMapper.readValue(response.getBody(), PoloniexOrderResponse.class);
                     log.debug("Order response: {}", orderResponse);
                     BigDecimal resultRate = TradeCalculator.getResultRate(orderResponse.getResultingTrades(), rate);
-                    BigDecimal resultAmount = TradeCalculator.getResultAmount(orderResponse.getResultingTrades(), amountToSell);
+                    BigDecimal resultAmount = TradeCalculator.getResultAmount(orderResponse.getResultingTrades(), exitAmount);
                     log.debug("Result rate = {}, result amount = {}", resultRate, resultAmount);
                     boolean exited = tradingRecord.exit(index, CalculationsUtils.toDecimal(resultRate), CalculationsUtils.toDecimal(resultAmount));
                     if (!exited) {

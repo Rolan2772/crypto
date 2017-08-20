@@ -2,6 +2,7 @@ package com.crypto.trade.poloniex.storage;
 
 import com.crypto.trade.poloniex.services.analytics.TimeFrame;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import eu.verdelhan.ta4j.Order;
 import eu.verdelhan.ta4j.Strategy;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -22,6 +23,7 @@ public class PoloniexStrategy {
     @JsonIgnore
     private Strategy strategy;
     private TimeFrame timeFrame;
+    private Order.OrderType direction;
     private BigDecimal tradeVolume;
     private List<PoloniexTradingRecord> tradingRecords = new ArrayList<>();
 
@@ -29,6 +31,7 @@ public class PoloniexStrategy {
         this.name = poloniexStrategy.getName();
         this.strategy = poloniexStrategy.getStrategy();
         this.timeFrame = poloniexStrategy.getTimeFrame();
+        this.direction = poloniexStrategy.getDirection();
         this.tradeVolume = poloniexStrategy.getTradeVolume();
         this.tradingRecords.addAll(tradingRecords);
     }

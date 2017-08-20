@@ -16,15 +16,16 @@ import java.math.BigDecimal;
 public class HistoryAnalyticsService implements AnalyticsService {
 
     @Override
-    public TradingAction analyzeTick(Strategy strategy, Tick lastTick, int index, int historyIndex, boolean analyzeHistory, TradingRecord tradingRecord, BigDecimal volume) {
+    public TradingAction analyzeTick(Strategy strategy, Tick lastTick, int index, int historyIndex, boolean analyzeHistory, TradingRecord tradingRecord, Order.OrderType direction, BigDecimal volume) {
         TradingAction action = TradingAction.NO_ACTION;
+        BigDecimal closePrice = CalculationsUtils.toBigDecimal(lastTick.getClosePrice());
         boolean shouldAnalyze = analyzeHistory || index >= historyIndex;
-        BigDecimal amount = TradeCalculator.getAmount(volume, CalculationsUtils.toBigDecimal(lastTick.getClosePrice()));
+        BigDecimal entryAmount = TradeCalculator.getEntryAmount(volume, closePrice, direction);
         if (shouldAnalyze) {
             if (strategy.shouldEnter(index, tradingRecord)) {
                 log.trace("Strategy should ENTER on {}", index);
                 action = TradingAction.SHOULD_ENTER;
-                boolean entered = tradingRecord.enter(index, lastTick.getClosePrice(), CalculationsUtils.toDecimal(amount));
+                boolean entered = tradingRecord.enter(index, lastTick.getClosePrice(), CalculationsUtils.toDecimal(entryAmount));
                 if (entered) {
                     Order entry = tradingRecord.getLastEntry();
                     action = TradingAction.ENTERED;
@@ -34,8 +35,10 @@ public class HistoryAnalyticsService implements AnalyticsService {
                 log.trace("Strategy should EXIT on {}", index);
                 action = TradingAction.SHOULD_EXIT;
                 Order entry = tradingRecord.getCurrentTrade().getEntry();
-                BigDecimal amountToSell = entry == null ? amount : TradeCalculator.getAmountWithFee(tradingRecord.getCurrentTrade().getEntry());
-                boolean exited = tradingRecord.exit(index, lastTick.getClosePrice(), CalculationsUtils.toDecimal(amountToSell));
+                BigDecimal exitAmount = entry == null
+                        ? entryAmount
+                        : TradeCalculator.getExitAmount(tradingRecord.getCurrentTrade().getEntry(), closePrice);
+                boolean exited = tradingRecord.exit(index, lastTick.getClosePrice(), CalculationsUtils.toDecimal(exitAmount));
                 if (exited) {
                     Order exit = tradingRecord.getLastExit();
                     action = TradingAction.EXITED;

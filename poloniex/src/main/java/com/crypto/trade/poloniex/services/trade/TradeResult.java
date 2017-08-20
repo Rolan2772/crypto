@@ -1,34 +1,33 @@
 package com.crypto.trade.poloniex.services.trade;
 
-import com.crypto.trade.poloniex.services.utils.CalculationsUtils;
-import lombok.Data;
+import eu.verdelhan.ta4j.Order;
+import lombok.AllArgsConstructor;
+import lombok.Value;
 
 import java.math.BigDecimal;
 
-@Data
+@Value
+@AllArgsConstructor
 public class TradeResult {
 
-    BigDecimal buySpent = BigDecimal.ZERO;
-    BigDecimal netSellGain = BigDecimal.ZERO;
-    BigDecimal grossSellGain = BigDecimal.ZERO;
-    BigDecimal volume = BigDecimal.ZERO;
-    Integer tradesCount = 0;
+    private BigDecimal entrySpent;
+    private BigDecimal netExitGain;
+    private BigDecimal grossExitGain;
+    private Order.OrderType direction;
+    // @TODO: add TotalResult data structure, and move volume and trades count there
+    private BigDecimal volume;
+    private Integer tradesCount;
 
-    // @TODO: move to lamda's
-    public void accumulate(BigDecimal buySpent, BigDecimal netSellGain, BigDecimal grossSellGain) {
-        this.buySpent = this.buySpent.add(buySpent);
-        this.netSellGain = this.netSellGain.add(netSellGain);
-        this.grossSellGain = this.grossSellGain.add(grossSellGain);
+    public TradeResult(Order.OrderType direction, BigDecimal volume) {
+        this.entrySpent = BigDecimal.ZERO;
+        this.netExitGain = BigDecimal.ZERO;
+        this.grossExitGain = BigDecimal.ZERO;
+        this.direction = direction;
+        this.volume = volume;
+        this.tradesCount = 0;
     }
 
-    public void accumulateVolume(BigDecimal volume) {
-        this.volume = this.volume.add(volume);
+    public TradeResult(Order.OrderType direction) {
+        this(direction, BigDecimal.ZERO);
     }
-
-    public void accumulateTradesCount(Integer tradesCount) {
-        this.tradesCount += tradesCount;
-    }
-
-
-
 }

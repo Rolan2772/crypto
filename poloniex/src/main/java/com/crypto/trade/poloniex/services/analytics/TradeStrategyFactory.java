@@ -8,8 +8,10 @@ import eu.verdelhan.ta4j.TimeSeries;
 import eu.verdelhan.ta4j.indicators.oscillators.StochasticOscillatorDIndicator;
 import eu.verdelhan.ta4j.indicators.oscillators.StochasticOscillatorKIndicator;
 import eu.verdelhan.ta4j.indicators.simple.ClosePriceIndicator;
+import eu.verdelhan.ta4j.indicators.trackers.DoubleEMAIndicator;
 import eu.verdelhan.ta4j.indicators.trackers.EMAIndicator;
 import eu.verdelhan.ta4j.indicators.trackers.RSIIndicator;
+import eu.verdelhan.ta4j.indicators.trackers.TripleEMAIndicator;
 import eu.verdelhan.ta4j.trading.rules.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -318,6 +320,91 @@ public class TradeStrategyFactory {
 
         Strategy strategy = new Strategy(entryRule, exitRule);
         strategy.setUnstablePeriod(100);
+
+        return strategy;
+    }
+
+    public Strategy createRisingTripleEmaStrategy(TimeSeries timeSeries) {
+        ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
+        EMAIndicator ema5 = new EMAIndicator(closePrice, 5);
+        EMAIndicator ema90 = new EMAIndicator(closePrice, 90);
+        DoubleEMAIndicator dma90 = new DoubleEMAIndicator(closePrice, 90);
+        TripleEMAIndicator tma90 = new TripleEMAIndicator(closePrice, 90);
+
+        Rule entryRule = new UpperRule(tma90, ema90)
+                .and(new CrossedUpIndicatorRule(ema5, tma90));
+
+        Rule exitRule = new LowerRule(tma90, dma90)
+                .and(new LowerRule(tma90, ema90))
+                .and(new CrossedDownIndicatorRule(ema5, tma90));
+
+        Strategy strategy = new Strategy(entryRule, exitRule);
+        strategy.setUnstablePeriod(90);
+
+        return strategy;
+    }
+
+    public Strategy createRisingTripleEmaStrategy1(TimeSeries timeSeries) {
+        ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
+        EMAIndicator ema5 = new EMAIndicator(closePrice, 5);
+        EMAIndicator ema90 = new EMAIndicator(closePrice, 90);
+        DoubleEMAIndicator dma90 = new DoubleEMAIndicator(closePrice, 90);
+        TripleEMAIndicator tma90 = new TripleEMAIndicator(closePrice, 90);
+
+        Rule entryRule = new UpperRule(tma90, ema90)
+                .and(new CrossedUpIndicatorRule(ema5, tma90));
+
+        Rule exitRule = new LowerRule(tma90, dma90)
+                .and(new LowerRule(tma90, ema90))
+                .and(new CrossedDownIndicatorRule(ema5, tma90))
+                .and(new StopGainRule(closePrice, Decimal.ONE));
+
+        Strategy strategy = new Strategy(entryRule, exitRule);
+        strategy.setUnstablePeriod(90);
+
+        return strategy;
+    }
+
+    public Strategy createRisingTripleEmaStrategy2(TimeSeries timeSeries) {
+        ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
+        EMAIndicator ema5 = new EMAIndicator(closePrice, 5);
+        EMAIndicator ema90 = new EMAIndicator(closePrice, 90);
+        DoubleEMAIndicator dma90 = new DoubleEMAIndicator(closePrice, 90);
+        TripleEMAIndicator tma90 = new TripleEMAIndicator(closePrice, 90);
+
+        Rule entryRule = new UpperRule(tma90, ema90)
+                .and(new CrossedUpIndicatorRule(ema5, tma90));
+
+        Rule exitRule = new LowerRule(tma90, dma90)
+                .and(new LowerRule(tma90, ema90))
+                .and(new CrossedDownIndicatorRule(ema5, tma90))
+                .and(new StopGainRule(closePrice, Decimal.ONE))
+                .and(new MaxGainRule(closePrice, Decimal.valueOf(1)));
+
+        Strategy strategy = new Strategy(entryRule, exitRule);
+        strategy.setUnstablePeriod(90);
+
+        return strategy;
+    }
+
+    public Strategy createRisingTripleEmaStrategy3(TimeSeries timeSeries) {
+        ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
+        EMAIndicator ema5 = new EMAIndicator(closePrice, 5);
+        EMAIndicator ema90 = new EMAIndicator(closePrice, 90);
+        DoubleEMAIndicator dma90 = new DoubleEMAIndicator(closePrice, 90);
+        TripleEMAIndicator tma90 = new TripleEMAIndicator(closePrice, 90);
+
+        Rule entryRule = new UpperRule(tma90, ema90)
+                .and(new CrossedDownIndicatorRule(ema5, tma90));
+
+        Rule exitRule = new LowerRule(tma90, dma90)
+                .and(new LowerRule(tma90, ema90))
+                .and(new CrossedUpIndicatorRule(ema5, tma90))
+                .and(new StopGainRule(closePrice, Decimal.ONE))
+                .and(new MaxGainRule(closePrice, Decimal.valueOf(1)));
+
+        Strategy strategy = new Strategy(entryRule, exitRule);
+        strategy.setUnstablePeriod(90);
 
         return strategy;
     }

@@ -32,6 +32,20 @@ public class DataExportController {
     @Autowired
     private TradesStorage tradesStorage;
 
+    @GetMapping("/orders")
+    public void orders() {
+        CurrencyPair currencyPair = CurrencyPair.BTC_ETH;
+        List<TimeFrameStorage> candlesData = candlesStorage.getData(currencyPair);
+        ordersExportService.exportMemoryData(currencyPair, candlesData);
+    }
+
+    @GetMapping("/orders/{type}")
+    public void osOrders(@PathVariable OsType type) {
+        CurrencyPair currencyPair = CurrencyPair.BTC_ETH;
+        List<TimeFrameStorage> candlesData = candlesStorage.getData(currencyPair);
+        ordersExportService.exportMemoryData(currencyPair, candlesData, type);
+    }
+
     @GetMapping("/all")
     public void all() {
         CurrencyPair currencyPair = CurrencyPair.BTC_ETH;

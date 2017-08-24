@@ -18,7 +18,7 @@ public class AppConfigController {
 
     @GetMapping("/reload/strategies")
     public void reloadStrategies() throws IOException, DeploymentException {
-        simplePoloniexBot.postConstruct();
+        //simplePoloniexBot.postConstruct();
     }
 
 }

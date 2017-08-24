@@ -218,6 +218,30 @@ public class PoloniexStrategyFactory {
         return timeFrameStorage;
     }
 
+    public List<TimeFrameStorage> createRealAmountBuyConf2(CurrencyPair currencyPair) {
+        TimeFrameStorage timeFrameStorage = new TimeFrameStorage(TimeFrame.ONE_MINUTE);
+        BigDecimal volume = BigDecimal.valueOf(0.08);
+        initStrategy("modified2-buy-rising-ema90",
+                timeFrameStorage,
+                1,
+                volume,
+                Order.OrderType.BUY,
+                ticks -> tradeStrategyFactory.createModifiedShortBuyEma90RisingTrendStrategy2(ticks));
+        initStrategy("rising-trend",
+                timeFrameStorage,
+                1,
+                volume,
+                Order.OrderType.BUY,
+                ticks -> tradeStrategyFactory.createRisingTrendStrategy(ticks));
+        initStrategy("tma-strategy-2",
+                timeFrameStorage,
+                1,
+                volume,
+                Order.OrderType.BUY,
+                ticks -> tradeStrategyFactory.createRisingTripleEmaStrategy2(ticks));
+        return Arrays.asList(timeFrameStorage);
+    }
+
     public List<TimeFrameStorage> createTopPerformingStrategies(CurrencyPair currencyPair) {
         TimeFrameStorage timeFrameStorage = new TimeFrameStorage(TimeFrame.ONE_MINUTE);
         initStrategy("sell-falling-ema90-1",

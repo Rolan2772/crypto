@@ -1,5 +1,7 @@
 package com.crypto.trade.poloniex.services.analytics;
 
+import com.crypto.trade.poloniex.services.analytics.indicators.CachedDoubleEMAIndicator;
+import com.crypto.trade.poloniex.services.analytics.indicators.CachedTripleEMAIndicator;
 import com.crypto.trade.poloniex.services.analytics.rules.*;
 import eu.verdelhan.ta4j.Decimal;
 import eu.verdelhan.ta4j.Rule;
@@ -8,26 +10,32 @@ import eu.verdelhan.ta4j.TimeSeries;
 import eu.verdelhan.ta4j.indicators.oscillators.StochasticOscillatorDIndicator;
 import eu.verdelhan.ta4j.indicators.oscillators.StochasticOscillatorKIndicator;
 import eu.verdelhan.ta4j.indicators.simple.ClosePriceIndicator;
-import eu.verdelhan.ta4j.indicators.trackers.DoubleEMAIndicator;
 import eu.verdelhan.ta4j.indicators.trackers.EMAIndicator;
 import eu.verdelhan.ta4j.indicators.trackers.RSIIndicator;
-import eu.verdelhan.ta4j.indicators.trackers.TripleEMAIndicator;
 import eu.verdelhan.ta4j.trading.rules.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
 public class TradeStrategyFactory {
 
     public static final int DEFAULT_TIME_FRAME = 14;
 
+    @Autowired
+    private AnalyticsCache analyticsCache;
+    @Autowired
+    private IndicatorFactory indicatorFactory;
+
     /**
      * RSI 14, StochasticK 14, StochasticD 3
      * Buy on RSI < 20, K intersects D, K < 20
      * Sell +1%
      */
-    public Strategy createShortBuyStrategy(TimeSeries timeSeries) {
+    public Strategy createShortBuyStrategy(TimeFrame timeFrame, TimeSeries timeSeries) {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-        RSIIndicator rsi = new RSIIndicator(closePrice, 14);
+        RSIIndicator rsi = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.RSI14,
+                indicatorFactory.createRsi14Indicator(closePrice));
         StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, 14);
         StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
 
@@ -44,9 +52,11 @@ public class TradeStrategyFactory {
         return strategy;
     }
 
-    public Strategy createModifiedShortBuyStrategy1(TimeSeries timeSeries) {
+    public Strategy createModifiedShortBuyStrategy1(TimeFrame timeFrame, TimeSeries timeSeries) {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-        RSIIndicator rsi = new RSIIndicator(closePrice, 14);
+        RSIIndicator rsi = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.RSI14,
+                indicatorFactory.createRsi14Indicator(closePrice));
         StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, 14);
         StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
 
@@ -64,9 +74,12 @@ public class TradeStrategyFactory {
         return strategy;
     }
 
-    public Strategy createModifiedShortBuyStrategy2(TimeSeries timeSeries) {
+    public Strategy createModifiedShortBuyStrategy2(TimeFrame timeFrame, TimeSeries timeSeries) {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-        RSIIndicator rsi = new RSIIndicator(closePrice, 14);
+        RSIIndicator rsi = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.RSI14,
+                indicatorFactory.createRsi14Indicator(closePrice));
+
         StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, 14);
         StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
 
@@ -84,10 +97,14 @@ public class TradeStrategyFactory {
         return strategy;
     }
 
-    public Strategy createShortBuyEma90RisingTrendStrategy(TimeSeries timeSeries) {
+    public Strategy createShortBuyEma90RisingTrendStrategy(TimeFrame timeFrame, TimeSeries timeSeries) {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-        EMAIndicator ema90 = new EMAIndicator(closePrice, 90);
-        RSIIndicator rsi = new RSIIndicator(closePrice, 14);
+        RSIIndicator rsi = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.RSI14,
+                indicatorFactory.createRsi14Indicator(closePrice));
+        EMAIndicator ema90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA90,
+                indicatorFactory.createEma90Indicator(closePrice));
         StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, 14);
         StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
 
@@ -105,10 +122,14 @@ public class TradeStrategyFactory {
         return strategy;
     }
 
-    public Strategy createModifiedShortBuyEma90RisingTrendStrategy1(TimeSeries timeSeries) {
+    public Strategy createModifiedShortBuyEma90RisingTrendStrategy1(TimeFrame timeFrame, TimeSeries timeSeries) {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-        EMAIndicator ema90 = new EMAIndicator(closePrice, 90);
-        RSIIndicator rsi = new RSIIndicator(closePrice, 14);
+        RSIIndicator rsi = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.RSI14,
+                indicatorFactory.createRsi14Indicator(closePrice));
+        EMAIndicator ema90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA90,
+                indicatorFactory.createEma90Indicator(closePrice));
         StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, 14);
         StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
 
@@ -127,10 +148,14 @@ public class TradeStrategyFactory {
         return strategy;
     }
 
-    public Strategy createModifiedShortBuyEma90RisingTrendStrategy2(TimeSeries timeSeries) {
+    public Strategy createModifiedShortBuyEma90RisingTrendStrategy2(TimeFrame timeFrame, TimeSeries timeSeries) {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-        EMAIndicator ema90 = new EMAIndicator(closePrice, 90);
-        RSIIndicator rsi = new RSIIndicator(closePrice, 14);
+        RSIIndicator rsi = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.RSI14,
+                indicatorFactory.createRsi14Indicator(closePrice));
+        EMAIndicator ema90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA90,
+                indicatorFactory.createEma90Indicator(closePrice));
         StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, 14);
         StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
 
@@ -149,10 +174,14 @@ public class TradeStrategyFactory {
         return strategy;
     }
 
-    public Strategy createModifiedShortBuyEma90RisingTrendStrategy3(TimeSeries timeSeries) {
+    public Strategy createModifiedShortBuyEma90RisingTrendStrategy3(TimeFrame timeFrame, TimeSeries timeSeries) {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-        EMAIndicator ema90 = new EMAIndicator(closePrice, 90);
-        RSIIndicator rsi = new RSIIndicator(closePrice, 14);
+        RSIIndicator rsi = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.RSI14,
+                indicatorFactory.createRsi14Indicator(closePrice));
+        EMAIndicator ema90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA90,
+                indicatorFactory.createEma90Indicator(closePrice));
         StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, 14);
         StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
 
@@ -171,10 +200,14 @@ public class TradeStrategyFactory {
         return strategy;
     }
 
-    public Strategy createModifiedShortBuyEma90RisingTrendStrategy4(TimeSeries timeSeries) {
+    public Strategy createModifiedShortBuyEma90RisingTrendStrategy4(TimeFrame timeFrame, TimeSeries timeSeries) {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-        EMAIndicator ema90 = new EMAIndicator(closePrice, 90);
-        RSIIndicator rsi = new RSIIndicator(closePrice, 14);
+        RSIIndicator rsi = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.RSI14,
+                indicatorFactory.createRsi14Indicator(closePrice));
+        EMAIndicator ema90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA90,
+                indicatorFactory.createEma90Indicator(closePrice));
         StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, 14);
         StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
 
@@ -193,10 +226,14 @@ public class TradeStrategyFactory {
         return strategy;
     }
 
-    public Strategy createShortSellEma90FallingTrendStrategy1(TimeSeries timeSeries) {
+    public Strategy createShortSellEma90FallingTrendStrategy1(TimeFrame timeFrame, TimeSeries timeSeries) {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-        EMAIndicator ema90 = new EMAIndicator(closePrice, 90);
-        RSIIndicator rsi = new RSIIndicator(closePrice, 14);
+        RSIIndicator rsi = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.RSI14,
+                indicatorFactory.createRsi14Indicator(closePrice));
+        EMAIndicator ema90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA90,
+                indicatorFactory.createEma90Indicator(closePrice));
         StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, 14);
         StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
 
@@ -215,10 +252,14 @@ public class TradeStrategyFactory {
         return strategy;
     }
 
-    public Strategy createShortSellEma90FallingTrendStrategy2(TimeSeries timeSeries) {
+    public Strategy createShortSellEma90FallingTrendStrategy2(TimeFrame timeFrame, TimeSeries timeSeries) {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-        EMAIndicator ema90 = new EMAIndicator(closePrice, 90);
-        RSIIndicator rsi = new RSIIndicator(closePrice, 14);
+        RSIIndicator rsi = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.RSI14,
+                indicatorFactory.createRsi14Indicator(closePrice));
+        EMAIndicator ema90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA90,
+                indicatorFactory.createEma90Indicator(closePrice));
         StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, 14);
         StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
 
@@ -237,10 +278,14 @@ public class TradeStrategyFactory {
         return strategy;
     }
 
-    public Strategy createShortSellEma90FallingTrendStrategy3(TimeSeries timeSeries) {
+    public Strategy createShortSellEma90FallingTrendStrategy3(TimeFrame timeFrame, TimeSeries timeSeries) {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-        RSIIndicator rsi = new RSIIndicator(closePrice, 14);
-        EMAIndicator ema90 = new EMAIndicator(closePrice, 90);
+        RSIIndicator rsi = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.RSI14,
+                indicatorFactory.createRsi14Indicator(closePrice));
+        EMAIndicator ema90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA90,
+                indicatorFactory.createEma90Indicator(closePrice));
 
         StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, 14);
         StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
@@ -260,10 +305,14 @@ public class TradeStrategyFactory {
         return strategy;
     }
 
-    public Strategy createShortSellEma90FallingTrendStrategy4(TimeSeries timeSeries) {
+    public Strategy createShortSellEma90FallingTrendStrategy4(TimeFrame timeFrame, TimeSeries timeSeries) {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-        RSIIndicator rsi = new RSIIndicator(closePrice, 14);
-        EMAIndicator ema90 = new EMAIndicator(closePrice, 90);
+        RSIIndicator rsi = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.RSI14,
+                indicatorFactory.createRsi14Indicator(closePrice));
+        EMAIndicator ema90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA90,
+                indicatorFactory.createEma90Indicator(closePrice));
 
         StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, 14);
         StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
@@ -283,11 +332,17 @@ public class TradeStrategyFactory {
         return strategy;
     }
 
-    public Strategy createRisingTrendStrategy(TimeSeries timeSeries) {
+    public Strategy createRisingTrendStrategy(TimeFrame timeFrame, TimeSeries timeSeries) {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-        EMAIndicator ema5 = new EMAIndicator(closePrice, 5);
-        EMAIndicator ema90 = new EMAIndicator(closePrice, 90);
-        EMAIndicator ema100 = new EMAIndicator(closePrice, 100);
+        EMAIndicator ema5 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA5,
+                indicatorFactory.createEma5Indicator(closePrice));
+        EMAIndicator ema90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA90,
+                indicatorFactory.createEma90Indicator(closePrice));
+        EMAIndicator ema100 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA100,
+                indicatorFactory.createEma100Indicator(closePrice));
 
         // ema90[0] >= ema90[-1] and ma05 > ma100
         Rule trendUp = new NotRule(new FallingDownIndicatorRule(ema90))
@@ -324,12 +379,27 @@ public class TradeStrategyFactory {
         return strategy;
     }
 
-    public Strategy createRisingTripleEmaStrategy(TimeSeries timeSeries) {
+    public Strategy createRisingTripleEmaStrategy(TimeFrame timeFrame, TimeSeries timeSeries) {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-        EMAIndicator ema5 = new EMAIndicator(closePrice, 5);
-        EMAIndicator ema90 = new EMAIndicator(closePrice, 90);
-        DoubleEMAIndicator dma90 = new DoubleEMAIndicator(closePrice, 90);
-        TripleEMAIndicator tma90 = new TripleEMAIndicator(closePrice, 90);
+
+        EMAIndicator ema5 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA5,
+                indicatorFactory.createEma5Indicator(closePrice));
+        EMAIndicator ema90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA90,
+                indicatorFactory.createEma90Indicator(closePrice));
+        EMAIndicator emaEma90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA_EMA90,
+                indicatorFactory.createEmaEma90Indicator(ema90));
+        CachedDoubleEMAIndicator dma90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.DMA90,
+                indicatorFactory.createDma90Indicator(closePrice, ema90, emaEma90));
+        EMAIndicator emaEmaEma90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA_EMA_EMA90,
+                indicatorFactory.createEmaEmaEma90Indicator(emaEma90));
+        CachedTripleEMAIndicator tma90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.TMA90,
+                indicatorFactory.createTma90Indicator(closePrice, ema90, emaEma90, emaEmaEma90));
 
         Rule entryRule = new UpperRule(tma90, ema90)
                 .and(new CrossedUpIndicatorRule(ema5, tma90));
@@ -339,17 +409,32 @@ public class TradeStrategyFactory {
                 .and(new CrossedDownIndicatorRule(ema5, tma90));
 
         Strategy strategy = new Strategy(entryRule, exitRule);
-        strategy.setUnstablePeriod(90);
+        strategy.setUnstablePeriod(270);
 
         return strategy;
     }
 
-    public Strategy createRisingTripleEmaStrategy1(TimeSeries timeSeries) {
+    public Strategy createRisingTripleEmaStrategy1(TimeFrame timeFrame, TimeSeries timeSeries) {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-        EMAIndicator ema5 = new EMAIndicator(closePrice, 5);
-        EMAIndicator ema90 = new EMAIndicator(closePrice, 90);
-        DoubleEMAIndicator dma90 = new DoubleEMAIndicator(closePrice, 90);
-        TripleEMAIndicator tma90 = new TripleEMAIndicator(closePrice, 90);
+
+        EMAIndicator ema5 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA5,
+                indicatorFactory.createEma5Indicator(closePrice));
+        EMAIndicator ema90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA90,
+                indicatorFactory.createEma90Indicator(closePrice));
+        EMAIndicator emaEma90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA_EMA90,
+                indicatorFactory.createEmaEma90Indicator(ema90));
+        CachedDoubleEMAIndicator dma90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.DMA90,
+                indicatorFactory.createDma90Indicator(closePrice, ema90, emaEma90));
+        EMAIndicator emaEmaEma90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA_EMA_EMA90,
+                indicatorFactory.createEmaEmaEma90Indicator(emaEma90));
+        CachedTripleEMAIndicator tma90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.TMA90,
+                indicatorFactory.createTma90Indicator(closePrice, ema90, emaEma90, emaEmaEma90));
 
         Rule entryRule = new UpperRule(tma90, ema90)
                 .and(new CrossedUpIndicatorRule(ema5, tma90));
@@ -360,17 +445,32 @@ public class TradeStrategyFactory {
                 .and(new StopGainRule(closePrice, Decimal.ONE));
 
         Strategy strategy = new Strategy(entryRule, exitRule);
-        strategy.setUnstablePeriod(90);
+        strategy.setUnstablePeriod(270);
 
         return strategy;
     }
 
-    public Strategy createRisingTripleEmaStrategy2(TimeSeries timeSeries) {
+    public Strategy createRisingTripleEmaStrategy2(TimeFrame timeFrame, TimeSeries timeSeries) {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-        EMAIndicator ema5 = new EMAIndicator(closePrice, 5);
-        EMAIndicator ema90 = new EMAIndicator(closePrice, 90);
-        DoubleEMAIndicator dma90 = new DoubleEMAIndicator(closePrice, 90);
-        TripleEMAIndicator tma90 = new TripleEMAIndicator(closePrice, 90);
+
+        EMAIndicator ema5 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA5,
+                indicatorFactory.createEma5Indicator(closePrice));
+        EMAIndicator ema90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA90,
+                indicatorFactory.createEma90Indicator(closePrice));
+        EMAIndicator emaEma90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA_EMA90,
+                indicatorFactory.createEmaEma90Indicator(ema90));
+        CachedDoubleEMAIndicator dma90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.DMA90,
+                indicatorFactory.createDma90Indicator(closePrice, ema90, emaEma90));
+        EMAIndicator emaEmaEma90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA_EMA_EMA90,
+                indicatorFactory.createEmaEmaEma90Indicator(emaEma90));
+        CachedTripleEMAIndicator tma90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.TMA90,
+                indicatorFactory.createTma90Indicator(closePrice, ema90, emaEma90, emaEmaEma90));
 
         Rule entryRule = new UpperRule(tma90, ema90)
                 .and(new CrossedUpIndicatorRule(ema5, tma90));
@@ -382,17 +482,32 @@ public class TradeStrategyFactory {
                 .and(new MaxGainRule(closePrice, Decimal.valueOf(1)));
 
         Strategy strategy = new Strategy(entryRule, exitRule);
-        strategy.setUnstablePeriod(90);
+        strategy.setUnstablePeriod(270);
 
         return strategy;
     }
 
-    public Strategy createRisingTripleEmaStrategy3(TimeSeries timeSeries) {
+    public Strategy createRisingTripleEmaStrategy3(TimeFrame timeFrame, TimeSeries timeSeries) {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-        EMAIndicator ema5 = new EMAIndicator(closePrice, 5);
-        EMAIndicator ema90 = new EMAIndicator(closePrice, 90);
-        DoubleEMAIndicator dma90 = new DoubleEMAIndicator(closePrice, 90);
-        TripleEMAIndicator tma90 = new TripleEMAIndicator(closePrice, 90);
+
+        EMAIndicator ema5 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA5,
+                indicatorFactory.createEma5Indicator(closePrice));
+        EMAIndicator ema90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA90,
+                indicatorFactory.createEma90Indicator(closePrice));
+        EMAIndicator emaEma90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA_EMA90,
+                indicatorFactory.createEmaEma90Indicator(ema90));
+        CachedDoubleEMAIndicator dma90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.DMA90,
+                indicatorFactory.createDma90Indicator(closePrice, ema90, emaEma90));
+        EMAIndicator emaEmaEma90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA_EMA_EMA90,
+                indicatorFactory.createEmaEmaEma90Indicator(emaEma90));
+        CachedTripleEMAIndicator tma90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.TMA90,
+                indicatorFactory.createTma90Indicator(closePrice, ema90, emaEma90, emaEmaEma90));
 
         Rule entryRule = new UpperRule(tma90, ema90)
                 .and(new CrossedDownIndicatorRule(ema5, tma90));
@@ -404,16 +519,23 @@ public class TradeStrategyFactory {
                 .and(new MaxGainRule(closePrice, Decimal.valueOf(1)));
 
         Strategy strategy = new Strategy(entryRule, exitRule);
-        strategy.setUnstablePeriod(90);
+        strategy.setUnstablePeriod(270);
 
         return strategy;
     }
 
-    public Strategy createModifiedRisingTrendStrategy(TimeSeries timeSeries) {
+    public Strategy createModifiedRisingTrendStrategy(TimeFrame timeFrame, TimeSeries timeSeries) {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-        EMAIndicator ema5 = new EMAIndicator(closePrice, 5);
-        EMAIndicator ema90 = new EMAIndicator(closePrice, 90);
-        EMAIndicator ema100 = new EMAIndicator(closePrice, 100);
+
+        EMAIndicator ema5 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA5,
+                indicatorFactory.createEma5Indicator(closePrice));
+        EMAIndicator ema90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA90,
+                indicatorFactory.createEma90Indicator(closePrice));
+        EMAIndicator ema100 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA100,
+                indicatorFactory.createEma100Indicator(closePrice));
 
         // ema90[0] >= ema90[-1] and ma05 > ma100
         Rule trendUp = new NotRule(new FallingDownIndicatorRule(ema90))
@@ -448,22 +570,6 @@ public class TradeStrategyFactory {
 
         Strategy strategy = new Strategy(entryRule, exitRule);
         strategy.setUnstablePeriod(100);
-
-        return strategy;
-    }
-
-    /**
-     * Buys on every candle
-     * Sells on candles: 27, 34, 36, 50, 60
-     */
-    public Strategy createTestStrategy(TimeSeries timeSeries) {
-        // Entry rule
-        Rule entryRule = new BooleanRule(true);
-
-        // Exit rule
-        Rule exitRule = new FixedRule(27, 34, 36, 50, 60);
-        Strategy strategy = new Strategy(entryRule, exitRule);
-        strategy.setUnstablePeriod(14);
 
         return strategy;
     }

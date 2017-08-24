@@ -1,5 +1,6 @@
 package com.crypto.trade.poloniex.storage;
 
+import com.crypto.trade.poloniex.services.analytics.AnalyticsCache;
 import com.crypto.trade.poloniex.services.analytics.AnalyticsService;
 import com.crypto.trade.poloniex.services.analytics.TimeFrame;
 import com.crypto.trade.poloniex.services.analytics.TradingAction;
@@ -26,6 +27,7 @@ public class NewCandleSupplier implements Supplier<Tick> {
     private TradingService tradingService;
     private boolean isRealPrice;
     private boolean isHistoryTick;
+    private AnalyticsCache analyticsCache;
 
     @Override
     public Tick get() {
@@ -63,6 +65,7 @@ public class NewCandleSupplier implements Supplier<Tick> {
     }
 
     private void onNewCandle(TimeFrameStorage timeFrameStorage, int index) {
+        analyticsCache.cacheIndex(index);
         TimeFrame timeFrame = timeFrameStorage.getTimeFrame();
         log.info("Analyzing new {} candle at {}.", timeFrame, index);
         Tick builtCandle = timeFrameStorage.getCandles().get(index);

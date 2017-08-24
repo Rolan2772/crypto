@@ -13,9 +13,7 @@ import eu.verdelhan.ta4j.TimeSeries;
 import eu.verdelhan.ta4j.indicators.oscillators.StochasticOscillatorDIndicator;
 import eu.verdelhan.ta4j.indicators.oscillators.StochasticOscillatorKIndicator;
 import eu.verdelhan.ta4j.indicators.simple.ClosePriceIndicator;
-import eu.verdelhan.ta4j.indicators.trackers.EMAIndicator;
-import eu.verdelhan.ta4j.indicators.trackers.RSIIndicator;
-import eu.verdelhan.ta4j.indicators.trackers.SMAIndicator;
+import eu.verdelhan.ta4j.indicators.trackers.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -61,7 +59,7 @@ public class AnalyticsExportService implements MemoryExportService<TimeFrameStor
         List<PoloniexStrategy> poloniexStrategies = timeFrameStorage.getActiveStrategies();
         List<PoloniexStrategy> strategiesCopy = exportHelper.createTradingRecordsCopy(poloniexStrategies);
         List<PoloniexTradingRecord> tradingRecords = timeFrameStorage.getAllTradingRecords();
-        StringBuilder sb = new StringBuilder("timestamp,close,rsi,stochK,stochD,sma,ema5,ema90,ema100")
+        StringBuilder sb = new StringBuilder("timestamp,close,rsi,stochK,stochD,sma,ema5,ema90,ema100,dma90,tma90")
                 .append(",")
                 .append(exportHelper.createStrategiesHeaders(tradingRecords, "sim"))
                 //.append(",")
@@ -82,10 +80,10 @@ public class AnalyticsExportService implements MemoryExportService<TimeFrameStor
         sb.append("History profit analytics: ");
         sb.append('\n');
         sb.append(exportHelper.convertProfit(strategiesCopy));
-//        sb.append('\n');
-//        sb.append("History trades analytics: ");
-//        sb.append('\n');
-//        sb.append(exportHelper.convertTradesData(strategiesCopy));
+        sb.append('\n');
+        sb.append("History trades analytics: ");
+        sb.append('\n');
+        sb.append(exportHelper.convertTradesData(strategiesCopy));
         sb.append('\n');
         sb.append("Real trades: ");
         sb.append('\n');
@@ -106,7 +104,9 @@ public class AnalyticsExportService implements MemoryExportService<TimeFrameStor
         EMAIndicator ema5 = new EMAIndicator(closePrice, 5);
         EMAIndicator ema90 = new EMAIndicator(closePrice, 90);
         EMAIndicator ema100 = new EMAIndicator(closePrice, 100);
-        return Stream.of(closePrice, rsi, stochK, stochD, sma, ema5, ema90, ema100).collect(Collectors.toList());
+        DoubleEMAIndicator dma90 = new DoubleEMAIndicator(closePrice, 90);
+        TripleEMAIndicator tma90 = new TripleEMAIndicator(closePrice, 90);
+        return Stream.of(closePrice, rsi, stochK, stochD, sma, ema5, ema90, dma90, tma90).collect(Collectors.toList());
     }
 
     @PreDestroy

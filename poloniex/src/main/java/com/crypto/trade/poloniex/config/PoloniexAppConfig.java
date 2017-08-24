@@ -1,6 +1,8 @@
 package com.crypto.trade.poloniex.config;
 
 import com.crypto.trade.poloniex.config.properties.PoloniexProperties;
+import com.crypto.trade.poloniex.services.analytics.AnalyticsCache;
+import com.crypto.trade.poloniex.services.analytics.IndicatorFactory;
 import com.crypto.trade.poloniex.services.analytics.PoloniexStrategyFactory;
 import com.crypto.trade.poloniex.services.analytics.TradeStrategyFactory;
 import com.crypto.trade.poloniex.services.export.ExportHelper;
@@ -59,5 +61,15 @@ public class PoloniexAppConfig {
     @Bean
     public ProfitCalculator profitCalculator() {
         return new ProfitCalculator();
+    }
+
+    @Bean
+    public AnalyticsCache analyticsCache() {
+        return new AnalyticsCache();
+    }
+
+    @Bean
+    public IndicatorFactory indicatorFactory() {
+        return new IndicatorFactory();
     }
 }

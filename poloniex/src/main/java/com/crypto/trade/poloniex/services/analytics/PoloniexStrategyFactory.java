@@ -23,30 +23,11 @@ public class PoloniexStrategyFactory {
     @Autowired
     private TradeStrategyFactory tradeStrategyFactory;
 
-    public List<TimeFrameStorage> createTestStrategy(CurrencyPair currencyPair) {
-        TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
-        TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
-        String shortBuyName = "test-short-buy";
-        Strategy shortBuyStrategy = tradeStrategyFactory.createTestStrategy(new TimeSeries(timeFrameStorage.getCandles()));
-        PoloniexStrategy poloniexStrategy = new PoloniexStrategy(shortBuyName,
-                shortBuyStrategy,
-                timeFrame,
-                Order.OrderType.BUY,
-                properties.getTradeConfig().getMinBtcTradeAmount());
-        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(1, shortBuyName, poloniexStrategy.getDirection()));
-        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(2, shortBuyName, poloniexStrategy.getDirection()));
-        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(3, shortBuyName, poloniexStrategy.getDirection()));
-        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(4, shortBuyName, poloniexStrategy.getDirection()));
-        poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(5, shortBuyName, poloniexStrategy.getDirection()));
-        timeFrameStorage.addStrategy(poloniexStrategy);
-        return Collections.singletonList(timeFrameStorage);
-    }
-
     public List<TimeFrameStorage> createShortBuyStrategy(CurrencyPair currencyPair) {
         return Arrays.stream(TimeFrame.values()).map(timeFrame -> {
             TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
             String shortBuyName = "short-buy";
-            Strategy shortBuyStrategy = tradeStrategyFactory.createShortBuyStrategy(new TimeSeries(timeFrameStorage.getCandles()));
+            Strategy shortBuyStrategy = tradeStrategyFactory.createShortBuyStrategy(timeFrame, new TimeSeries(timeFrameStorage.getCandles()));
             PoloniexStrategy poloniexStrategy = new PoloniexStrategy(shortBuyName,
                     shortBuyStrategy,
                     timeFrame,
@@ -66,7 +47,7 @@ public class PoloniexStrategyFactory {
         TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
         TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
         String shortBuyName = "new-short-buy";
-        Strategy shortBuyStrategy = tradeStrategyFactory.createShortBuyStrategy(new TimeSeries(timeFrameStorage.getCandles()));
+        Strategy shortBuyStrategy = tradeStrategyFactory.createShortBuyStrategy(timeFrame, new TimeSeries(timeFrameStorage.getCandles()));
         PoloniexStrategy poloniexStrategy = new PoloniexStrategy(shortBuyName,
                 shortBuyStrategy,
                 timeFrame,
@@ -85,7 +66,7 @@ public class PoloniexStrategyFactory {
         TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
         TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
         String shortBuyName = "rising-trend";
-        Strategy shortBuyStrategy = tradeStrategyFactory.createRisingTrendStrategy(new TimeSeries(timeFrameStorage.getCandles()));
+        Strategy shortBuyStrategy = tradeStrategyFactory.createRisingTrendStrategy(timeFrame, new TimeSeries(timeFrameStorage.getCandles()));
         PoloniexStrategy poloniexStrategy = new PoloniexStrategy(shortBuyName,
                 shortBuyStrategy,
                 timeFrame,
@@ -105,7 +86,7 @@ public class PoloniexStrategyFactory {
         TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
         TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
         String shortBuyName = "profit-test-short-buy-1";
-        Strategy shortBuyStrategy = tradeStrategyFactory.createShortBuyStrategy(new TimeSeries(timeFrameStorage.getCandles()));
+        Strategy shortBuyStrategy = tradeStrategyFactory.createShortBuyStrategy(timeFrame, new TimeSeries(timeFrameStorage.getCandles()));
         PoloniexStrategy poloniexStrategy = new PoloniexStrategy(shortBuyName,
                 shortBuyStrategy,
                 timeFrame,
@@ -131,7 +112,7 @@ public class PoloniexStrategyFactory {
         timeFrameStorage.addStrategy(poloniexStrategy);
 
         String shortBuyName1 = "profit-test-short-buy-2";
-        Strategy shortBuyStrategy1 = tradeStrategyFactory.createShortBuyStrategy(new TimeSeries(timeFrameStorage.getCandles()));
+        Strategy shortBuyStrategy1 = tradeStrategyFactory.createShortBuyStrategy(timeFrame, new TimeSeries(timeFrameStorage.getCandles()));
         PoloniexStrategy poloniexStrategy1 = new PoloniexStrategy(shortBuyName1,
                 shortBuyStrategy1,
                 timeFrame,
@@ -156,7 +137,7 @@ public class PoloniexStrategyFactory {
         TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
         TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
         String shortBuyName = "initial-orders-short-buy";
-        Strategy shortBuyStrategy = tradeStrategyFactory.createShortBuyStrategy(new TimeSeries(timeFrameStorage.getCandles()));
+        Strategy shortBuyStrategy = tradeStrategyFactory.createShortBuyStrategy(timeFrame, new TimeSeries(timeFrameStorage.getCandles()));
         PoloniexStrategy poloniexStrategy = new PoloniexStrategy(shortBuyName,
                 shortBuyStrategy,
                 timeFrame,
@@ -205,7 +186,7 @@ public class PoloniexStrategyFactory {
 
     private TimeFrameStorage createStrategy(String strategyName, TimeFrame timeFrame, int recordsCount) {
         TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
-        Strategy shortBuyStrategy = tradeStrategyFactory.createShortBuyStrategy(new TimeSeries(timeFrameStorage.getCandles()));
+        Strategy shortBuyStrategy = tradeStrategyFactory.createShortBuyStrategy(timeFrame, new TimeSeries(timeFrameStorage.getCandles()));
         PoloniexStrategy poloniexStrategy = new PoloniexStrategy(strategyName,
                 shortBuyStrategy,
                 timeFrame,
@@ -219,60 +200,63 @@ public class PoloniexStrategyFactory {
     }
 
     public List<TimeFrameStorage> createRealAmountBuyConf2(CurrencyPair currencyPair) {
-        TimeFrameStorage timeFrameStorage = new TimeFrameStorage(TimeFrame.ONE_MINUTE);
+        TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
+        TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
         BigDecimal volume = BigDecimal.valueOf(0.08);
         initStrategy("modified2-buy-rising-ema90",
                 timeFrameStorage,
                 1,
                 volume,
                 Order.OrderType.BUY,
-                ticks -> tradeStrategyFactory.createModifiedShortBuyEma90RisingTrendStrategy2(ticks));
+                ticks -> tradeStrategyFactory.createModifiedShortBuyEma90RisingTrendStrategy2(timeFrame, ticks));
         initStrategy("rising-trend",
                 timeFrameStorage,
                 1,
                 volume,
                 Order.OrderType.BUY,
-                ticks -> tradeStrategyFactory.createRisingTrendStrategy(ticks));
+                ticks -> tradeStrategyFactory.createRisingTrendStrategy(timeFrame, ticks));
         initStrategy("tma-strategy-2",
                 timeFrameStorage,
                 1,
                 volume,
                 Order.OrderType.BUY,
-                ticks -> tradeStrategyFactory.createRisingTripleEmaStrategy2(ticks));
+                ticks -> tradeStrategyFactory.createRisingTripleEmaStrategy2(timeFrame, ticks));
         return Arrays.asList(timeFrameStorage);
     }
 
     public List<TimeFrameStorage> createTopPerformingStrategies(CurrencyPair currencyPair) {
-        TimeFrameStorage timeFrameStorage = new TimeFrameStorage(TimeFrame.ONE_MINUTE);
+        TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
+        TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
         initStrategy("sell-falling-ema90-1",
                 timeFrameStorage,
                 2,
                 BigDecimal.valueOf(0.05),
                 Order.OrderType.SELL,
-                ticks -> tradeStrategyFactory.createShortSellEma90FallingTrendStrategy1(ticks));
+                ticks -> tradeStrategyFactory.createShortSellEma90FallingTrendStrategy1(timeFrame, ticks));
         initStrategy("modified2-buy-rising-ema90",
                 timeFrameStorage,
                 2,
                 BigDecimal.valueOf(0.005),
                 Order.OrderType.BUY,
-                ticks -> tradeStrategyFactory.createModifiedShortBuyEma90RisingTrendStrategy2(ticks));
+                ticks -> tradeStrategyFactory.createModifiedShortBuyEma90RisingTrendStrategy2(timeFrame, ticks));
         initStrategy("rising-trend",
                 timeFrameStorage,
                 2,
                 BigDecimal.valueOf(0.005),
                 Order.OrderType.BUY,
-                ticks -> tradeStrategyFactory.createRisingTrendStrategy(ticks));
+                ticks -> tradeStrategyFactory.createRisingTrendStrategy(timeFrame, ticks));
         initStrategy("tma-strategy-2",
                 timeFrameStorage,
                 2,
                 BigDecimal.valueOf(0.005),
                 Order.OrderType.BUY,
-                ticks -> tradeStrategyFactory.createRisingTripleEmaStrategy2(ticks));
+                ticks -> tradeStrategyFactory.createRisingTripleEmaStrategy2(timeFrame, ticks));
         return Arrays.asList(timeFrameStorage);
     }
 
     public List<TimeFrameStorage> experimentOneStrategy(CurrencyPair currencyPair) {
-        TimeFrameStorage timeFrameStorage = new TimeFrameStorage(TimeFrame.ONE_MINUTE);
+        TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
+        TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
 
         BigDecimal minVolume = properties.getTradeConfig().getMinBtcTradeAmount();
         BigDecimal realVolume = properties.getTradeConfig().getRealBtcTradeAmount();
@@ -282,56 +266,56 @@ public class PoloniexStrategyFactory {
                 1,
                 minVolume,
                 Order.OrderType.BUY,
-                ticks -> tradeStrategyFactory.createShortBuyEma90RisingTrendStrategy(ticks));
+                ticks -> tradeStrategyFactory.createShortBuyEma90RisingTrendStrategy(timeFrame, ticks));
         initStrategy("modified1-buy-rising-ema90",
                 timeFrameStorage,
                 1,
                 minVolume,
                 Order.OrderType.BUY,
-                ticks -> tradeStrategyFactory.createModifiedShortBuyEma90RisingTrendStrategy1(ticks));
+                ticks -> tradeStrategyFactory.createModifiedShortBuyEma90RisingTrendStrategy1(timeFrame, ticks));
         initStrategy("modified2-buy-rising-ema90",
                 timeFrameStorage,
                 1,
                 minVolume,
                 Order.OrderType.BUY,
-                ticks -> tradeStrategyFactory.createModifiedShortBuyEma90RisingTrendStrategy2(ticks));
+                ticks -> tradeStrategyFactory.createModifiedShortBuyEma90RisingTrendStrategy2(timeFrame, ticks));
         initStrategy("modified3-buy-rising-ema90",
                 timeFrameStorage,
                 1,
                 minVolume,
                 Order.OrderType.BUY,
-                ticks -> tradeStrategyFactory.createModifiedShortBuyEma90RisingTrendStrategy3(ticks));
+                ticks -> tradeStrategyFactory.createModifiedShortBuyEma90RisingTrendStrategy3(timeFrame, ticks));
         initStrategy("modified4-buy-rising-ema90",
                 timeFrameStorage,
                 1,
                 minVolume,
                 Order.OrderType.BUY,
-                ticks -> tradeStrategyFactory.createModifiedShortBuyEma90RisingTrendStrategy4(ticks));
+                ticks -> tradeStrategyFactory.createModifiedShortBuyEma90RisingTrendStrategy4(timeFrame, ticks));
 
         initStrategy("sell-falling-ema90-1",
                 timeFrameStorage,
                 1,
                 BigDecimal.valueOf(0.005),
                 Order.OrderType.SELL,
-                ticks -> tradeStrategyFactory.createShortSellEma90FallingTrendStrategy1(ticks));
+                ticks -> tradeStrategyFactory.createShortSellEma90FallingTrendStrategy1(timeFrame, ticks));
         initStrategy("sell-falling-ema90-2",
                 timeFrameStorage,
                 1,
                 BigDecimal.valueOf(0.005),
                 Order.OrderType.SELL,
-                ticks -> tradeStrategyFactory.createShortSellEma90FallingTrendStrategy2(ticks));
+                ticks -> tradeStrategyFactory.createShortSellEma90FallingTrendStrategy2(timeFrame, ticks));
         initStrategy("sell-falling-ema90-3",
                 timeFrameStorage,
                 1,
                 BigDecimal.valueOf(0.005),
                 Order.OrderType.SELL,
-                ticks -> tradeStrategyFactory.createShortSellEma90FallingTrendStrategy3(ticks));
+                ticks -> tradeStrategyFactory.createShortSellEma90FallingTrendStrategy3(timeFrame, ticks));
         initStrategy("sell-falling-ema90-4",
                 timeFrameStorage,
                 1,
                 BigDecimal.valueOf(0.005),
                 Order.OrderType.SELL,
-                ticks -> tradeStrategyFactory.createShortSellEma90FallingTrendStrategy4(ticks));
+                ticks -> tradeStrategyFactory.createShortSellEma90FallingTrendStrategy4(timeFrame, ticks));
 
         /*initStrategy("modified1-short-buy",
                 timeFrameStorage,
@@ -351,19 +335,20 @@ public class PoloniexStrategyFactory {
                 1,
                 minVolume,
                 Order.OrderType.BUY,
-                ticks -> tradeStrategyFactory.createRisingTrendStrategy(ticks));
+                ticks -> tradeStrategyFactory.createRisingTrendStrategy(timeFrame, ticks));
         initStrategy("rising-trend-modified",
                 timeFrameStorage,
                 1,
                 minVolume,
                 Order.OrderType.BUY,
-                ticks -> tradeStrategyFactory.createModifiedRisingTrendStrategy(ticks));
+                ticks -> tradeStrategyFactory.createModifiedRisingTrendStrategy(timeFrame, ticks));
 
         return Arrays.asList(timeFrameStorage);
     }
 
     public List<TimeFrameStorage> bigDataStrategies(CurrencyPair currencyPair) {
-        TimeFrameStorage timeFrameStorage = new TimeFrameStorage(TimeFrame.ONE_MINUTE);
+        TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
+        TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
 
         BigDecimal minVolume = properties.getTradeConfig().getMinBtcTradeAmount();
         initStrategy("modified2-buy-rising-ema90",
@@ -371,37 +356,37 @@ public class PoloniexStrategyFactory {
                 1,
                 minVolume,
                 Order.OrderType.BUY,
-                ticks -> tradeStrategyFactory.createModifiedShortBuyEma90RisingTrendStrategy2(ticks));
+                ticks -> tradeStrategyFactory.createModifiedShortBuyEma90RisingTrendStrategy2(timeFrame, ticks));
         initStrategy("rising-trend",
                 timeFrameStorage,
                 1,
                 minVolume,
                 Order.OrderType.BUY,
-                ticks -> tradeStrategyFactory.createRisingTrendStrategy(ticks));
+                ticks -> tradeStrategyFactory.createRisingTrendStrategy(timeFrame, ticks));
         initStrategy("tma-strategy",
                 timeFrameStorage,
                 1,
                 minVolume,
                 Order.OrderType.BUY,
-                ticks -> tradeStrategyFactory.createRisingTripleEmaStrategy(ticks));
+                ticks -> tradeStrategyFactory.createRisingTripleEmaStrategy(timeFrame, ticks));
         initStrategy("tma-strategy-1",
                 timeFrameStorage,
                 1,
                 minVolume,
                 Order.OrderType.BUY,
-                ticks -> tradeStrategyFactory.createRisingTripleEmaStrategy1(ticks));
+                ticks -> tradeStrategyFactory.createRisingTripleEmaStrategy1(timeFrame, ticks));
         initStrategy("tma-strategy-2",
                 timeFrameStorage,
                 1,
                 minVolume,
                 Order.OrderType.BUY,
-                ticks -> tradeStrategyFactory.createRisingTripleEmaStrategy2(ticks));
+                ticks -> tradeStrategyFactory.createRisingTripleEmaStrategy2(timeFrame, ticks));
         initStrategy("tma-strategy-3",
                 timeFrameStorage,
                 1,
                 minVolume,
                 Order.OrderType.BUY,
-                ticks -> tradeStrategyFactory.createRisingTripleEmaStrategy3(ticks));
+                ticks -> tradeStrategyFactory.createRisingTripleEmaStrategy3(timeFrame, ticks));
         return Arrays.asList(timeFrameStorage);
     }
 
@@ -412,7 +397,8 @@ public class PoloniexStrategyFactory {
                               Order.OrderType direction,
                               Function<TimeSeries, Strategy> createStrategyFunction) {
         TimeFrame timeFrame = timeFrameStorage.getTimeFrame();
-        Strategy strategy = createStrategyFunction.apply(new TimeSeries(timeFrameStorage.getCandles()));
+        TimeSeries timeSeries = new TimeSeries(timeFrameStorage.getCandles());
+        Strategy strategy = createStrategyFunction.apply(timeSeries);
         PoloniexStrategy poloniexStrategy = new PoloniexStrategy(name, strategy, timeFrame, direction, volume);
         IntStream.rangeClosed(1, tradingRecordsCount).forEach(index -> poloniexStrategy.addTradingRecord(new PoloniexTradingRecord(index, name, direction)));
         timeFrameStorage.addStrategy(poloniexStrategy);

@@ -1,5 +1,6 @@
 package com.crypto.trade.poloniex.services.export;
 
+import com.crypto.trade.poloniex.services.analytics.AnalyticsCache;
 import com.crypto.trade.poloniex.services.analytics.AnalyticsService;
 import com.crypto.trade.poloniex.services.analytics.TradingAction;
 import com.crypto.trade.poloniex.services.trade.ProfitCalculator;

@@ -1,5 +1,6 @@
 package com.crypto.trade.poloniex.services.bots;
 
+import com.crypto.trade.poloniex.services.analytics.AnalyticsCache;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import com.crypto.trade.poloniex.services.analytics.PoloniexStrategyFactory;
 import com.crypto.trade.poloniex.services.trade.HistoryService;

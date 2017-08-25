@@ -363,30 +363,30 @@ public class PoloniexStrategyFactory {
                 minVolume,
                 Order.OrderType.BUY,
                 ticks -> tradeStrategyFactory.createRisingTrendStrategy(timeFrame, ticks));
-        initStrategy("tma-strategy",
+        initStrategy("falling-trend",
                 timeFrameStorage,
                 1,
                 minVolume,
                 Order.OrderType.BUY,
-                ticks -> tradeStrategyFactory.createRisingTripleEmaStrategy(timeFrame, ticks));
-        initStrategy("tma-strategy-1",
+                ticks -> tradeStrategyFactory.createRisingTrendStrategy(timeFrame, ticks));
+        initStrategy("tma-strategy-corrected",
                 timeFrameStorage,
                 1,
                 minVolume,
                 Order.OrderType.BUY,
-                ticks -> tradeStrategyFactory.createRisingTripleEmaStrategy1(timeFrame, ticks));
+                ticks -> tradeStrategyFactory.createRisingTripleEmaStrategyCorrected(timeFrame, ticks));
+        initStrategy("tma-falling-strategy",
+                timeFrameStorage,
+                1,
+                minVolume,
+                Order.OrderType.BUY,
+                ticks -> tradeStrategyFactory.createFallingTripleEmaStrategy(timeFrame, ticks));
         initStrategy("tma-strategy-2",
                 timeFrameStorage,
                 1,
                 minVolume,
                 Order.OrderType.BUY,
                 ticks -> tradeStrategyFactory.createRisingTripleEmaStrategy2(timeFrame, ticks));
-        initStrategy("tma-strategy-3",
-                timeFrameStorage,
-                1,
-                minVolume,
-                Order.OrderType.BUY,
-                ticks -> tradeStrategyFactory.createRisingTripleEmaStrategy3(timeFrame, ticks));
         return Arrays.asList(timeFrameStorage);
     }
 

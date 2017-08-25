@@ -379,7 +379,54 @@ public class TradeStrategyFactory {
         return strategy;
     }
 
-    public Strategy createRisingTripleEmaStrategy(TimeFrame timeFrame, TimeSeries timeSeries) {
+    public Strategy createFallingTrendStrategy(TimeFrame timeFrame, TimeSeries timeSeries) {
+        ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
+        EMAIndicator ema5 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA5,
+                indicatorFactory.createEma5Indicator(closePrice));
+        EMAIndicator ema90 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA90,
+                indicatorFactory.createEma90Indicator(closePrice));
+        EMAIndicator ema100 = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.EMA100,
+                indicatorFactory.createEma100Indicator(closePrice));
+
+        // ema90[0] >= ema90[-1] and ma05 > ma100
+        Rule trendUp = new NotRule(new FallingDownIndicatorRule(ema90))
+                .and(new UpperRule(ema5, ema100));
+        // ema90[-1] >= ema90[-2] and ema05[-1] < ma100[-1]
+        Rule buySignal1 = new NotRule(new FallingDownIndicatorRule(ema90, 1))
+                .and(new LowerRule(ema5, ema100, 1));
+        // ema90[-1] <= ema90[-2] and ema05[-1] < ema100[-1]
+        Rule buySignal2 = new NotRule(new RisingUpIndicatorRule(ema90, 1))
+                .and(new LowerRule(ema5, ema100, 1));
+
+        Rule entry1 = trendUp.and(buySignal1);
+        Rule entry2 = trendUp.and(new NotRule(buySignal1)).and(buySignal2);
+
+        Rule entryRule = entry1.or(entry2);
+
+        // Exit rule
+        // ema90[0] <= ema90[-1] and ema05 < ema100
+        Rule trendDown = new NotRule(new RisingUpIndicatorRule(ema90))
+                .and(new LowerRule(ema5, ema100));
+        // ema90[0] < ema90[-1] and ema05 > ema100
+        Rule trendPreDown = new FallingDownIndicatorRule(ema90)
+                .and(new UpperRule(ema5, ema100));
+        // ema90[-1] >= ema90[-2] and ema05[-1] > ema100[-1]
+        Rule exit1 = new NotRule(new FallingDownIndicatorRule(ema90, 1))
+                .and(new UpperRule(ema5, ema100, 1));
+
+        Rule exitRule = new OrRule(trendDown, trendPreDown)
+                .and(exit1).and(new StopGainRule(closePrice, Decimal.ONE));
+
+        Strategy strategy = new Strategy(exitRule, entryRule);
+        strategy.setUnstablePeriod(100);
+
+        return strategy;
+    }
+
+    public Strategy createRisingTripleEmaStrategyCorrected(TimeFrame timeFrame, TimeSeries timeSeries) {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
 
         EMAIndicator ema5 = analyticsCache.getIndicator(timeFrame,
@@ -401,12 +448,13 @@ public class TradeStrategyFactory {
                 IndicatorType.TMA90,
                 indicatorFactory.createTma90Indicator(closePrice, ema90, emaEma90, emaEmaEma90));
 
-        Rule entryRule = new UpperRule(tma90, ema90)
+        Rule entryRule = new LowerRule(tma90, dma90)
+                .and(new LowerRule(tma90, ema90))
                 .and(new CrossedUpIndicatorRule(ema5, tma90));
 
-        Rule exitRule = new LowerRule(tma90, dma90)
-                .and(new LowerRule(tma90, ema90))
-                .and(new CrossedDownIndicatorRule(ema5, tma90));
+        Rule exitRule = new UpperRule(tma90, ema90)
+                .and(new CrossedDownIndicatorRule(ema5, tma90))
+                .and(new StopGainRule(closePrice, Decimal.ONE));
 
         Strategy strategy = new Strategy(entryRule, exitRule);
         strategy.setUnstablePeriod(270);
@@ -414,7 +462,7 @@ public class TradeStrategyFactory {
         return strategy;
     }
 
-    public Strategy createRisingTripleEmaStrategy1(TimeFrame timeFrame, TimeSeries timeSeries) {
+    public Strategy createFallingTripleEmaStrategy(TimeFrame timeFrame, TimeSeries timeSeries) {
         ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
 
         EMAIndicator ema5 = analyticsCache.getIndicator(timeFrame,
@@ -436,10 +484,10 @@ public class TradeStrategyFactory {
                 IndicatorType.TMA90,
                 indicatorFactory.createTma90Indicator(closePrice, ema90, emaEma90, emaEmaEma90));
 
-        Rule entryRule = new UpperRule(tma90, ema90)
+        Rule exitRule = new UpperRule(tma90, ema90)
                 .and(new CrossedUpIndicatorRule(ema5, tma90));
 
-        Rule exitRule = new LowerRule(tma90, dma90)
+        Rule entryRule = new LowerRule(tma90, dma90)
                 .and(new LowerRule(tma90, ema90))
                 .and(new CrossedDownIndicatorRule(ema5, tma90))
                 .and(new StopGainRule(closePrice, Decimal.ONE));
@@ -478,43 +526,6 @@ public class TradeStrategyFactory {
         Rule exitRule = new LowerRule(tma90, dma90)
                 .and(new LowerRule(tma90, ema90))
                 .and(new CrossedDownIndicatorRule(ema5, tma90))
-                .and(new StopGainRule(closePrice, Decimal.ONE))
-                .and(new MaxGainRule(closePrice, Decimal.valueOf(1)));
-
-        Strategy strategy = new Strategy(entryRule, exitRule);
-        strategy.setUnstablePeriod(270);
-
-        return strategy;
-    }
-
-    public Strategy createRisingTripleEmaStrategy3(TimeFrame timeFrame, TimeSeries timeSeries) {
-        ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-
-        EMAIndicator ema5 = analyticsCache.getIndicator(timeFrame,
-                IndicatorType.EMA5,
-                indicatorFactory.createEma5Indicator(closePrice));
-        EMAIndicator ema90 = analyticsCache.getIndicator(timeFrame,
-                IndicatorType.EMA90,
-                indicatorFactory.createEma90Indicator(closePrice));
-        EMAIndicator emaEma90 = analyticsCache.getIndicator(timeFrame,
-                IndicatorType.EMA_EMA90,
-                indicatorFactory.createEmaEma90Indicator(ema90));
-        CachedDoubleEMAIndicator dma90 = analyticsCache.getIndicator(timeFrame,
-                IndicatorType.DMA90,
-                indicatorFactory.createDma90Indicator(closePrice, ema90, emaEma90));
-        EMAIndicator emaEmaEma90 = analyticsCache.getIndicator(timeFrame,
-                IndicatorType.EMA_EMA_EMA90,
-                indicatorFactory.createEmaEmaEma90Indicator(emaEma90));
-        CachedTripleEMAIndicator tma90 = analyticsCache.getIndicator(timeFrame,
-                IndicatorType.TMA90,
-                indicatorFactory.createTma90Indicator(closePrice, ema90, emaEma90, emaEmaEma90));
-
-        Rule entryRule = new UpperRule(tma90, ema90)
-                .and(new CrossedDownIndicatorRule(ema5, tma90));
-
-        Rule exitRule = new LowerRule(tma90, dma90)
-                .and(new LowerRule(tma90, ema90))
-                .and(new CrossedUpIndicatorRule(ema5, tma90))
                 .and(new StopGainRule(closePrice, Decimal.ONE))
                 .and(new MaxGainRule(closePrice, Decimal.valueOf(1)));
 

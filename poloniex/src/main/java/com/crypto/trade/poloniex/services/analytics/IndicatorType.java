@@ -4,6 +4,7 @@ public enum IndicatorType {
 
     EMA5,
     EMA90,
+    EMA540,
     EMA_EMA90,
     EMA_EMA_EMA90,
     EMA100,

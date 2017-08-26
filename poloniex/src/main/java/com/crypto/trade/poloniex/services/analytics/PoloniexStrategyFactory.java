@@ -346,6 +346,135 @@ public class PoloniexStrategyFactory {
         return Arrays.asList(timeFrameStorage);
     }
 
+    public List<TimeFrameStorage> allTimeFramesAndStrategies(CurrencyPair currencyPair) {
+        return Arrays.stream(TimeFrame.values())
+                .map(timeFrame -> {
+                    TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
+
+                    BigDecimal volume = BigDecimal.valueOf(0.08);
+                    initStrategy("short-buy-rising-ema90",
+                            timeFrameStorage,
+                            1,
+                            volume,
+                            Order.OrderType.BUY,
+                            ticks -> tradeStrategyFactory.createShortBuyEma90RisingTrendStrategy(timeFrame, ticks));
+                    initStrategy("modified1-buy-rising-ema90",
+                            timeFrameStorage,
+                            1,
+                            volume,
+                            Order.OrderType.BUY,
+                            ticks -> tradeStrategyFactory.createModifiedShortBuyEma90RisingTrendStrategy1(timeFrame, ticks));
+                    initStrategy("modified2-buy-rising-ema90",
+                            timeFrameStorage,
+                            1,
+                            volume,
+                            Order.OrderType.BUY,
+                            ticks -> tradeStrategyFactory.createModifiedShortBuyEma90RisingTrendStrategy2(timeFrame, ticks));
+                    initStrategy("modified2-buy-rising-ema540",
+                            timeFrameStorage,
+                            1,
+                            volume,
+                            Order.OrderType.BUY,
+                            ticks -> tradeStrategyFactory.createModifiedShortBuyEma540RisingTrendStrategy2(timeFrame, ticks));
+                    initStrategy("modified3-buy-rising-ema90",
+                            timeFrameStorage,
+                            1,
+                            volume,
+                            Order.OrderType.BUY,
+                            ticks -> tradeStrategyFactory.createModifiedShortBuyEma90RisingTrendStrategy3(timeFrame, ticks));
+                    initStrategy("modified4-buy-rising-ema90",
+                            timeFrameStorage,
+                            1,
+                            volume,
+                            Order.OrderType.BUY,
+                            ticks -> tradeStrategyFactory.createModifiedShortBuyEma90RisingTrendStrategy4(timeFrame, ticks));
+
+                    initStrategy("sell-falling-ema90-1",
+                            timeFrameStorage,
+                            1,
+                            BigDecimal.valueOf(0.005),
+                            Order.OrderType.SELL,
+                            ticks -> tradeStrategyFactory.createShortSellEma90FallingTrendStrategy1(timeFrame, ticks));
+                    initStrategy("sell-falling-ema90-2",
+                            timeFrameStorage,
+                            1,
+                            BigDecimal.valueOf(0.005),
+                            Order.OrderType.SELL,
+                            ticks -> tradeStrategyFactory.createShortSellEma90FallingTrendStrategy2(timeFrame, ticks));
+                    initStrategy("sell-falling-ema90-3",
+                            timeFrameStorage,
+                            1,
+                            BigDecimal.valueOf(0.005),
+                            Order.OrderType.SELL,
+                            ticks -> tradeStrategyFactory.createShortSellEma90FallingTrendStrategy3(timeFrame, ticks));
+                    initStrategy("sell-falling-ema90-4",
+                            timeFrameStorage,
+                            1,
+                            BigDecimal.valueOf(0.005),
+                            Order.OrderType.SELL,
+                            ticks -> tradeStrategyFactory.createShortSellEma90FallingTrendStrategy4(timeFrame, ticks));
+
+                    initStrategy("short-buy",
+                            timeFrameStorage,
+                            1,
+                            volume,
+                            Order.OrderType.BUY,
+                            ticks -> tradeStrategyFactory.createShortBuyStrategy(timeFrame, ticks));
+                    initStrategy("modified1-short-buy",
+                            timeFrameStorage,
+                            1,
+                            volume,
+                            Order.OrderType.BUY,
+                            ticks -> tradeStrategyFactory.createModifiedShortBuyStrategy1(timeFrame, ticks));
+                    initStrategy("modified2-short-buy",
+                            timeFrameStorage,
+                            1,
+                            volume,
+                            Order.OrderType.BUY,
+                            ticks -> tradeStrategyFactory.createModifiedShortBuyStrategy2(timeFrame, ticks));
+
+                    initStrategy("rising-trend",
+                            timeFrameStorage,
+                            1,
+                            volume,
+                            Order.OrderType.BUY,
+                            ticks -> tradeStrategyFactory.createRisingTrendStrategy(timeFrame, ticks));
+                    initStrategy("rising-trend-modified",
+                            timeFrameStorage,
+                            1,
+                            volume,
+                            Order.OrderType.BUY,
+                            ticks -> tradeStrategyFactory.createModifiedRisingTrendStrategy(timeFrame, ticks));
+                    initStrategy("falling-trend",
+                            timeFrameStorage,
+                            1,
+                            volume,
+                            Order.OrderType.SELL,
+                            ticks -> tradeStrategyFactory.createFallingTrendStrategy(timeFrame, ticks));
+
+                    initStrategy("tma-strategy-corrected",
+                            timeFrameStorage,
+                            1,
+                            volume,
+                            Order.OrderType.BUY,
+                            ticks -> tradeStrategyFactory.createRisingTripleEmaStrategyCorrected(timeFrame, ticks));
+                    initStrategy("tma-falling-strategy",
+                            timeFrameStorage,
+                            1,
+                            volume,
+                            Order.OrderType.SELL,
+                            ticks -> tradeStrategyFactory.createFallingTripleEmaStrategy(timeFrame, ticks));
+                    initStrategy("tma-strategy-2",
+                            timeFrameStorage,
+                            1,
+                            volume,
+                            Order.OrderType.BUY,
+                            ticks -> tradeStrategyFactory.createRisingTripleEmaStrategy2(timeFrame, ticks));
+                    return timeFrameStorage;
+                })
+                .collect(Collectors.toList());
+    }
+
     public List<TimeFrameStorage> bigDataStrategies(CurrencyPair currencyPair) {
         TimeFrame timeFrame = TimeFrame.ONE_MINUTE;
         TimeFrameStorage timeFrameStorage = new TimeFrameStorage(timeFrame);
@@ -357,6 +486,12 @@ public class PoloniexStrategyFactory {
                 minVolume,
                 Order.OrderType.BUY,
                 ticks -> tradeStrategyFactory.createModifiedShortBuyEma90RisingTrendStrategy2(timeFrame, ticks));
+        initStrategy("modified2-buy-rising-ema540",
+                timeFrameStorage,
+                1,
+                minVolume,
+                Order.OrderType.BUY,
+                ticks -> tradeStrategyFactory.createModifiedShortBuyEma540RisingTrendStrategy2(timeFrame, ticks));
         initStrategy("rising-trend",
                 timeFrameStorage,
                 1,

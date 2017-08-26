@@ -33,6 +33,10 @@ public class IndicatorFactory {
         return new EMAIndicator(closePrice, 90);
     }
 
+    public EMAIndicator createEma540Indicator(ClosePriceIndicator closePrice) {
+        return new EMAIndicator(closePrice, 540);
+    }
+
     public EMAIndicator createEma100Indicator(ClosePriceIndicator closePrice) {
         return new EMAIndicator(closePrice, 100);
     }

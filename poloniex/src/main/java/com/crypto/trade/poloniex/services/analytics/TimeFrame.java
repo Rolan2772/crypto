@@ -8,18 +8,34 @@ import java.time.temporal.TemporalUnit;
 
 public enum TimeFrame {
 
-    ONE_MINUTE("1minute",
+    ONE_MINUTE("minute-1",
             1L,
             ChronoUnit.MINUTES,
             ChronoField.MINUTE_OF_HOUR),
-    FIVE_MINUTES("5minute",
+    FIVE_MINUTES("minute-5",
             5L,
             ChronoUnit.MINUTES,
             ChronoField.MINUTE_OF_HOUR),
-    FIFTEEN_MINUTES("15minute",
+    FIFTEEN_MINUTES("minute-15",
             15L,
             ChronoUnit.MINUTES,
-            ChronoField.MINUTE_OF_HOUR);
+            ChronoField.MINUTE_OF_HOUR),
+    THIRTY_MINUTES("minute-30",
+            30L,
+            ChronoUnit.MINUTES,
+            ChronoField.MINUTE_OF_HOUR),
+    ONE_HOUR("hour-1",
+            1L,
+            ChronoUnit.HOURS,
+            ChronoField.HOUR_OF_DAY),
+    TWO_HOURS("hour-2",
+            2L,
+            ChronoUnit.HOURS,
+            ChronoField.HOUR_OF_DAY),
+    FOUR_HOURS("hour-4",
+            4L,
+            ChronoUnit.HOURS,
+            ChronoField.HOUR_OF_DAY);
 
     private String displayName;
     private Long duration;

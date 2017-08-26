@@ -9,5 +9,7 @@ public enum IndicatorType {
     EMA100,
     DMA90,
     TMA90,
-    RSI14
+    RSI14,
+    STOCHK14,
+    STOCHD3
 }

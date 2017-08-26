@@ -29,6 +29,7 @@ public class FileTradesHistoryService implements HistoryService {
         int index = 0;
         Path historyPath = Paths.get(fileName);
         while (historyPath.toFile().exists()) {
+            log.info("Loading " + historyPath.toFile().getName());
             try {
                 trades.addAll(jsonMapper.readValue(historyPath.toFile(), new TypeReference<List<PoloniexHistoryTrade>>() {
                 }));

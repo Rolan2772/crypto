@@ -36,8 +36,12 @@ public class TradeStrategyFactory {
         RSIIndicator rsi = analyticsCache.getIndicator(timeFrame,
                 IndicatorType.RSI14,
                 indicatorFactory.createRsi14Indicator(closePrice));
-        StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, 14);
-        StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
+        StochasticOscillatorKIndicator stochK = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.STOCHK14,
+                indicatorFactory.createStochK14(timeSeries));
+        StochasticOscillatorDIndicator stochD = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.STOCHD3,
+                indicatorFactory.createStochD3(stochK));
 
         // Entry rule
         Rule entryRule = new UnderIndicatorRule(rsi, Decimal.valueOf(20)) // RSI < 20
@@ -57,8 +61,12 @@ public class TradeStrategyFactory {
         RSIIndicator rsi = analyticsCache.getIndicator(timeFrame,
                 IndicatorType.RSI14,
                 indicatorFactory.createRsi14Indicator(closePrice));
-        StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, 14);
-        StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
+        StochasticOscillatorKIndicator stochK = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.STOCHK14,
+                indicatorFactory.createStochK14(timeSeries));
+        StochasticOscillatorDIndicator stochD = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.STOCHD3,
+                indicatorFactory.createStochD3(stochK));
 
         // Entry rule
         Rule entryRule = new UnderIndicatorRule(rsi, Decimal.valueOf(20)) // RSI < 20
@@ -79,9 +87,12 @@ public class TradeStrategyFactory {
         RSIIndicator rsi = analyticsCache.getIndicator(timeFrame,
                 IndicatorType.RSI14,
                 indicatorFactory.createRsi14Indicator(closePrice));
-
-        StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, 14);
-        StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
+        StochasticOscillatorKIndicator stochK = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.STOCHK14,
+                indicatorFactory.createStochK14(timeSeries));
+        StochasticOscillatorDIndicator stochD = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.STOCHD3,
+                indicatorFactory.createStochD3(stochK));
 
         // Entry rule
         Rule entryRule = new UnderIndicatorRule(rsi, Decimal.valueOf(20)) // RSI < 20
@@ -105,8 +116,12 @@ public class TradeStrategyFactory {
         EMAIndicator ema90 = analyticsCache.getIndicator(timeFrame,
                 IndicatorType.EMA90,
                 indicatorFactory.createEma90Indicator(closePrice));
-        StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, 14);
-        StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
+        StochasticOscillatorKIndicator stochK = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.STOCHK14,
+                indicatorFactory.createStochK14(timeSeries));
+        StochasticOscillatorDIndicator stochD = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.STOCHD3,
+                indicatorFactory.createStochD3(stochK));
 
         // Entry rule
         Rule entryRule = new UnderIndicatorRule(rsi, Decimal.valueOf(20)) // RSI < 20
@@ -130,8 +145,12 @@ public class TradeStrategyFactory {
         EMAIndicator ema90 = analyticsCache.getIndicator(timeFrame,
                 IndicatorType.EMA90,
                 indicatorFactory.createEma90Indicator(closePrice));
-        StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, 14);
-        StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
+        StochasticOscillatorKIndicator stochK = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.STOCHK14,
+                indicatorFactory.createStochK14(timeSeries));
+        StochasticOscillatorDIndicator stochD = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.STOCHD3,
+                indicatorFactory.createStochD3(stochK));
 
         // Entry rule
         Rule entryRule = new UnderIndicatorRule(rsi, Decimal.valueOf(20)) // RSI < 20
@@ -156,8 +175,12 @@ public class TradeStrategyFactory {
         EMAIndicator ema90 = analyticsCache.getIndicator(timeFrame,
                 IndicatorType.EMA90,
                 indicatorFactory.createEma90Indicator(closePrice));
-        StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, 14);
-        StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
+        StochasticOscillatorKIndicator stochK = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.STOCHK14,
+                indicatorFactory.createStochK14(timeSeries));
+        StochasticOscillatorDIndicator stochD = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.STOCHD3,
+                indicatorFactory.createStochD3(stochK));
 
         // Entry rule
         Rule entryRule = new UnderIndicatorRule(rsi, Decimal.valueOf(20)) // RSI < 20
@@ -182,8 +205,12 @@ public class TradeStrategyFactory {
         EMAIndicator ema90 = analyticsCache.getIndicator(timeFrame,
                 IndicatorType.EMA90,
                 indicatorFactory.createEma90Indicator(closePrice));
-        StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, 14);
-        StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
+        StochasticOscillatorKIndicator stochK = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.STOCHK14,
+                indicatorFactory.createStochK14(timeSeries));
+        StochasticOscillatorDIndicator stochD = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.STOCHD3,
+                indicatorFactory.createStochD3(stochK));
 
         // Entry rule
         Rule entryRule = new UnderIndicatorRule(rsi, Decimal.valueOf(20)) // RSI < 20
@@ -208,8 +235,12 @@ public class TradeStrategyFactory {
         EMAIndicator ema90 = analyticsCache.getIndicator(timeFrame,
                 IndicatorType.EMA90,
                 indicatorFactory.createEma90Indicator(closePrice));
-        StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, 14);
-        StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
+        StochasticOscillatorKIndicator stochK = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.STOCHK14,
+                indicatorFactory.createStochK14(timeSeries));
+        StochasticOscillatorDIndicator stochD = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.STOCHD3,
+                indicatorFactory.createStochD3(stochK));
 
         // Entry rule
         Rule entryRule = new UnderIndicatorRule(rsi, Decimal.valueOf(20)) // RSI < 20
@@ -234,8 +265,12 @@ public class TradeStrategyFactory {
         EMAIndicator ema90 = analyticsCache.getIndicator(timeFrame,
                 IndicatorType.EMA90,
                 indicatorFactory.createEma90Indicator(closePrice));
-        StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, 14);
-        StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
+        StochasticOscillatorKIndicator stochK = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.STOCHK14,
+                indicatorFactory.createStochK14(timeSeries));
+        StochasticOscillatorDIndicator stochD = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.STOCHD3,
+                indicatorFactory.createStochD3(stochK));
 
         // Entry rule
         Rule entryRule = new OverIndicatorRule(rsi, Decimal.valueOf(80))
@@ -260,8 +295,12 @@ public class TradeStrategyFactory {
         EMAIndicator ema90 = analyticsCache.getIndicator(timeFrame,
                 IndicatorType.EMA90,
                 indicatorFactory.createEma90Indicator(closePrice));
-        StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, 14);
-        StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
+        StochasticOscillatorKIndicator stochK = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.STOCHK14,
+                indicatorFactory.createStochK14(timeSeries));
+        StochasticOscillatorDIndicator stochD = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.STOCHD3,
+                indicatorFactory.createStochD3(stochK));
 
         // Entry rule
         Rule entryRule = new OverIndicatorRule(rsi, Decimal.valueOf(80)) // RSI < 20
@@ -286,9 +325,12 @@ public class TradeStrategyFactory {
         EMAIndicator ema90 = analyticsCache.getIndicator(timeFrame,
                 IndicatorType.EMA90,
                 indicatorFactory.createEma90Indicator(closePrice));
-
-        StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, 14);
-        StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
+        StochasticOscillatorKIndicator stochK = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.STOCHK14,
+                indicatorFactory.createStochK14(timeSeries));
+        StochasticOscillatorDIndicator stochD = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.STOCHD3,
+                indicatorFactory.createStochD3(stochK));
 
         // Entry rule
         Rule entryRule = new OverIndicatorRule(rsi, Decimal.valueOf(80)) // RSI < 20
@@ -313,9 +355,12 @@ public class TradeStrategyFactory {
         EMAIndicator ema90 = analyticsCache.getIndicator(timeFrame,
                 IndicatorType.EMA90,
                 indicatorFactory.createEma90Indicator(closePrice));
-
-        StochasticOscillatorKIndicator stochK = new StochasticOscillatorKIndicator(timeSeries, 14);
-        StochasticOscillatorDIndicator stochD = new StochasticOscillatorDIndicator(stochK);
+        StochasticOscillatorKIndicator stochK = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.STOCHK14,
+                indicatorFactory.createStochK14(timeSeries));
+        StochasticOscillatorDIndicator stochD = analyticsCache.getIndicator(timeFrame,
+                IndicatorType.STOCHD3,
+                indicatorFactory.createStochD3(stochK));
 
         // Entry rule
         Rule entryRule = new OverIndicatorRule(rsi, Decimal.valueOf(80)) // RSI < 20

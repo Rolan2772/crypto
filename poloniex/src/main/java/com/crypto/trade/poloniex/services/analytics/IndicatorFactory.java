@@ -4,6 +4,9 @@ import com.crypto.trade.poloniex.services.analytics.indicators.CachedDoubleEMAIn
 import com.crypto.trade.poloniex.services.analytics.indicators.CachedTripleEMAIndicator;
 import eu.verdelhan.ta4j.Decimal;
 import eu.verdelhan.ta4j.Indicator;
+import eu.verdelhan.ta4j.TimeSeries;
+import eu.verdelhan.ta4j.indicators.oscillators.StochasticOscillatorDIndicator;
+import eu.verdelhan.ta4j.indicators.oscillators.StochasticOscillatorKIndicator;
 import eu.verdelhan.ta4j.indicators.simple.ClosePriceIndicator;
 import eu.verdelhan.ta4j.indicators.trackers.EMAIndicator;
 import eu.verdelhan.ta4j.indicators.trackers.RSIIndicator;
@@ -12,6 +15,14 @@ public class IndicatorFactory {
 
     public RSIIndicator createRsi14Indicator(ClosePriceIndicator closePrice) {
         return new RSIIndicator(closePrice, 14);
+    }
+
+    public StochasticOscillatorKIndicator createStochK14(TimeSeries timeSeries) {
+        return new StochasticOscillatorKIndicator(timeSeries, 14);
+    }
+
+    public StochasticOscillatorDIndicator createStochD3(StochasticOscillatorKIndicator stochK14) {
+        return new StochasticOscillatorDIndicator(stochK14);
     }
 
     public EMAIndicator createEma5Indicator(ClosePriceIndicator closePrice) {

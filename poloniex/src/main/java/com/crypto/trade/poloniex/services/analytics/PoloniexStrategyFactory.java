@@ -367,8 +367,8 @@ public class PoloniexStrategyFactory {
                 timeFrameStorage,
                 1,
                 minVolume,
-                Order.OrderType.BUY,
-                ticks -> tradeStrategyFactory.createRisingTrendStrategy(timeFrame, ticks));
+                Order.OrderType.SELL,
+                ticks -> tradeStrategyFactory.createFallingTrendStrategy(timeFrame, ticks));
         initStrategy("tma-strategy-corrected",
                 timeFrameStorage,
                 1,
@@ -379,7 +379,7 @@ public class PoloniexStrategyFactory {
                 timeFrameStorage,
                 1,
                 minVolume,
-                Order.OrderType.BUY,
+                Order.OrderType.SELL,
                 ticks -> tradeStrategyFactory.createFallingTripleEmaStrategy(timeFrame, ticks));
         initStrategy("tma-strategy-2",
                 timeFrameStorage,

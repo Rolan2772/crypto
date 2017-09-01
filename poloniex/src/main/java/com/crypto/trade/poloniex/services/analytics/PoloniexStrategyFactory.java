@@ -392,13 +392,13 @@ public class PoloniexStrategyFactory {
                     initStrategy("sell-falling-ema90-1",
                             timeFrameStorage,
                             1,
-                            BigDecimal.valueOf(0.005),
+                            volume,
                             Order.OrderType.SELL,
                             ticks -> tradeStrategyFactory.createShortSellEma90FallingTrendStrategy1(timeFrame, ticks));
                     initStrategy("sell-falling-ema90-2",
                             timeFrameStorage,
                             1,
-                            BigDecimal.valueOf(0.005),
+                            volume,
                             Order.OrderType.SELL,
                             ticks -> tradeStrategyFactory.createShortSellEma90FallingTrendStrategy2(timeFrame, ticks));
                     initStrategy("sell-falling-ema90-3",
@@ -410,7 +410,7 @@ public class PoloniexStrategyFactory {
                     initStrategy("sell-falling-ema90-4",
                             timeFrameStorage,
                             1,
-                            BigDecimal.valueOf(0.005),
+                            volume,
                             Order.OrderType.SELL,
                             ticks -> tradeStrategyFactory.createShortSellEma90FallingTrendStrategy4(timeFrame, ticks));
 

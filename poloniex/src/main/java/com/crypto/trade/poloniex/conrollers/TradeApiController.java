@@ -4,10 +4,7 @@ import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import com.crypto.trade.poloniex.services.export.DataConversionService;
 import com.crypto.trade.poloniex.storage.CandlesStorage;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.stream.Collectors;
 
@@ -20,9 +17,9 @@ public class TradeApiController {
     @Autowired
     private CandlesStorage candlesStorage;
 
-    @GetMapping("/orders")
-    public String getOrders() {
-        return candlesStorage.getData(CurrencyPair.BTC_ETH)
+    @GetMapping("/{currency}/orders")
+    public String getOrders(@PathVariable CurrencyPair currency) {
+        return candlesStorage.getData(currency)
                 .stream()
                 .map(timeFrameStorage -> {
                     return timeFrameStorage.getTimeFrame().getDisplayName() + "\n" +

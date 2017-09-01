@@ -65,20 +65,20 @@ public class TradesStorage {
 
     @Scheduled(fixedRate = 600000)
     public void cleanTrades() {
-        CurrencyPair currencyPair = CurrencyPair.BTC_ETH;
+        candlesStorage.getCurrencies().forEach(currencyPair -> {
+            log.info("Cleaning {} stale trades.", currencyPair);
+            ZonedDateTime minTime = DateTimeUtils.now().minus(MAX_AGE).truncatedTo(ChronoUnit.MINUTES);
+            SortedSet<PoloniexTrade> currencyTrades = getTrades(currencyPair);
+            SortedSet<PoloniexTrade> staleTrades = currencyTrades.stream()
+                    .filter(t -> t.getTradeTime().compareTo(minTime) < 0)
+                    .collect(Collectors.toCollection(() -> new TreeSet<>(TradesStorage.TRADES_COMPARATOR)));
 
-        log.info("Cleaning {} stale trades.", currencyPair);
-        ZonedDateTime minTime = DateTimeUtils.now().minus(MAX_AGE).truncatedTo(ChronoUnit.MINUTES);
-        SortedSet<PoloniexTrade> currencyTrades = getTrades(currencyPair);
-        SortedSet<PoloniexTrade> staleTrades = currencyTrades.stream()
-                .filter(t -> t.getTradeTime().compareTo(minTime) < 0)
-                .collect(Collectors.toCollection(() -> new TreeSet<>(TradesStorage.TRADES_COMPARATOR)));
-
-        int staleElementsCount = staleTrades.size();
-        log.info("Found {} trades older than {}.", staleElementsCount, minTime);
-        if (staleElementsCount > 0) {
-            currencyTrades.removeAll(staleTrades);
-            //tradesExportService.exportExcessData(TradesExportService.STALE_TRADES_FILE_NAME + currencyPair, staleTrades);
-        }
+            int staleElementsCount = staleTrades.size();
+            log.info("Found {} trades older than {}.", staleElementsCount, minTime);
+            if (staleElementsCount > 0) {
+                currencyTrades.removeAll(staleTrades);
+                //tradesExportService.exportExcessData(TradesExportService.STALE_TRADES_FILE_NAME + currencyPair, staleTrades);
+            }
+        });
     }
 }

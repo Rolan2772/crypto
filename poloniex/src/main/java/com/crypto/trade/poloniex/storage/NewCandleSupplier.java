@@ -1,9 +1,6 @@
 package com.crypto.trade.poloniex.storage;
 
-import com.crypto.trade.poloniex.services.analytics.AnalyticsCache;
-import com.crypto.trade.poloniex.services.analytics.AnalyticsService;
-import com.crypto.trade.poloniex.services.analytics.TimeFrame;
-import com.crypto.trade.poloniex.services.analytics.TradingAction;
+import com.crypto.trade.poloniex.services.analytics.*;
 import com.crypto.trade.poloniex.services.trade.TradingService;
 import eu.verdelhan.ta4j.Tick;
 import eu.verdelhan.ta4j.TradingRecord;
@@ -28,10 +25,11 @@ public class NewCandleSupplier implements Supplier<Tick> {
     private boolean isRealPrice;
     private boolean isHistoryTick;
     private AnalyticsCache analyticsCache;
+    private CurrencyPair currency;
 
     @Override
     public Tick get() {
-        log.info("No candle found for {} trade.", tradeTime.toLocalDateTime());
+        log.info("No candle found for {} {} trade.", currency, tradeTime.toLocalDateTime());
         List<Tick> candles = timeFrameStorage.getCandles();
         TimeFrame timeFrame = timeFrameStorage.getTimeFrame();
         int lastIndex = candles.size() - 1;
@@ -45,7 +43,7 @@ public class NewCandleSupplier implements Supplier<Tick> {
         // @TODO: check missed candles and indicators when no ticks
         Tick newCandle = new Tick(timeFrame.getFrameDuration(), timeFrame.calculateEndTime(tradeTime));
         candles.add(newCandle);
-        log.info("New {} candle {} - {} with index {} has been created.", timeFrame, newCandle.getBeginTime().toLocalDateTime(), newCandle.getEndTime().toLocalDateTime(), candles.size() - 1);
+        log.info("New {} {} candle {} - {} with index {} has been created.", currency, timeFrame, newCandle.getBeginTime().toLocalDateTime(), newCandle.getEndTime().toLocalDateTime(), candles.size() - 1);
         return newCandle;
     }
 
@@ -53,12 +51,12 @@ public class NewCandleSupplier implements Supplier<Tick> {
         List<Tick> candles = timeFrameStorage.getCandles();
         if (!candles.isEmpty()) {
             TimeFrame timeFrame = timeFrameStorage.getTimeFrame();
-            log.info("Trading on built {} candle at index {}", timeFrame, index);
+            log.info("Trading on built {} {} candle at index {}", currency, timeFrame, index);
             strategyExecutor.submit(() -> {
                 try {
                     onNewCandle(timeFrameStorage, index);
                 } catch (Exception ex) {
-                    log.error("Failed to trade on " + timeFrame + " at index " + index, ex);
+                    log.error("Failed to trade on " + currency + " " + timeFrame + " at index " + index, ex);
                 }
             });
         }
@@ -67,7 +65,7 @@ public class NewCandleSupplier implements Supplier<Tick> {
     private void onNewCandle(TimeFrameStorage timeFrameStorage, int index) {
         analyticsCache.cacheIndex(index);
         TimeFrame timeFrame = timeFrameStorage.getTimeFrame();
-        log.info("Analyzing new {} candle at {}.", timeFrame, index);
+        log.info("Analyzing new {} {} candle at {}.", currency, timeFrame, index);
         Tick builtCandle = timeFrameStorage.getCandles().get(index);
         for (PoloniexStrategy poloniexStrategy : timeFrameStorage.getActiveStrategies()) {
             log.debug("Executing strategy '{}' on time series {}", poloniexStrategy.getName(), timeFrame);

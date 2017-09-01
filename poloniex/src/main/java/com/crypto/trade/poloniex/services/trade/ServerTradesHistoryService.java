@@ -3,7 +3,6 @@ package com.crypto.trade.poloniex.services.trade;
 import com.crypto.trade.poloniex.config.properties.PoloniexProperties;
 import com.crypto.trade.poloniex.dto.PoloniexHistoryTrade;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
-import com.crypto.trade.poloniex.services.utils.CsvFileWriter;
 import com.crypto.trade.poloniex.services.utils.SyncUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
-public class ServerTradesHistoryService implements HistoryService{
+public class ServerTradesHistoryService implements HistoryService {
 
     public static final Duration MAXIMUM_PER_REQUEST = Duration.ofHours(6);
 
@@ -36,10 +32,17 @@ public class ServerTradesHistoryService implements HistoryService{
     @Autowired
     private SyncUtils syncUtils;
 
+    @Override
     public List<PoloniexHistoryTrade> loadTradesHistory(CurrencyPair currencyPair, Duration historyDuration) {
+        LocalDateTime end = LocalDateTime.now();
+        return loadTradesHistory(currencyPair, end.minus(historyDuration), end);
+    }
+
+    @Override
+    public List<PoloniexHistoryTrade> loadTradesHistory(CurrencyPair currencyPair, LocalDateTime start, LocalDateTime end) {
         List<PoloniexHistoryTrade> trades = new ArrayList<>();
-        Instant from = Instant.now().minus(historyDuration);
-        Instant now = Instant.now();
+        Instant from = start.toInstant(ZoneOffset.UTC);
+        Instant now = end.toInstant(ZoneOffset.UTC);
         log.info("Loading trades history from {} to {}", ZonedDateTime.ofInstant(from, ZoneOffset.UTC).toLocalDateTime(), ZonedDateTime.ofInstant(now, ZoneOffset.UTC).toLocalDateTime());
         while (from.compareTo(now) < 0) {
             Map<String, Object> parameters = new HashMap<>();

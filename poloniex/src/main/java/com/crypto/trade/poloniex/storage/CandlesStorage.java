@@ -43,12 +43,12 @@ public class CandlesStorage {
 
     public void addTrade(CurrencyPair currency, PoloniexTrade poloniexTrade) {
         candles.computeIfPresent(currency, (currencyPair, candles) -> {
-            candles.forEach(timeFrameStorage -> updateCandles(timeFrameStorage, poloniexTrade, false));
+            candles.forEach(timeFrameStorage -> updateCandles(currencyPair, timeFrameStorage, poloniexTrade, false));
             return candles;
         });
     }
 
-    private void updateCandles(TimeFrameStorage timeFrameStorage, PoloniexTrade poloniexTrade, boolean isHistoryTick) {
+    private void updateCandles(CurrencyPair currencyPair, TimeFrameStorage timeFrameStorage, PoloniexTrade poloniexTrade, boolean isHistoryTick) {
         timeFrameStorage.getUpdateLock().lock();
         try {
             Tick candle = findCandle(timeFrameStorage.getCandles(), poloniexTrade.getTradeTime())
@@ -59,7 +59,8 @@ public class CandlesStorage {
                             tradingService,
                             poloniexProperties.getTradeConfig().isRealPrice(),
                             isHistoryTick,
-                            analyticsCache));
+                            analyticsCache,
+                            currencyPair));
             candle.addTrade(Decimal.valueOf(poloniexTrade.getAmount()), Decimal.valueOf(poloniexTrade.getRate()));
         } finally {
             timeFrameStorage.getUpdateLock().unlock();
@@ -94,7 +95,7 @@ public class CandlesStorage {
                     log.info("Clearing {} candles with history for {}", timeFrame, currency);
                     timeFrameStorage.getCandles().clear();
                     log.info("Updating candles with history for {}", currency);
-                    poloniexTrades.forEach(poloniexTrade -> updateCandles(timeFrameStorage, poloniexTrade, true));
+                    poloniexTrades.forEach(poloniexTrade -> updateCandles(currencyPair, timeFrameStorage, poloniexTrade, true));
                 } finally {
                     timeFrameStorage.getUpdateLock().unlock();
                 }
@@ -110,5 +111,9 @@ public class CandlesStorage {
                 .findFirst()
                 .orElse(new TimeFrameStorage(TimeFrame.ONE_MINUTE))
                 .getActiveStrategies();
+    }
+
+    public Set<CurrencyPair> getCurrencies() {
+        return candles.keySet();
     }
 }

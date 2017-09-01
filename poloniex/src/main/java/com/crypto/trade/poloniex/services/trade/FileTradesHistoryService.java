@@ -12,6 +12,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,20 +27,26 @@ public class FileTradesHistoryService implements HistoryService {
 
     @Override
     public List<PoloniexHistoryTrade> loadTradesHistory(CurrencyPair currencyPair, Duration historyDuration) {
+        LocalDateTime end = LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.MIN);
+        return loadTradesHistory(currencyPair, end.minus(historyDuration), end);
+    }
+
+    @Override
+    public List<PoloniexHistoryTrade> loadTradesHistory(CurrencyPair currencyPair, LocalDateTime start, LocalDateTime end) {
+        LocalDate currentDay = start.toLocalDate();
         List<PoloniexHistoryTrade> trades = new ArrayList<>();
-        String fileName = "analytics/poloniex.json";
-        int index = 0;
+        String fileName = "analytics/history/" + currencyPair + "/poloniex-" + currentDay + ".json";
         Path historyPath = Paths.get(fileName);
-        while (historyPath.toFile().exists()) {
-            log.info("Loading " + historyPath.toFile().getName());
+        while (historyPath.toFile().exists() && currentDay.isBefore(end.toLocalDate())) {
+            log.info("Loading " + currencyPair + " " + historyPath.toFile().getName());
             try {
                 trades.addAll(jsonMapper.readValue(historyPath.toFile(), new TypeReference<List<PoloniexHistoryTrade>>() {
                 }));
             } catch (IOException e) {
-                log.error("Failed to read history.", e);
+                log.error("Failed to read history", e);
             }
-            index += 1;
-            historyPath = Paths.get(fileName + "." + index);
+            currentDay = currentDay.plusDays(1);
+            historyPath = Paths.get("analytics/history/" + currencyPair + "/poloniex-" + currentDay + ".json");
         }
         return trades;
     }

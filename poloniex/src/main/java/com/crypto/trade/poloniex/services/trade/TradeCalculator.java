@@ -18,10 +18,10 @@ public class TradeCalculator {
     }
 
     public static BigDecimal getExpectedProfit(Order entryOrder, BigDecimal sellPrice) {
-        BigDecimal buySpent = getTotal(entryOrder);
-        BigDecimal sellGain = getTotal(sellPrice, CalculationsUtils.toBigDecimal(entryOrder.getAmount()));
-        log.debug("Sell price: {}, entry order: {}, bury spent: {}, sell gain: {}", sellPrice, entryOrder, buySpent, sellGain);
-        return CalculationsUtils.divide(sellGain, buySpent);
+        BigDecimal entrySpent = getEntrySpent(entryOrder);
+        BigDecimal exitGain = getExitAmount(entryOrder, sellPrice);
+        log.debug("Sell price: {}, entry order: {}, bury spent: {}, sell gain: {}", sellPrice, entryOrder, entrySpent, exitGain);
+        return CalculationsUtils.divide(exitGain, entrySpent);
     }
 
     public static BigDecimal getEntryAmount(BigDecimal volume, BigDecimal rate, Order.OrderType direction) {

@@ -11,16 +11,16 @@ import java.util.List;
 @Slf4j
 public class TradeCalculator {
 
-    public static boolean canSell(Order entryOrder, BigDecimal sellPrice) {
-        BigDecimal expectedProfit = getExpectedProfit(entryOrder, sellPrice);
+    public static boolean canSell(Order entryOrder, BigDecimal exitPrice) {
+        BigDecimal expectedProfit = getExpectedProfit(entryOrder, exitPrice);
         log.info("Expected profit: {}, minimum profit: {}", expectedProfit, CalculationsUtils.MIN_PROFIT_PERCENT);
         return expectedProfit.compareTo(CalculationsUtils.MIN_PROFIT_PERCENT) > 0;
     }
 
-    public static BigDecimal getExpectedProfit(Order entryOrder, BigDecimal sellPrice) {
+    public static BigDecimal getExpectedProfit(Order entryOrder, BigDecimal exitPrice) {
         BigDecimal entrySpent = getEntrySpent(entryOrder);
-        BigDecimal exitGain = getExitAmount(entryOrder, sellPrice);
-        log.debug("Sell price: {}, entry order: {}, bury spent: {}, sell gain: {}", sellPrice, entryOrder, entrySpent, exitGain);
+        BigDecimal exitGain = getGrossExitGain(entryOrder, exitPrice);
+        log.debug("Sell price: {}, entry order: {}, bury spent: {}, sell gain: {}", exitPrice, entryOrder, entrySpent, exitGain);
         return CalculationsUtils.divide(exitGain, entrySpent);
     }
 
@@ -53,6 +53,13 @@ public class TradeCalculator {
         return entryOrder.getType() == Order.OrderType.BUY
                 ? getTotal(exitPrice, entryAmount)
                 : CalculationsUtils.toBigDecimal(exitOrder.getAmount());
+    }
+
+    public static BigDecimal getGrossExitGain(Order entryOrder, BigDecimal exitPrice) {
+        BigDecimal entryAmount = CalculationsUtils.toBigDecimal(entryOrder.getAmount());
+        return entryOrder.getType() == Order.OrderType.BUY
+                ? getTotal(exitPrice, entryAmount)
+                : getExitAmount(entryOrder, exitPrice);
     }
 
     public static BigDecimal getNetExitGain(Order entryOrder, Order exitOrder) {

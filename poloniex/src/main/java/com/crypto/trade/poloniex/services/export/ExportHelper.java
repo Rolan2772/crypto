@@ -1,6 +1,5 @@
 package com.crypto.trade.poloniex.services.export;
 
-import com.crypto.trade.poloniex.services.analytics.AnalyticsCache;
 import com.crypto.trade.poloniex.services.analytics.AnalyticsService;
 import com.crypto.trade.poloniex.services.analytics.TradingAction;
 import com.crypto.trade.poloniex.services.trade.ProfitCalculator;
@@ -55,7 +54,7 @@ public class ExportHelper {
                 .collect(Collectors.joining(","));
     }
 
-    public String convertIndicators(TimeSeries timeSeries, List<Indicator<?>> indicators, int index) {
+    public String convertIndicators(TimeSeries timeSeries, List<Indicator<Decimal>> indicators, int index) {
         String closeTime = DateTimeUtils.format(timeSeries.getTick(index).getBeginTime());
         String values = indicators.stream()
                 .map(indicator -> indicator.getValue(index))

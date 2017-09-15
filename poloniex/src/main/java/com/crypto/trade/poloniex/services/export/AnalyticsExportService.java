@@ -8,14 +8,15 @@ import com.crypto.trade.poloniex.storage.CandlesStorage;
 import com.crypto.trade.poloniex.storage.PoloniexStrategy;
 import com.crypto.trade.poloniex.storage.PoloniexTradingRecord;
 import com.crypto.trade.poloniex.storage.TimeFrameStorage;
+import eu.verdelhan.ta4j.BaseTimeSeries;
 import eu.verdelhan.ta4j.Decimal;
 import eu.verdelhan.ta4j.Indicator;
 import eu.verdelhan.ta4j.TimeSeries;
-import eu.verdelhan.ta4j.indicators.oscillators.StochasticOscillatorDIndicator;
-import eu.verdelhan.ta4j.indicators.oscillators.StochasticOscillatorKIndicator;
-import eu.verdelhan.ta4j.indicators.simple.ClosePriceIndicator;
-import eu.verdelhan.ta4j.indicators.trackers.EMAIndicator;
-import eu.verdelhan.ta4j.indicators.trackers.RSIIndicator;
+import eu.verdelhan.ta4j.indicators.EMAIndicator;
+import eu.verdelhan.ta4j.indicators.RSIIndicator;
+import eu.verdelhan.ta4j.indicators.StochasticOscillatorDIndicator;
+import eu.verdelhan.ta4j.indicators.StochasticOscillatorKIndicator;
+import eu.verdelhan.ta4j.indicators.helpers.ClosePriceIndicator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -73,7 +74,7 @@ public class AnalyticsExportService implements MemoryExportService<TimeFrameStor
                 .append("\n");
 
         int count = timeFrameStorage.getCandles().size();
-        TimeSeries timeSeries = new TimeSeries(timeFrame.name(), timeFrameStorage.getCandles());
+        TimeSeries timeSeries = new BaseTimeSeries(timeFrame.name(), timeFrameStorage.getCandles());
         List<Indicator<Decimal>> indicators = createIndicators(timeFrame, timeSeries);
         IntStream.range(0, count).forEach(index -> sb.append(exportHelper.convertIndicators(timeSeries, indicators, index))
                 .append(",")

@@ -3,7 +3,7 @@ package com.crypto.trade.poloniex.services.analytics.rules;
 import eu.verdelhan.ta4j.Decimal;
 import eu.verdelhan.ta4j.Trade;
 import eu.verdelhan.ta4j.TradingRecord;
-import eu.verdelhan.ta4j.indicators.simple.ClosePriceIndicator;
+import eu.verdelhan.ta4j.indicators.helpers.ClosePriceIndicator;
 import eu.verdelhan.ta4j.trading.rules.AbstractRule;
 
 import java.util.stream.IntStream;

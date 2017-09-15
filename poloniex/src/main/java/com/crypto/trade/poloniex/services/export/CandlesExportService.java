@@ -7,6 +7,7 @@ import com.crypto.trade.poloniex.storage.CandlesStorage;
 import com.crypto.trade.poloniex.storage.PoloniexStrategy;
 import com.crypto.trade.poloniex.storage.PoloniexTradingRecord;
 import com.crypto.trade.poloniex.storage.TimeFrameStorage;
+import eu.verdelhan.ta4j.BaseTimeSeries;
 import eu.verdelhan.ta4j.TimeSeries;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +60,7 @@ public class CandlesExportService implements MemoryExportService<TimeFrameStorag
                 .append("\n");
 
         int count = timeFrameStorage.getCandles().size();
-        TimeSeries timeSeries = new TimeSeries(timeFrame.name(), timeFrameStorage.getCandles());
+        TimeSeries timeSeries = new BaseTimeSeries(timeFrame.name(), timeFrameStorage.getCandles());
         IntStream.range(0, count).forEach(index -> sb.append(exportHelper.convertCandle(timeSeries, index))
                 .append(",")
                 .append(exportHelper.createHistoryTradesAnalytics(strategiesCopy, timeSeries, index, timeFrameStorage.getHistoryIndex()))

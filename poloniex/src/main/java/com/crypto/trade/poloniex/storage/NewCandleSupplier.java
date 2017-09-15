@@ -2,6 +2,7 @@ package com.crypto.trade.poloniex.storage;
 
 import com.crypto.trade.poloniex.services.analytics.*;
 import com.crypto.trade.poloniex.services.trade.TradingService;
+import eu.verdelhan.ta4j.BaseTick;
 import eu.verdelhan.ta4j.Tick;
 import eu.verdelhan.ta4j.TradingRecord;
 import lombok.Value;
@@ -41,7 +42,7 @@ public class NewCandleSupplier implements Supplier<Tick> {
         }
 
         // @TODO: check missed candles and indicators when no ticks
-        Tick newCandle = new Tick(timeFrame.getFrameDuration(), timeFrame.calculateEndTime(tradeTime));
+        Tick newCandle = new BaseTick(timeFrame.getFrameDuration(), timeFrame.calculateEndTime(tradeTime));
         candles.add(newCandle);
         log.info("New {} {} candle {} - {} with index {} has been created.", currency, timeFrame, newCandle.getBeginTime().toLocalDateTime(), newCandle.getEndTime().toLocalDateTime(), candles.size() - 1);
         return newCandle;

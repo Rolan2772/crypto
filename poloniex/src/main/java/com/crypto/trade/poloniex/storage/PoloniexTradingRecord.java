@@ -1,5 +1,6 @@
 package com.crypto.trade.poloniex.storage;
 
+import eu.verdelhan.ta4j.BaseTradingRecord;
 import eu.verdelhan.ta4j.Order;
 import eu.verdelhan.ta4j.TradingRecord;
 import lombok.EqualsAndHashCode;
@@ -23,7 +24,7 @@ public class PoloniexTradingRecord {
     public PoloniexTradingRecord(int id, String strategyName, Order.OrderType direction) {
         this.id = id;
         this.strategyName = strategyName;
-        this.tradingRecord = new TradingRecord(direction);
+        this.tradingRecord = new BaseTradingRecord(direction);
     }
 
     public void addPoloniexOrder(PoloniexOrder order) {

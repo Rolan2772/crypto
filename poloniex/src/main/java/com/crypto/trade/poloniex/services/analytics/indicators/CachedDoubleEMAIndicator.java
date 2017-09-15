@@ -3,10 +3,9 @@ package com.crypto.trade.poloniex.services.analytics.indicators;
 import eu.verdelhan.ta4j.Decimal;
 import eu.verdelhan.ta4j.Indicator;
 import eu.verdelhan.ta4j.indicators.CachedIndicator;
-import eu.verdelhan.ta4j.indicators.trackers.EMAIndicator;
+import eu.verdelhan.ta4j.indicators.EMAIndicator;
 
 public class CachedDoubleEMAIndicator extends CachedIndicator<Decimal> {
-
 
     private final EMAIndicator ema;
     private final EMAIndicator emaEma;

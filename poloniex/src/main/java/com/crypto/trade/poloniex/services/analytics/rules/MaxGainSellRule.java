@@ -9,13 +9,13 @@ import eu.verdelhan.ta4j.trading.rules.AbstractRule;
 
 import java.util.stream.IntStream;
 
-public class MaxLossRule extends AbstractRule {
+public class MaxGainSellRule extends AbstractRule {
 
     private ClosePriceIndicator closePrice;
 
     private Decimal maxRecession;
 
-    public MaxLossRule(ClosePriceIndicator closePrice, Decimal maxRecession) {
+    public MaxGainSellRule(ClosePriceIndicator closePrice, Decimal maxRecession) {
         this.closePrice = closePrice;
         this.maxRecession = maxRecession.dividedBy(Decimal.HUNDRED);
     }

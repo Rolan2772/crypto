@@ -37,7 +37,7 @@ public class HistoryAnalyticsService implements AnalyticsService {
                 Order entry = tradingRecord.getCurrentTrade().getEntry();
                 BigDecimal exitAmount = entry == null
                         ? entryAmount
-                        : TradeCalculator.getExitAmount(tradingRecord.getCurrentTrade().getEntry(), closePrice);
+                        : TradeCalculator.getExitAmount(entry, closePrice);
                 boolean exited = tradingRecord.exit(index, lastTick.getClosePrice(), CalculationsUtils.toDecimal(exitAmount));
                 if (exited) {
                     Order exit = tradingRecord.getLastExit();

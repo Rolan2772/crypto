@@ -41,16 +41,16 @@ public class TradingService {
     public Optional<PoloniexOrder> placeOrder(TradingRecord tradingRecord, int index, Order.OrderType direction, BigDecimal volume, boolean real) {
         Optional<PoloniexOrder> poloniexOrder = Optional.empty();
         if (tradingRecord.getCurrentTrade().isNew()) {
-            poloniexOrder = buy(tradingRecord, index, direction, volume, real);
+            poloniexOrder = enter(tradingRecord, index, direction, volume, real);
         } else if (tradingRecord.getCurrentTrade().isOpened()) {
-            poloniexOrder = sell(tradingRecord, index, real);
+            poloniexOrder = exit(tradingRecord, index, real);
         } else {
             log.warn("No suitable action found for trading record {} at index {}", tradingRecord, index);
         }
         return poloniexOrder;
     }
 
-    private Optional<PoloniexOrder> buy(TradingRecord tradingRecord, int index, Order.OrderType direction, BigDecimal volume, boolean real) {
+    private Optional<PoloniexOrder> enter(TradingRecord tradingRecord, int index, Order.OrderType direction, BigDecimal volume, boolean real) {
         log.info("Processing BUY request {} at index {}", tradingRecord.getCurrentTrade(), index);
         Optional<PoloniexOrder> result = Optional.empty();
         BigDecimal lastTrade = tradesStorage.getLastTrade(CurrencyPair.BTC_ETH);
@@ -58,9 +58,10 @@ public class TradingService {
                 ? lastTrade
                 : CalculationsUtils.divide(lastTrade, BigDecimal.valueOf(2));
         BigDecimal entryAmount = TradeCalculator.getEntryAmount(volume, rate, direction);
+        String command = direction == Order.OrderType.BUY ? "buy" : "sell";
 
         Map<String, Object> params = new HashMap<>();
-        params.put("command", "buy");
+        params.put("command", command);
         params.put("currencyPair", CurrencyPair.BTC_ETH);
         params.put("rate", rate);
         params.put("amount", entryAmount);
@@ -96,7 +97,7 @@ public class TradingService {
         return result;
     }
 
-    private Optional<PoloniexOrder> sell(TradingRecord tradingRecord, int index, boolean real) {
+    private Optional<PoloniexOrder> exit(TradingRecord tradingRecord, int index, boolean real) {
         log.info("Processing SELL request {} at index {}", tradingRecord.getCurrentTrade(), index);
         Optional<PoloniexOrder> result = Optional.empty();
         Order entryOrder = tradingRecord.getCurrentTrade().getEntry();
@@ -108,8 +109,10 @@ public class TradingService {
         if (TradeCalculator.canSell(entryOrder, rate)) {
             BigDecimal exitAmount = TradeCalculator.getExitAmount(entryOrder, rate);
 
+            String command = entryOrder.getType() == Order.OrderType.BUY ? "sell" : "buy";
+
             Map<String, Object> params = new HashMap<>();
-            params.put("command", "sell");
+            params.put("command", command);
             params.put("currencyPair", CurrencyPair.BTC_ETH);
             params.put("rate", rate);
             params.put("amount", exitAmount);

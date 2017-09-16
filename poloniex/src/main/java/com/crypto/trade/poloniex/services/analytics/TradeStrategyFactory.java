@@ -16,8 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Slf4j
 public class TradeStrategyFactory {
 
-    public static final int DEFAULT_TIME_FRAME = 14;
-
     @Autowired
     private AnalyticsCache analyticsCache;
     @Autowired
@@ -46,7 +44,7 @@ public class TradeStrategyFactory {
                 .and(new CrossedUpIndicatorRule(stochK, stochD)); // K cross D from the bottom
 
         // Exit rule
-        Rule exitRule = new StopGainRule(closePrice, Decimal.valueOf(1));
+        Rule exitRule = new ModifiedStopGainRule(closePrice, Decimal.valueOf(1));
         Strategy strategy = new BaseStrategy(entryRule, exitRule);
         strategy.setUnstablePeriod(14);
 
@@ -71,8 +69,8 @@ public class TradeStrategyFactory {
                 .and(new CrossedUpIndicatorRule(stochK, stochD)); // K cross D from the bottom
 
         // Exit rule
-        Rule exitRule = new StopGainRule(closePrice, Decimal.valueOf(1))
-                .and(new MaxGainRule(closePrice, Decimal.valueOf(0.5)));
+        Rule exitRule = new ModifiedStopGainRule(closePrice, Decimal.valueOf(1))
+                .and(new MaxGainBuyRule(closePrice, Decimal.valueOf(0.5)));
         Strategy strategy = new BaseStrategy(entryRule, exitRule);
         strategy.setUnstablePeriod(14);
 
@@ -97,8 +95,8 @@ public class TradeStrategyFactory {
                 .and(new CrossedUpIndicatorRule(stochK, stochD)); // K cross D from the bottom
 
         // Exit rule
-        Rule exitRule = new StopGainRule(closePrice, Decimal.valueOf(1))
-                .and(new MaxGainRule(closePrice, Decimal.valueOf(0.25)));
+        Rule exitRule = new ModifiedStopGainRule(closePrice, Decimal.valueOf(1))
+                .and(new MaxGainBuyRule(closePrice, Decimal.valueOf(0.25)));
         Strategy strategy = new BaseStrategy(entryRule, exitRule);
         strategy.setUnstablePeriod(14);
 
@@ -127,7 +125,7 @@ public class TradeStrategyFactory {
                 .and(new RisingUpIndicatorRule(ema90)); // Rising trend
 
         // Exit rule
-        Rule exitRule = new StopGainRule(closePrice, Decimal.valueOf(1));
+        Rule exitRule = new ModifiedStopGainRule(closePrice, Decimal.valueOf(1));
         Strategy strategy = new BaseStrategy(entryRule, exitRule);
         strategy.setUnstablePeriod(90);
 
@@ -156,8 +154,8 @@ public class TradeStrategyFactory {
                 .and(new RisingUpIndicatorRule(ema90)); // Rising trend
 
         // Exit rule
-        Rule exitRule = new StopGainRule(closePrice, Decimal.valueOf(1))
-                .and(new MaxGainRule(closePrice, Decimal.valueOf(0.5)));
+        Rule exitRule = new ModifiedStopGainRule(closePrice, Decimal.valueOf(1))
+                .and(new MaxGainBuyRule(closePrice, Decimal.valueOf(0.5)));
         Strategy strategy = new BaseStrategy(entryRule, exitRule);
         strategy.setUnstablePeriod(90);
 
@@ -192,8 +190,8 @@ public class TradeStrategyFactory {
                 .and(new RisingUpIndicatorRule(ema90)); // Rising trend
 
         // Exit rule
-        Rule exitRule = new StopGainRule(closePrice, Decimal.valueOf(1))
-                .and(new MaxGainRule(closePrice, Decimal.valueOf(0.25)));
+        Rule exitRule = new ModifiedStopGainRule(closePrice, Decimal.valueOf(1))
+                .and(new MaxGainBuyRule(closePrice, Decimal.valueOf(0.25)));
         Strategy strategy = new BaseStrategy(entryRule, exitRule);
         strategy.setUnstablePeriod(90);
 
@@ -222,8 +220,8 @@ public class TradeStrategyFactory {
                 .and(new RisingUpIndicatorRule(ema540)); // Rising trend
 
         // Exit rule
-        Rule exitRule = new StopGainRule(closePrice, Decimal.valueOf(1))
-                .and(new MaxGainRule(closePrice, Decimal.valueOf(0.25)));
+        Rule exitRule = new ModifiedStopGainRule(closePrice, Decimal.valueOf(1))
+                .and(new MaxGainBuyRule(closePrice, Decimal.valueOf(0.25)));
         Strategy strategy = new BaseStrategy(entryRule, exitRule);
         strategy.setUnstablePeriod(540);
 
@@ -252,8 +250,8 @@ public class TradeStrategyFactory {
                 .and(new RisingUpIndicatorRule(ema90)); // Rising trend
 
         // Exit rule
-        Rule exitRule = new StopGainRule(closePrice, Decimal.valueOf(1))
-                .and(new MaxGainRule(closePrice, Decimal.valueOf(10)));
+        Rule exitRule = new ModifiedStopGainRule(closePrice, Decimal.valueOf(1))
+                .and(new MaxGainBuyRule(closePrice, Decimal.valueOf(10)));
         Strategy strategy = new BaseStrategy(entryRule, exitRule);
         strategy.setUnstablePeriod(90);
 
@@ -282,8 +280,8 @@ public class TradeStrategyFactory {
                 .and(new RisingUpIndicatorRule(ema90)); // Rising trend
 
         // Exit rule
-        Rule exitRule = new StopGainRule(closePrice, Decimal.valueOf(1))
-                .and(new MaxGainRule(closePrice, Decimal.valueOf(20)));
+        Rule exitRule = new ModifiedStopGainRule(closePrice, Decimal.valueOf(1))
+                .and(new MaxGainBuyRule(closePrice, Decimal.valueOf(20)));
         Strategy strategy = new BaseStrategy(entryRule, exitRule);
         strategy.setUnstablePeriod(90);
 
@@ -312,8 +310,8 @@ public class TradeStrategyFactory {
                 .and(new FallingDownIndicatorRule(ema90));
 
         // Exit rule
-        Rule exitRule = new StopLossRule(closePrice, Decimal.valueOf(1))
-                .and(new MaxLossRule(closePrice, Decimal.valueOf(1)));
+        Rule exitRule = new ModifiedStopGainRule(closePrice, Decimal.valueOf(1))
+                .and(new MaxGainSellRule(closePrice, Decimal.valueOf(1)));
         Strategy strategy = new BaseStrategy(entryRule, exitRule);
         strategy.setUnstablePeriod(14);
 
@@ -342,8 +340,8 @@ public class TradeStrategyFactory {
                 .and(new FallingDownIndicatorRule(ema90)); // Rising trend
 
         // Exit rule
-        Rule exitRule = new StopLossRule(closePrice, Decimal.valueOf(0.51))
-                .and(new MaxLossRule(closePrice, Decimal.valueOf(1)));
+        Rule exitRule = new ModifiedStopGainRule(closePrice, Decimal.valueOf(0.51))
+                .and(new MaxGainSellRule(closePrice, Decimal.valueOf(1)));
         Strategy strategy = new BaseStrategy(entryRule, exitRule);
         strategy.setUnstablePeriod(14);
 
@@ -372,8 +370,8 @@ public class TradeStrategyFactory {
                 .and(new FallingDownIndicatorRule(ema90)); // Rising trend
 
         // Exit rule
-        Rule exitRule = new StopLossRule(closePrice, Decimal.valueOf(0.51))
-                .and(new MaxLossRule(closePrice, Decimal.valueOf(2)));
+        Rule exitRule = new ModifiedStopGainRule(closePrice, Decimal.valueOf(0.51))
+                .and(new MaxGainSellRule(closePrice, Decimal.valueOf(2)));
         Strategy strategy = new BaseStrategy(entryRule, exitRule);
         strategy.setUnstablePeriod(14);
 
@@ -402,8 +400,8 @@ public class TradeStrategyFactory {
                 .and(new FallingDownIndicatorRule(ema90)); // Rising trend
 
         // Exit rule
-        Rule exitRule = new StopLossRule(closePrice, Decimal.valueOf(0.51))
-                .and(new MaxLossRule(closePrice, Decimal.valueOf(5)));
+        Rule exitRule = new ModifiedStopGainRule(closePrice, Decimal.valueOf(0.51))
+                .and(new MaxGainSellRule(closePrice, Decimal.valueOf(5)));
         Strategy strategy = new BaseStrategy(entryRule, exitRule);
         strategy.setUnstablePeriod(14);
 
@@ -449,7 +447,7 @@ public class TradeStrategyFactory {
                 .and(new UpperRule(ema5, ema100, 1));
 
         Rule exitRule = new OrRule(trendDown, trendPreDown)
-                .and(exit1).and(new StopGainRule(closePrice, Decimal.ONE));
+                .and(exit1).and(new ModifiedStopGainRule(closePrice, Decimal.ONE));
 
         Strategy strategy = new BaseStrategy(entryRule, exitRule);
         strategy.setUnstablePeriod(100);
@@ -482,7 +480,7 @@ public class TradeStrategyFactory {
         Rule entry1 = trendUp.and(buySignal1);
         Rule entry2 = trendUp.and(new NotRule(buySignal1)).and(buySignal2);
 
-        Rule entryRule = entry1.or(entry2).and(new StopLossRule(closePrice, Decimal.ONE));
+        Rule entryRule = entry1.or(entry2).and(new ModifiedStopGainRule(closePrice, Decimal.ONE));
 
         // Exit rule
         // ema90[0] <= ema90[-1] and ema05 < ema100
@@ -532,7 +530,7 @@ public class TradeStrategyFactory {
 
         Rule exitRule = new UpperRule(tma90, ema90)
                 .and(new CrossedDownIndicatorRule(ema5, tma90))
-                .and(new StopGainRule(closePrice, Decimal.ONE));
+                .and(new ModifiedStopGainRule(closePrice, Decimal.ONE));
 
         Strategy strategy = new BaseStrategy(entryRule, exitRule);
         strategy.setUnstablePeriod(270);
@@ -562,13 +560,13 @@ public class TradeStrategyFactory {
                 IndicatorType.TMA90,
                 indicatorFactory.createTma90Indicator(closePrice, ema90, emaEma90, emaEmaEma90));
 
-        Rule exitRule = new UpperRule(tma90, ema90)
-                .and(new CrossedUpIndicatorRule(ema5, tma90))
-                .and(new StopLossRule(closePrice, Decimal.ONE));
-
         Rule entryRule = new LowerRule(tma90, dma90)
                 .and(new LowerRule(tma90, ema90))
                 .and(new CrossedDownIndicatorRule(ema5, tma90));
+
+        Rule exitRule = new UpperRule(tma90, ema90)
+                .and(new CrossedUpIndicatorRule(ema5, tma90))
+                .and(new ModifiedStopGainRule(closePrice, Decimal.ONE));
 
         Strategy strategy = new BaseStrategy(entryRule, exitRule);
         strategy.setUnstablePeriod(270);
@@ -604,8 +602,8 @@ public class TradeStrategyFactory {
         Rule exitRule = new LowerRule(tma90, dma90)
                 .and(new LowerRule(tma90, ema90))
                 .and(new CrossedDownIndicatorRule(ema5, tma90))
-                .and(new StopGainRule(closePrice, Decimal.ONE))
-                .and(new MaxGainRule(closePrice, Decimal.valueOf(1)));
+                .and(new ModifiedStopGainRule(closePrice, Decimal.ONE))
+                .and(new MaxGainBuyRule(closePrice, Decimal.valueOf(1)));
 
         Strategy strategy = new BaseStrategy(entryRule, exitRule);
         strategy.setUnstablePeriod(270);
@@ -654,7 +652,7 @@ public class TradeStrategyFactory {
 
         Rule exitRule = new OrRule(trendDown, trendPreDown)
                 .and(exit1)
-                .and(new StopGainRule(closePrice, Decimal.valueOf(40)));
+                .and(new ModifiedStopGainRule(closePrice, Decimal.valueOf(40)));
 
         Strategy strategy = new BaseStrategy(entryRule, exitRule);
         strategy.setUnstablePeriod(100);

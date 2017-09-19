@@ -9,15 +9,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 public class ExecutorsConfig {
 
     @Bean
-    public ThreadPoolTaskExecutor tradesExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        // @TODO: pool should be smaller, how ever core pull size of 10 threads leads to race conditions
-        executor.setCorePoolSize(50);
-        executor.setMaxPoolSize(50);
-        return executor;
-    }
-
-    @Bean
     public ThreadPoolTaskExecutor strategyExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         // @TODO: pool should be smaller, how ever core pull size of 10 threads leads to race conditions

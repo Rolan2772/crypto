@@ -30,6 +30,6 @@ public class TradeApiController {
 
     @GetMapping("/loadOrders")
     public void loadOrders(@RequestParam String fileName) {
-        // @TODO: load previos execution orders
+        // @TODO: load previous execution orders
     }
 }

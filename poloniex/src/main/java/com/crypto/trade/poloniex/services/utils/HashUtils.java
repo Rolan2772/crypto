@@ -17,7 +17,7 @@ public class HashUtils {
             SecretKeySpec keySpec = new SecretKeySpec(
                     key.getBytes(DEFAULT_ENCODING),
                     HMAC_SHA512);
-
+            // @TODO: init only once
             Mac mac = Mac.getInstance(HMAC_SHA512);
             mac.init(keySpec);
             return toHexString(mac.doFinal(value.getBytes(DEFAULT_ENCODING)));

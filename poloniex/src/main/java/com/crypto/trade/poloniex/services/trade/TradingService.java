@@ -106,7 +106,7 @@ public class TradingService {
             rate = rate.multiply(BigDecimal.valueOf(2));
         }
 
-        if (TradeCalculator.canSell(entryOrder, rate)) {
+        if (TradeCalculator.canExit(entryOrder, rate)) {
             BigDecimal exitAmount = TradeCalculator.getExitAmount(entryOrder, rate);
 
             String command = entryOrder.getType() == Order.OrderType.BUY ? "sell" : "buy";

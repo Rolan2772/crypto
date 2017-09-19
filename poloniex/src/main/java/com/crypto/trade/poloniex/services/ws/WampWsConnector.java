@@ -6,7 +6,6 @@ import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import com.crypto.trade.poloniex.storage.TradesStorage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import rx.Subscription;
 import ws.wamp.jawampa.WampClient;
 import ws.wamp.jawampa.WampClientBuilder;
@@ -23,8 +22,6 @@ public class WampWsConnector implements WsConnector {
 
     @Autowired
     private PoloniexProperties poloniexProperties;
-    @Autowired
-    private ThreadPoolTaskExecutor tradesExecutor;
     @Autowired
     private TradesStorage tradesStorage;
 

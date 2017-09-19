@@ -12,13 +12,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class TradeCalculatorTest {
 
     @Test
-    public void getTotal() {
+    public void total() {
         assertEquals(BigDecimal.valueOf(0.00099999),
                 TradeCalculator.getTotal(BigDecimal.valueOf(0.07042652), BigDecimal.valueOf(0.01419919)));
     }
@@ -45,20 +44,22 @@ public class TradeCalculatorTest {
     @Test
     public void entryAmount() {
         assertEquals(BigDecimal.valueOf(0.00116671),
-                TradeCalculator.getEntryAmount(BigDecimal.valueOf(0.000105), BigDecimal.valueOf(0.08999601), Order.OrderType.BUY));
+                TradeCalculator.getEntryAmount(BigDecimal.valueOf(0.000105), BigDecimal.valueOf(0.08999601),
+                        Order.OrderType.BUY));
         assertEquals(BigDecimal.valueOf(0.005),
-                TradeCalculator.getEntryAmount(BigDecimal.valueOf(0.005), BigDecimal.valueOf(0.08999601), Order.OrderType.SELL));
+                TradeCalculator.getEntryAmount(BigDecimal.valueOf(0.005), BigDecimal.valueOf(0.08999601),
+                        Order.OrderType.SELL));
     }
 
     @Test
-    public void buyExitAmount() {
+    public void buyDirectionExitAmount() {
         Order order = TestOrderUtils.createEntryOrder(Decimal.valueOf("0.08999601"), Decimal.valueOf("0.11237875"));
         assertEquals(BigDecimal.valueOf(0.11209781),
                 TradeCalculator.getExitAmount(order, BigDecimal.ONE));
     }
 
     @Test
-    public void sellExitAmount() {
+    public void sellDirectionExitAmount() {
         BigDecimal entryAmount = BigDecimal.valueOf(0.11237875);
         Order entryOrder = TestOrderUtils.createEntryOrder(Order.OrderType.SELL,
                 Decimal.valueOf("0.08999601"),
@@ -70,13 +71,21 @@ public class TradeCalculatorTest {
     }
 
     @Test
-    public void buySpent() {
+    public void buyDirectionSpent() {
         Order entryOrder = TestOrderUtils.createEntryOrder(Decimal.valueOf("0.08242652"), Decimal.valueOf("0.12132017"));
         assertEquals(BigDecimal.valueOf(0.00999999), TradeCalculator.getEntrySpent(entryOrder));
     }
 
     @Test
-    public void netSellGain() {
+    public void sellDirectionSpent() {
+        Order entryOrder = TestOrderUtils.createEntryOrder(Order.OrderType.SELL,
+                Decimal.valueOf("0.08242652"),
+                Decimal.valueOf("0.12132017"));
+        assertEquals(BigDecimal.valueOf(0.12132017), TradeCalculator.getEntrySpent(entryOrder));
+    }
+
+    @Test
+    public void netBuyDirectionGain() {
         Order entryOrder = TestOrderUtils.createEntryOrder(Order.OrderType.BUY,
                 Decimal.valueOf("0.08199601"),
                 Decimal.valueOf("0.12209781"));
@@ -88,15 +97,99 @@ public class TradeCalculatorTest {
     }
 
     @Test
-    public void grossSellGain() {
-        Order entryOrder = TestOrderUtils.createEntryOrder(Order.OrderType.BUY,
-                Decimal.valueOf("0.09000543"),
-                Decimal.valueOf("0.11237805"));
-        Order exitOrder = TestOrderUtils.createEntryOrder(Order.OrderType.SELL,
-                Decimal.valueOf("0.09199601"),
-                Decimal.valueOf("0.11209781"));
+    public void netSellDirectionGain() {
+        Order entryOrder = TestOrderUtils.createEntryOrder(Order.OrderType.SELL,
+                Decimal.valueOf("0.08"),
+                Decimal.valueOf("0.1"));
+        Order exitOrder = TestOrderUtils.createEntryOrder(Order.OrderType.BUY,
+                Decimal.valueOf("0.04"),
+                Decimal.valueOf("0.2"));
 
-        assertEquals(BigDecimal.valueOf(0.01033833), TradeCalculator.getGrossExitGain(entryOrder, exitOrder));
+        assertEquals(new BigDecimal("0.19950000"), TradeCalculator.getNetExitGain(entryOrder, exitOrder));
+    }
+
+    @Test
+    public void grossBuyDirectionGain() {
+        Order entryOrder = TestOrderUtils.createEntryOrder(Order.OrderType.BUY,
+                Decimal.valueOf("0.08"),
+                Decimal.valueOf("0.1"));
+        Order exitOrder = TestOrderUtils.createEntryOrder(Order.OrderType.SELL,
+                Decimal.valueOf("0.16"),
+                Decimal.valueOf("0.1"));
+
+        assertEquals(new BigDecimal("0.01600000"), TradeCalculator.getGrossExitGain(entryOrder, exitOrder));
+    }
+
+    @Test
+    public void grossLastPriceBuyDirectionGain() {
+        Order entryOrder = TestOrderUtils.createEntryOrder(Order.OrderType.BUY,
+                Decimal.valueOf("0.08"),
+                Decimal.valueOf("0.1"));
+
+        assertEquals(new BigDecimal("0.01600000"), TradeCalculator.getGrossExitGain(entryOrder, BigDecimal.valueOf(0.16)));
+    }
+
+    @Test
+    public void grossSellDirectionGain() {
+        Order entryOrder = TestOrderUtils.createEntryOrder(Order.OrderType.SELL,
+                Decimal.valueOf("0.08"),
+                Decimal.valueOf("0.1"));
+        Order exitOrder = TestOrderUtils.createEntryOrder(Order.OrderType.BUY,
+                Decimal.valueOf("0.04"),
+                Decimal.valueOf("0.2"));
+
+        assertEquals(new BigDecimal("0.20000000"), TradeCalculator.getGrossExitGain(entryOrder, exitOrder));
+    }
+
+    @Test
+    public void grossLastPriceSellDirectionGain() {
+        Order entryOrder = TestOrderUtils.createEntryOrder(Order.OrderType.SELL,
+                Decimal.valueOf("0.08"),
+                Decimal.valueOf("0.1"));
+
+        assertEquals(new BigDecimal("0.20000000"), TradeCalculator.getGrossExitGain(entryOrder, BigDecimal.valueOf(0.04)));
+    }
+
+    @Test
+    public void expectedBuyDirectionProfit() {
+        Order entryOrder = TestOrderUtils.createEntryOrder(Order.OrderType.BUY,
+                Decimal.valueOf("0.02"),
+                Decimal.valueOf("0.1"));
+
+        assertEquals(BigDecimal.valueOf(1.5), TradeCalculator.getExpectedProfit(entryOrder, BigDecimal.valueOf(0.03)));
+
+    }
+
+    @Test
+    public void expectedSellDirectionProfit() {
+        Order entryOrder = TestOrderUtils.createEntryOrder(Order.OrderType.SELL,
+                Decimal.valueOf("0.08"),
+                Decimal.valueOf("0.1"));
+
+        assertEquals(BigDecimal.valueOf(1.33333330), TradeCalculator.getExpectedProfit(entryOrder,
+                BigDecimal.valueOf(0.06)));
+    }
+
+    @Test
+    public void canExitSellDirection() {
+        Order entryOrder = TestOrderUtils.createEntryOrder(Order.OrderType.SELL,
+                Decimal.valueOf("0.08"),
+                Decimal.valueOf("0.1"));
+        assertFalse(TradeCalculator.canExit(entryOrder, BigDecimal.valueOf(0.09)));
+        assertFalse(TradeCalculator.canExit(entryOrder, BigDecimal.valueOf(0.0793)));
+        assertTrue(TradeCalculator.canExit(entryOrder, BigDecimal.valueOf(0.0792)));
+        assertTrue(TradeCalculator.canExit(entryOrder, BigDecimal.valueOf(0.06)));
+    }
+
+    @Test
+    public void canExitBuyDirection() {
+        Order entryOrder = TestOrderUtils.createEntryOrder(Order.OrderType.BUY,
+                Decimal.valueOf("0.08"),
+                Decimal.valueOf("0.1"));
+        assertFalse(TradeCalculator.canExit(entryOrder, BigDecimal.valueOf(0.07)));
+        assertFalse(TradeCalculator.canExit(entryOrder, BigDecimal.valueOf(0.0807)));
+        assertTrue(TradeCalculator.canExit(entryOrder, BigDecimal.valueOf(0.0808)));
+        assertTrue(TradeCalculator.canExit(entryOrder, BigDecimal.valueOf(0.09)));
     }
 
     @Test

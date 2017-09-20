@@ -7,7 +7,7 @@ import lombok.Value;
 @Value
 public class ExportData {
 
-    private static String OS = System.getProperty("os.name").toLowerCase();
+    private static final String OS = System.getProperty("os.name").toLowerCase();
 
     private CurrencyPair currencyPair;
     private String namePrefix;

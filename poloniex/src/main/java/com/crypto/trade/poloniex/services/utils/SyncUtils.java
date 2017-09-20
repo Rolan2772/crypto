@@ -9,6 +9,7 @@ public class SyncUtils {
         try {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new IllegalStateException("Sleeping was interrupted.", e);
         }
     }

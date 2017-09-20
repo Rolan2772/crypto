@@ -13,7 +13,7 @@
     <packaging>pom</packaging>
 
     <name>trade-parent</name>
-    <description>Demo project for Spring Boot</description>
+    <description>Crypto trading bot exmaple</description>
 
     <parent>
         <groupId>org.springframework.boot</groupId>

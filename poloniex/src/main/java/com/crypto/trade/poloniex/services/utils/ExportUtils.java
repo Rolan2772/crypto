@@ -7,4 +7,7 @@ public class ExportUtils {
     public static String getTradingRecordName(PoloniexTradingRecord tradingRecord) {
         return tradingRecord.getStrategyName() + "-tr-" + tradingRecord.getId();
     }
+
+    private ExportUtils() {
+    }
 }

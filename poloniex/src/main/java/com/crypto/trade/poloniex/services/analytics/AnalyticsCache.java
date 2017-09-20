@@ -5,12 +5,11 @@ import eu.verdelhan.ta4j.Indicator;
 import eu.verdelhan.ta4j.indicators.RecursiveCachedIndicator;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.EnumMap;
 
 public class AnalyticsCache {
 
-    private Map<TimeFrame, IndicatorsStorage> cache = new HashMap<>();
+    private EnumMap<TimeFrame, IndicatorsStorage> cache = new EnumMap<>(TimeFrame.class);
 
     public AnalyticsCache() {
         for (TimeFrame timeFrame : TimeFrame.values()) {
@@ -18,6 +17,7 @@ public class AnalyticsCache {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public <T extends Indicator<Decimal>> T getIndicator(TimeFrame timeFrame, IndicatorType type, Indicator<Decimal> defaultValue) {
         return (T) cache.get(timeFrame).getIndicator(type, defaultValue);
     }

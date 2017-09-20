@@ -21,10 +21,9 @@ public class TradeApiController {
     public String getOrders(@PathVariable CurrencyPair currency) {
         return candlesStorage.getData(currency)
                 .stream()
-                .map(timeFrameStorage -> {
-                    return timeFrameStorage.getTimeFrame().getDisplayName() + "\n" +
-                            ordersExportService.convert(timeFrameStorage).toString();
-                })
+                .map(timeFrameStorage -> timeFrameStorage.getTimeFrame()
+                        .getDisplayName() + "\n" +
+                        ordersExportService.convert(timeFrameStorage).toString())
                 .collect(Collectors.joining("\n\n"));
     }
 

@@ -156,7 +156,7 @@ public class TradeCalculatorTest {
                 Decimal.valueOf("0.02"),
                 Decimal.valueOf("0.1"));
 
-        assertEquals(BigDecimal.valueOf(1.5), TradeCalculator.getExpectedProfit(entryOrder, BigDecimal.valueOf(0.03)));
+        assertEquals(new BigDecimal("1.50000000"), TradeCalculator.getExpectedProfit(entryOrder, BigDecimal.valueOf(0.03)));
 
     }
 
@@ -166,7 +166,7 @@ public class TradeCalculatorTest {
                 Decimal.valueOf("0.08"),
                 Decimal.valueOf("0.1"));
 
-        assertEquals(BigDecimal.valueOf(1.33333330), TradeCalculator.getExpectedProfit(entryOrder,
+        assertEquals(new BigDecimal("1.33333330"), TradeCalculator.getExpectedProfit(entryOrder,
                 BigDecimal.valueOf(0.06)));
     }
 

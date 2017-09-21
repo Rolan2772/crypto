@@ -20,10 +20,14 @@ public class SignatureGenerator {
     private final Mac mac;
 
     public SignatureGenerator() {
+        this(HMAC_SHA512);
+    }
+
+    public SignatureGenerator(String algorithm) {
         try {
-            this.mac = Mac.getInstance(HMAC_SHA512);
+            this.mac = Mac.getInstance(algorithm);
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("Failed to create " + HMAC_SHA512 + " MAC.", e);
+            throw new IllegalStateException("Failed to instantiate MAC for " + algorithm, e);
         }
     }
 

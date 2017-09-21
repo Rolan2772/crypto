@@ -1,6 +1,8 @@
 package com.crypto.trade.poloniex.storage;
 
 import com.crypto.trade.poloniex.services.analytics.*;
+import com.crypto.trade.poloniex.services.analytics.model.AnalyticsData;
+import com.crypto.trade.poloniex.services.analytics.model.TradeData;
 import com.crypto.trade.poloniex.services.trade.TradingService;
 import eu.verdelhan.ta4j.BaseTick;
 import eu.verdelhan.ta4j.Tick;
@@ -76,14 +78,13 @@ public class NewCandleSupplier implements Supplier<Tick> {
             for (int trIndex = 0; trIndex < tradingRecords.size(); trIndex++) {
                 PoloniexTradingRecord poloniexTradingRecord = tradingRecords.get(trIndex);
                 TradingRecord tradingRecord = poloniexTradingRecord.getTradingRecord();
-                TradingAction action = realTimeAnalyticsService.analyzeTick(poloniexStrategy.getStrategy(),
-                        builtCandle,
-                        index,
-                        timeFrameStorage.getHistoryIndex(),
-                        false,
-                        tradingRecord,
-                        poloniexStrategy.getDirection(),
-                        poloniexStrategy.getTradeVolume());
+                TradingAction action = realTimeAnalyticsService.analyzeTick(
+                        AnalyticsData.of(poloniexStrategy.getStrategy(),
+                                tradingRecord,
+                                timeFrameStorage.getHistoryIndex()),
+                        TradeData.of(builtCandle, index,
+                                poloniexStrategy.getDirection(),
+                                poloniexStrategy.getTradeVolume()));
                 log.debug("Strategy {}/{} trading record {} analytics result {}, processing: {}.", timeFrame, poloniexStrategy.getName(), trIndex, action, poloniexTradingRecord.getProcessing().get());
                 if (TradingAction.shouldPlaceOrder(action)) {
                     try {

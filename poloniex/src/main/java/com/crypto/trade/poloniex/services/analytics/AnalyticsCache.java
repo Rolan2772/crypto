@@ -17,9 +17,10 @@ public class AnalyticsCache {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public <T extends Indicator<Decimal>> T getIndicator(TimeFrame timeFrame, IndicatorType type, Indicator<Decimal> defaultValue) {
-        return (T) cache.get(timeFrame).getIndicator(type, defaultValue);
+    public <T extends Indicator<Decimal>> T getIndicator(TimeFrame timeFrame,
+                                                         IndicatorType type,
+                                                         Indicator<Decimal> defaultValue) {
+        return cache.get(timeFrame).getIndicator(type, defaultValue);
     }
 
     public void cacheIndex(int index) {

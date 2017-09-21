@@ -4,7 +4,7 @@ import eu.verdelhan.ta4j.Decimal;
 import eu.verdelhan.ta4j.Order;
 import eu.verdelhan.ta4j.Trade;
 
-public class TestOrderUtils {
+public class TestOrderFactory {
 
     public static Order createEntryOrder(Decimal price, Decimal amount) {
         return createEntryOrder(Order.OrderType.BUY, price, amount);

@@ -2,6 +2,8 @@ package com.crypto.trade.poloniex.services.export;
 
 import com.crypto.trade.poloniex.services.analytics.AnalyticsService;
 import com.crypto.trade.poloniex.services.analytics.TradingAction;
+import com.crypto.trade.poloniex.services.analytics.model.AnalyticsData;
+import com.crypto.trade.poloniex.services.analytics.model.TradeData;
 import com.crypto.trade.poloniex.services.trade.ProfitCalculator;
 import com.crypto.trade.poloniex.services.trade.TradeCalculator;
 import com.crypto.trade.poloniex.services.trade.TradeResult;
@@ -70,14 +72,11 @@ public class ExportHelper {
                     BigDecimal volume = strategy.getTradeVolume();
                     return strategy.getTradingRecords()
                             .stream()
-                            .map(tradingRecord -> analyticsService.analyzeTick(strategy.getStrategy(),
-                                    tick,
-                                    index,
-                                    historyIndex,
-                                    false,
-                                    tradingRecord.getTradingRecord(),
-                                    strategy.getDirection(),
-                                    volume));
+                            .map(tradingRecord -> analyticsService.analyzeTick(
+                                    AnalyticsData.of(strategy.getStrategy(),
+                                            tradingRecord.getTradingRecord(),
+                                            historyIndex),
+                                    TradeData.of(tick, index, strategy.getDirection(), volume)));
                 })
                 .map(Object::toString)
                 .collect(Collectors.joining(","));

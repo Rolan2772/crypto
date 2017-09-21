@@ -1,7 +1,6 @@
 package com.crypto.trade.poloniex.services.trade;
 
 import com.crypto.trade.poloniex.config.properties.PoloniexProperties;
-import com.crypto.trade.poloniex.services.utils.HashUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -14,7 +13,9 @@ import java.util.stream.Collectors;
 public class PoloniexRequestHelper {
 
     @Autowired
-    private PoloniexProperties poloniex;
+    private PoloniexProperties properties;
+    @Autowired
+    private SignatureGenerator signatureGenerator;
 
     public String createRequestBody(Map<String, Object> params) {
         StringBuilder body = new StringBuilder();
@@ -29,11 +30,11 @@ public class PoloniexRequestHelper {
     }
 
     public HttpHeaders createRequestHeaders(String body) {
-        String sign = HashUtils.hmacSha512(body, poloniex.getSecret().getSignature());
+        String sign = signatureGenerator.sign(body);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        headers.set("Key", poloniex.getSecret().getKey());
+        headers.set("Key", properties.getSecret().getKey());
         headers.set("Sign", sign);
         return headers;
     }

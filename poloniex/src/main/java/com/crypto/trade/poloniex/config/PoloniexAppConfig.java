@@ -8,6 +8,7 @@ import com.crypto.trade.poloniex.services.analytics.TradeStrategyFactory;
 import com.crypto.trade.poloniex.services.export.ExportHelper;
 import com.crypto.trade.poloniex.services.trade.PoloniexRequestHelper;
 import com.crypto.trade.poloniex.services.trade.ProfitCalculator;
+import com.crypto.trade.poloniex.services.trade.SignatureGenerator;
 import com.crypto.trade.poloniex.services.utils.SyncUtils;
 import com.crypto.trade.poloniex.storage.CandlesStorage;
 import com.crypto.trade.poloniex.storage.TradesStorage;
@@ -71,5 +72,10 @@ public class PoloniexAppConfig {
     @Bean
     public IndicatorFactory indicatorFactory() {
         return new IndicatorFactory();
+    }
+
+    @Bean
+    public SignatureGenerator signatureGenerator() {
+        return new SignatureGenerator();
     }
 }

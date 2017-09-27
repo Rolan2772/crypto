@@ -1,4 +1,4 @@
-package com.crypto.trade.poloniex.storage;
+package com.crypto.trade.poloniex.storage.model;
 
 import com.crypto.trade.poloniex.services.analytics.TimeFrame;
 import eu.verdelhan.ta4j.Tick;

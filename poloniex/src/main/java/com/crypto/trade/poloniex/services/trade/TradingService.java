@@ -5,7 +5,7 @@ import com.crypto.trade.poloniex.dto.PoloniexOrderResponse;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import com.crypto.trade.poloniex.services.analytics.TradingAction;
 import com.crypto.trade.poloniex.services.utils.CalculationsUtils;
-import com.crypto.trade.poloniex.storage.PoloniexOrder;
+import com.crypto.trade.poloniex.storage.model.PoloniexOrder;
 import com.crypto.trade.poloniex.storage.TradesStorage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.verdelhan.ta4j.Order;

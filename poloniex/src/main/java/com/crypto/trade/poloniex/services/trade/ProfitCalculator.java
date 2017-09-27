@@ -1,8 +1,8 @@
 package com.crypto.trade.poloniex.services.trade;
 
 import com.crypto.trade.poloniex.services.utils.CalculationsUtils;
-import com.crypto.trade.poloniex.storage.PoloniexStrategy;
-import com.crypto.trade.poloniex.storage.PoloniexTradingRecord;
+import com.crypto.trade.poloniex.storage.model.PoloniexStrategy;
+import com.crypto.trade.poloniex.storage.model.PoloniexTradingRecord;
 import eu.verdelhan.ta4j.Order;
 import eu.verdelhan.ta4j.Trade;
 

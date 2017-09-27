@@ -1,4 +1,4 @@
-package com.crypto.trade.poloniex.storage;
+package com.crypto.trade.poloniex.services.analytics.model;
 
 import com.crypto.trade.poloniex.services.analytics.TradingAction;
 import lombok.AllArgsConstructor;

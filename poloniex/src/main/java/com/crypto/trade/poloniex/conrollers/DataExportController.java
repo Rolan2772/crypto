@@ -3,7 +3,7 @@ package com.crypto.trade.poloniex.conrollers;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import com.crypto.trade.poloniex.services.export.*;
 import com.crypto.trade.poloniex.storage.CandlesStorage;
-import com.crypto.trade.poloniex.storage.TimeFrameStorage;
+import com.crypto.trade.poloniex.storage.model.TimeFrameStorage;
 import com.crypto.trade.poloniex.storage.TradesStorage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

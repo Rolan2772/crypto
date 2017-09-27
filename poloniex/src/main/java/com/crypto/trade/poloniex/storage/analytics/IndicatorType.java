@@ -1,4 +1,4 @@
-package com.crypto.trade.poloniex.services.analytics;
+package com.crypto.trade.poloniex.storage.analytics;
 
 public enum IndicatorType {
 
@@ -12,5 +12,6 @@ public enum IndicatorType {
     TMA90,
     RSI14,
     STOCHK14,
-    STOCHD3
+    STOCHD3,
+    CLOSED_PRICE
 }

@@ -4,6 +4,11 @@ import com.crypto.trade.poloniex.services.analytics.*;
 import com.crypto.trade.poloniex.services.analytics.model.AnalyticsData;
 import com.crypto.trade.poloniex.services.analytics.model.TradeData;
 import com.crypto.trade.poloniex.services.trade.TradingService;
+import com.crypto.trade.poloniex.storage.analytics.AnalyticsStorage;
+import com.crypto.trade.poloniex.storage.model.PoloniexOrder;
+import com.crypto.trade.poloniex.storage.model.PoloniexStrategy;
+import com.crypto.trade.poloniex.storage.model.PoloniexTradingRecord;
+import com.crypto.trade.poloniex.storage.model.TimeFrameStorage;
 import eu.verdelhan.ta4j.BaseTick;
 import eu.verdelhan.ta4j.Tick;
 import eu.verdelhan.ta4j.TradingRecord;
@@ -27,7 +32,7 @@ public class NewCandleSupplier implements Supplier<Tick> {
     private TradingService tradingService;
     private boolean isRealPrice;
     private boolean isHistoryTick;
-    private AnalyticsCache analyticsCache;
+    private AnalyticsStorage analyticsStorage;
     private CurrencyPair currency;
 
     @Override
@@ -66,7 +71,7 @@ public class NewCandleSupplier implements Supplier<Tick> {
     }
 
     private void onNewCandle(TimeFrameStorage timeFrameStorage, int index) {
-        analyticsCache.cacheIndex(index);
+        analyticsStorage.cacheIndex(index);
         TimeFrame timeFrame = timeFrameStorage.getTimeFrame();
         log.info("Analyzing new {} {} candle at {}.", currency, timeFrame, index);
         Tick builtCandle = timeFrameStorage.getCandles().get(index);

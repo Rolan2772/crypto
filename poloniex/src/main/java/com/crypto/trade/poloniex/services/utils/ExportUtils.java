@@ -1,6 +1,6 @@
 package com.crypto.trade.poloniex.services.utils;
 
-import com.crypto.trade.poloniex.storage.PoloniexTradingRecord;
+import com.crypto.trade.poloniex.storage.model.PoloniexTradingRecord;
 
 public class ExportUtils {
 

@@ -1,22 +1,18 @@
 package com.crypto.trade.poloniex.services.export;
 
-import com.crypto.trade.poloniex.services.analytics.*;
-import com.crypto.trade.poloniex.services.analytics.indicators.CachedDoubleEMAIndicator;
-import com.crypto.trade.poloniex.services.analytics.indicators.CachedTripleEMAIndicator;
+import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
+import com.crypto.trade.poloniex.services.analytics.TimeFrame;
 import com.crypto.trade.poloniex.services.utils.CsvFileWriter;
 import com.crypto.trade.poloniex.storage.CandlesStorage;
-import com.crypto.trade.poloniex.storage.PoloniexStrategy;
-import com.crypto.trade.poloniex.storage.PoloniexTradingRecord;
-import com.crypto.trade.poloniex.storage.TimeFrameStorage;
+import com.crypto.trade.poloniex.storage.analytics.AnalyticsStorage;
+import com.crypto.trade.poloniex.storage.analytics.IndicatorType;
+import com.crypto.trade.poloniex.storage.model.PoloniexStrategy;
+import com.crypto.trade.poloniex.storage.model.PoloniexTradingRecord;
+import com.crypto.trade.poloniex.storage.model.TimeFrameStorage;
 import eu.verdelhan.ta4j.BaseTimeSeries;
 import eu.verdelhan.ta4j.Decimal;
 import eu.verdelhan.ta4j.Indicator;
 import eu.verdelhan.ta4j.TimeSeries;
-import eu.verdelhan.ta4j.indicators.EMAIndicator;
-import eu.verdelhan.ta4j.indicators.RSIIndicator;
-import eu.verdelhan.ta4j.indicators.StochasticOscillatorDIndicator;
-import eu.verdelhan.ta4j.indicators.StochasticOscillatorKIndicator;
-import eu.verdelhan.ta4j.indicators.helpers.ClosePriceIndicator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,15 +37,13 @@ public class AnalyticsExportService implements MemoryExportService<TimeFrameStor
     @Autowired
     private ExportHelper exportHelper;
     @Autowired
-    private AnalyticsCache analyticsCache;
-    @Autowired
-    private IndicatorFactory indicatorFactory;
+    private AnalyticsStorage analyticsStorage;
 
     @Override
     public void exportMemoryData(CurrencyPair currencyPair, Collection<TimeFrameStorage> data, OsType osType) {
         data.forEach(timeFrameStorage -> {
             String name = osType + "-" + createName(timeFrameStorage.getTimeFrame(), currencyPair);
-            csvFileWriter.write(new ExportData(currencyPair, name, convert(timeFrameStorage), osType));
+            csvFileWriter.write(new ExportData(currencyPair, name, convert(currencyPair, timeFrameStorage), osType));
         });
     }
 
@@ -57,11 +51,11 @@ public class AnalyticsExportService implements MemoryExportService<TimeFrameStor
     public void exportMemoryData(CurrencyPair currencyPair, Collection<TimeFrameStorage> data) {
         data.forEach(timeFrameStorage -> {
             String name = createName(timeFrameStorage.getTimeFrame(), currencyPair);
-            csvFileWriter.write(new ExportData(currencyPair, name, convert(timeFrameStorage)));
+            csvFileWriter.write(new ExportData(currencyPair, name, convert(currencyPair, timeFrameStorage)));
         });
     }
 
-    private StringBuilder convert(TimeFrameStorage timeFrameStorage) {
+    private StringBuilder convert(CurrencyPair currencyPair, TimeFrameStorage timeFrameStorage) {
         TimeFrame timeFrame = timeFrameStorage.getTimeFrame();
         List<PoloniexStrategy> poloniexStrategies = timeFrameStorage.getActiveStrategies();
         List<PoloniexStrategy> strategiesCopy = exportHelper.createTradingRecordsCopy(poloniexStrategies);
@@ -75,7 +69,7 @@ public class AnalyticsExportService implements MemoryExportService<TimeFrameStor
 
         int count = timeFrameStorage.getCandles().size();
         TimeSeries timeSeries = new BaseTimeSeries(timeFrame.name(), timeFrameStorage.getCandles());
-        List<Indicator<Decimal>> indicators = createIndicators(timeFrame, timeSeries);
+        List<Indicator<Decimal>> indicators = createIndicators(currencyPair, timeFrame);
         IntStream.range(0, count).forEach(index -> sb.append(exportHelper.convertIndicators(timeSeries, indicators, index))
                 .append(",")
                 .append(exportHelper.createHistoryTradesAnalytics(strategiesCopy, timeSeries, index, timeFrameStorage.getHistoryIndex()))
@@ -101,39 +95,25 @@ public class AnalyticsExportService implements MemoryExportService<TimeFrameStor
         return ANALYTICS_FILE_NAME + currencyPair + "(" + timeFrame.getDisplayName() + ")";
     }
 
-    private List<Indicator<Decimal>> createIndicators(TimeFrame timeFrame, TimeSeries timeSeries) {
-        ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
-        RSIIndicator rsi = analyticsCache.getIndicator(timeFrame,
-                IndicatorType.RSI14,
-                indicatorFactory.createRsi14Indicator(closePrice));
-        StochasticOscillatorKIndicator stochK = analyticsCache.getIndicator(timeFrame,
-                IndicatorType.STOCHK14,
-                indicatorFactory.createStochK14(timeSeries));
-        StochasticOscillatorDIndicator stochD = analyticsCache.getIndicator(timeFrame,
-                IndicatorType.STOCHD3,
-                indicatorFactory.createStochD3(stochK));
-        EMAIndicator ema5 = analyticsCache.getIndicator(timeFrame,
-                IndicatorType.EMA5,
-                indicatorFactory.createEma5Indicator(closePrice));
-        EMAIndicator ema90 = analyticsCache.getIndicator(timeFrame,
-                IndicatorType.EMA90,
-                indicatorFactory.createEma90Indicator(closePrice));
-        EMAIndicator ema100 = analyticsCache.getIndicator(timeFrame,
-                IndicatorType.EMA100,
-                indicatorFactory.createEma100Indicator(closePrice));
-        EMAIndicator emaEma90 = analyticsCache.getIndicator(timeFrame,
-                IndicatorType.EMA_EMA90,
-                indicatorFactory.createEmaEma90Indicator(ema90));
-        CachedDoubleEMAIndicator dma90 = analyticsCache.getIndicator(timeFrame,
-                IndicatorType.DMA90,
-                indicatorFactory.createDma90Indicator(closePrice, ema90, emaEma90));
-        EMAIndicator emaEmaEma90 = analyticsCache.getIndicator(timeFrame,
-                IndicatorType.EMA_EMA_EMA90,
-                indicatorFactory.createEmaEmaEma90Indicator(emaEma90));
-        CachedTripleEMAIndicator tma90 = analyticsCache.getIndicator(timeFrame,
-                IndicatorType.TMA90,
-                indicatorFactory.createTma90Indicator(closePrice, ema90, emaEma90, emaEmaEma90));
-        return Stream.of(closePrice, rsi, stochK, stochD, ema5, ema90, ema100, dma90, tma90).collect(Collectors.toList());
+    private List<Indicator<Decimal>> createIndicators(CurrencyPair currencyPair, TimeFrame timeFrame) {
+        return Stream.of(analyticsStorage.<Indicator<Decimal>>getIndicator(currencyPair, timeFrame, IndicatorType.CLOSED_PRICE),
+                analyticsStorage.getIndicator(currencyPair, timeFrame,
+                        IndicatorType.RSI14),
+                analyticsStorage.getIndicator(currencyPair, timeFrame,
+                        IndicatorType.STOCHK14),
+                analyticsStorage.getIndicator(currencyPair, timeFrame,
+                        IndicatorType.STOCHD3),
+                analyticsStorage.getIndicator(currencyPair, timeFrame,
+                        IndicatorType.EMA5),
+                analyticsStorage.getIndicator(currencyPair, timeFrame,
+                        IndicatorType.EMA90),
+                analyticsStorage.getIndicator(currencyPair, timeFrame,
+                        IndicatorType.EMA100),
+                analyticsStorage.getIndicator(currencyPair, timeFrame,
+                        IndicatorType.DMA90),
+                analyticsStorage.getIndicator(currencyPair, timeFrame,
+                        IndicatorType.TMA90))
+                .collect(Collectors.toList());
     }
 
     @PreDestroy

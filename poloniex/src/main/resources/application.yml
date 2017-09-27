@@ -11,6 +11,7 @@ poloniex:
     minBtcTradeAmount: 0.000105
     # 5$ approximately
     realBtcTradeAmount: 0.0018
+  currencies: BTC_ETH, BTC_LTC, BTC_XRP
 
 # Spring app configuration
 server:

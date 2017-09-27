@@ -3,7 +3,6 @@ package com.crypto.trade.poloniex.storage;
 import com.crypto.trade.poloniex.dto.PoloniexHistoryTrade;
 import com.crypto.trade.poloniex.dto.PoloniexTrade;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
-import com.crypto.trade.poloniex.services.export.TradesExportService;
 import com.crypto.trade.poloniex.services.utils.DateTimeUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +28,6 @@ public class TradesStorage {
 
     @Autowired
     private CandlesStorage candlesStorage;
-    @Autowired
-    private TradesExportService tradesExportService;
 
     private ConcurrentMap<CurrencyPair, SortedSet<PoloniexTrade>> trades = new ConcurrentHashMap<>();
 
@@ -77,7 +74,6 @@ public class TradesStorage {
             log.info("Found {} trades older than {}.", staleElementsCount, minTime);
             if (staleElementsCount > 0) {
                 currencyTrades.removeAll(staleTrades);
-                //tradesExportService.exportExcessData(TradesExportService.STALE_TRADES_FILE_NAME + currencyPair, staleTrades);
             }
         });
     }

@@ -5,7 +5,7 @@ import com.crypto.trade.poloniex.services.analytics.TimeFrame;
 import com.crypto.trade.poloniex.services.utils.CsvFileWriter;
 import com.crypto.trade.poloniex.services.utils.ExportUtils;
 import com.crypto.trade.poloniex.storage.CandlesStorage;
-import com.crypto.trade.poloniex.storage.TimeFrameStorage;
+import com.crypto.trade.poloniex.storage.model.TimeFrameStorage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

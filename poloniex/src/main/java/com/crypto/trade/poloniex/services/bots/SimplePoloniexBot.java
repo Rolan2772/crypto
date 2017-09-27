@@ -1,7 +1,8 @@
 package com.crypto.trade.poloniex.services.bots;
 
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
-import com.crypto.trade.poloniex.services.analytics.PoloniexStrategyFactory;
+import com.crypto.trade.poloniex.services.analytics.poloniex.ExperimentalTradeConfigFactory;
+import com.crypto.trade.poloniex.services.analytics.poloniex.RealTradeConfFactory;
 import com.crypto.trade.poloniex.services.trade.HistoryService;
 import com.crypto.trade.poloniex.services.ws.WsConnector;
 import com.crypto.trade.poloniex.storage.CandlesStorage;
@@ -20,7 +21,7 @@ import java.time.Duration;
 public class SimplePoloniexBot {
 
     //    @Qualifier("fileTradesHistoryService")
-//    @Qualifier("copyTradesHistoryService")
+    //    @Qualifier("copyTradesHistoryService")
     @Qualifier("serverTradesHistoryService")
     @Autowired
     private HistoryService historyService;
@@ -29,7 +30,9 @@ public class SimplePoloniexBot {
     @Autowired
     private WsConnector wsConnector;
     @Autowired
-    private PoloniexStrategyFactory poloniexStrategyFactory;
+    private RealTradeConfFactory realTradeConfFactory;
+    @Autowired
+    private ExperimentalTradeConfigFactory experimentalTradeConfigFactory;
     @Autowired
     private CandlesStorage candlesStorage;
 
@@ -37,7 +40,7 @@ public class SimplePoloniexBot {
     public void postConstruct() throws IOException, DeploymentException {
         CurrencyPair btcEth = CurrencyPair.BTC_ETH;
         tradesStorage.initCurrency(btcEth);
-        candlesStorage.initCurrency(btcEth, poloniexStrategyFactory.createTopPerformingStrategies(btcEth));
+        candlesStorage.initCurrency(btcEth, experimentalTradeConfigFactory.createTopPerformingStrategies(btcEth));
         wsConnector.connect();
         tradesStorage.addTradesHistory(btcEth, historyService.loadTradesHistory(btcEth, Duration.ofHours(6)));
     }

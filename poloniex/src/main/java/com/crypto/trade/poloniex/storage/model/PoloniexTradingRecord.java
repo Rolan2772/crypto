@@ -1,4 +1,4 @@
-package com.crypto.trade.poloniex.storage;
+package com.crypto.trade.poloniex.storage.model;
 
 import eu.verdelhan.ta4j.BaseTradingRecord;
 import eu.verdelhan.ta4j.Order;

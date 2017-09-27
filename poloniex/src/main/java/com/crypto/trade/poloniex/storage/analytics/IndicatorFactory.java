@@ -1,4 +1,4 @@
-package com.crypto.trade.poloniex.services.analytics;
+package com.crypto.trade.poloniex.storage.analytics;
 
 import com.crypto.trade.poloniex.services.analytics.indicators.CachedDoubleEMAIndicator;
 import com.crypto.trade.poloniex.services.analytics.indicators.CachedTripleEMAIndicator;
@@ -13,6 +13,16 @@ import eu.verdelhan.ta4j.indicators.helpers.ClosePriceIndicator;
 
 public class IndicatorFactory {
 
+    /*public <T extends Indicator<Decimal>> T createIndicator(IndicatorType type, TimeSeries timeSeries) {
+        ClosePriceIndicator closePrice = new ClosePriceIndicator(timeSeries);
+        switch (type) {
+            case RSI14:
+                return (T) new RSIIndicator(closePrice, 14);
+            default:
+                throw new IllegalArgumentException("Wrong indicator type: " + type);
+        }
+    }
+*/
     public RSIIndicator createRsi14Indicator(ClosePriceIndicator closePrice) {
         return new RSIIndicator(closePrice, 14);
     }

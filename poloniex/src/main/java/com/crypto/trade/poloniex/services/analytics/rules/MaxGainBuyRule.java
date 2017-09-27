@@ -40,7 +40,7 @@ public class MaxGainBuyRule extends AbstractRule {
 
     private Decimal findMaxPrice(int entryIndex, int currentIndex) {
         return IntStream.rangeClosed(entryIndex, currentIndex)
-                .mapToObj(index -> closePrice.getValue(index))
+                .mapToObj(closePrice::getValue)
                 .max(Decimal::compareTo).orElse(Decimal.ZERO);
     }
 }

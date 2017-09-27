@@ -4,14 +4,14 @@ import eu.verdelhan.ta4j.Decimal;
 import eu.verdelhan.ta4j.Indicator;
 import lombok.Value;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
 @Value
 public class IndicatorsStorage {
 
-    private Map<IndicatorType, Indicator<Decimal>> indicators = new HashMap<>();
+    private Map<IndicatorType, Indicator<Decimal>> indicators = new EnumMap<>(IndicatorType.class);
 
     public <T extends Indicator<Decimal>> T getIndicator(IndicatorType indicatorType, Supplier<T> factory) {
         indicators.computeIfAbsent(indicatorType, key -> factory.get());

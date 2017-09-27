@@ -75,36 +75,11 @@ public class TrendStrategyFactory {
     public Strategy createFallingTrendStrategy(CurrencyPair currencyPair, TimeFrame timeFrame) {
         TrendAnalytics analytics = analyticsHelper.getRisingAnalytics(currencyPair, timeFrame);
 
-        // ema90[0] >= ema90[-1] and ma05 > ma100
-        Rule trendUp = new NotRule(new FallingDownIndicatorRule(analytics.getEma90()))
-                .and(new UpperRule(analytics.getEma5(), analytics.getEma100()));
-        // ema90[-1] >= ema90[-2] and ema05[-1] < ma100[-1]
-        Rule buySignal1 = new NotRule(new FallingDownIndicatorRule(analytics.getEma90(), 1))
-                .and(new LowerRule(analytics.getEma5(), analytics.getEma100(), 1));
-        // ema90[-1] <= ema90[-2] and ema05[-1] < ema100[-1]
-        Rule buySignal2 = new NotRule(new RisingUpIndicatorRule(analytics.getEma90(), 1))
-                .and(new LowerRule(analytics.getEma5(), analytics.getEma100(), 1));
+        Rule entryRule = createBuyExitRule(analytics);
+        Rule exitRule = createBuyEntryRule(analytics)
+                .and(new ModifiedStopGainRule(analytics.getClosePrice(), Decimal.ONE));
 
-        Rule entry1 = trendUp.and(buySignal1);
-        Rule entry2 = trendUp.and(new NotRule(buySignal1)).and(buySignal2);
-
-        Rule entryRule = entry1.or(entry2).and(new ModifiedStopGainRule(analytics.getClosePrice(), Decimal.ONE));
-
-        // Exit rule
-        // ema90[0] <= ema90[-1] and ema05 < ema100
-        Rule trendDown = new NotRule(new RisingUpIndicatorRule(analytics.getEma90()))
-                .and(new LowerRule(analytics.getEma5(), analytics.getEma100()));
-        // ema90[0] < ema90[-1] and ema05 > ema100
-        Rule trendPreDown = new FallingDownIndicatorRule(analytics.getEma90())
-                .and(new UpperRule(analytics.getEma5(), analytics.getEma100()));
-        // ema90[-1] >= ema90[-2] and ema05[-1] > ema100[-1]
-        Rule exit1 = new NotRule(new FallingDownIndicatorRule(analytics.getEma90(), 1))
-                .and(new UpperRule(analytics.getEma5(), analytics.getEma100(), 1));
-
-        Rule exitRule = new OrRule(trendDown, trendPreDown)
-                .and(exit1);
-
-        Strategy strategy = new BaseStrategy(exitRule, entryRule);
+        Strategy strategy = new BaseStrategy(entryRule, exitRule);
         strategy.setUnstablePeriod(100);
 
         return strategy;

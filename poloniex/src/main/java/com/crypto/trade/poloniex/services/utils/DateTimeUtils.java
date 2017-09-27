@@ -16,4 +16,7 @@ public class DateTimeUtils {
     public static String format(TemporalAccessor temporalAccessor) {
         return CSV_FORMATTER.format(temporalAccessor);
     }
+
+    private DateTimeUtils() {
+    }
 }

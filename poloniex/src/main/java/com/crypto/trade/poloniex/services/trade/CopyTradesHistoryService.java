@@ -3,7 +3,6 @@ package com.crypto.trade.poloniex.services.trade;
 import com.crypto.trade.poloniex.config.properties.PoloniexProperties;
 import com.crypto.trade.poloniex.dto.PoloniexHistoryTrade;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
-import com.crypto.trade.poloniex.services.utils.CsvFileWriter;
 import com.crypto.trade.poloniex.services.utils.SyncUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -35,8 +34,6 @@ public class CopyTradesHistoryService implements HistoryService {
     @Autowired
     private SyncUtils syncUtils;
     @Autowired
-    private CsvFileWriter csvFileWriter;
-    @Autowired
     private ObjectMapper objectMapper;
 
     @Override
@@ -48,8 +45,6 @@ public class CopyTradesHistoryService implements HistoryService {
     @Override
     public List<PoloniexHistoryTrade> loadTradesHistory(CurrencyPair currencyPair, LocalDateTime start, LocalDateTime end) {
         List<PoloniexHistoryTrade> trades = new ArrayList<>();
-        //LocalDate fromDate = LocalDate.of(2017, Month.JANUARY, 1);
-        //LocalDate toDate = LocalDate.of(2017, Month.AUGUST, 28);
         Instant now = end.toInstant(ZoneOffset.UTC);
         Instant from = start.toInstant(ZoneOffset.UTC);
         SortedSet<PoloniexHistoryTrade> history = new TreeSet<>(Comparator.comparing(PoloniexHistoryTrade::getDate)

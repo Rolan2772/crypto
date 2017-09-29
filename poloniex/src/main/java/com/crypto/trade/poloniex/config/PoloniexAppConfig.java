@@ -3,11 +3,10 @@ package com.crypto.trade.poloniex.config;
 import com.crypto.trade.poloniex.config.properties.PoloniexProperties;
 import com.crypto.trade.poloniex.services.analytics.poloniex.ExperimentalTradeConfigFactory;
 import com.crypto.trade.poloniex.services.analytics.poloniex.RealTradeConfFactory;
-import com.crypto.trade.poloniex.services.analytics.poloniex.TradeConfigUtils;
 import com.crypto.trade.poloniex.services.analytics.strategies.AnalyticsHelper;
 import com.crypto.trade.poloniex.services.analytics.strategies.ShortBuyStrategyFactory;
+import com.crypto.trade.poloniex.services.analytics.strategies.TmaStrategyFactory;
 import com.crypto.trade.poloniex.services.analytics.strategies.TrendStrategyFactory;
-import com.crypto.trade.poloniex.services.analytics.strategies.TripleEmaStrategyFactory;
 import com.crypto.trade.poloniex.services.export.ExportHelper;
 import com.crypto.trade.poloniex.services.trade.PoloniexRequestHelper;
 import com.crypto.trade.poloniex.services.trade.ProfitCalculator;
@@ -16,7 +15,6 @@ import com.crypto.trade.poloniex.services.utils.SyncUtils;
 import com.crypto.trade.poloniex.storage.CandlesStorage;
 import com.crypto.trade.poloniex.storage.TradesStorage;
 import com.crypto.trade.poloniex.storage.analytics.AnalyticsStorage;
-import com.crypto.trade.poloniex.storage.analytics.IndicatorFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,13 +43,13 @@ public class PoloniexAppConfig {
     }
 
     @Bean
-    public TrendStrategyFactory trendStrategyFactory() {
+    public TrendStrategyFactory trendFactory() {
         return new TrendStrategyFactory();
     }
 
     @Bean
-    public TripleEmaStrategyFactory tripleEmaStrategyFactory() {
-        return new TripleEmaStrategyFactory();
+    public TmaStrategyFactory tmaFactory() {
+        return new TmaStrategyFactory();
     }
 
     @Bean
@@ -67,11 +65,6 @@ public class PoloniexAppConfig {
     @Bean
     public RealTradeConfFactory realTradeConfFactory() {
         return new RealTradeConfFactory();
-    }
-
-    @Bean
-    public TradeConfigUtils tradeConfigUtils() {
-        return new TradeConfigUtils();
     }
 
     @Bean
@@ -97,11 +90,6 @@ public class PoloniexAppConfig {
     @Bean
     public AnalyticsStorage analyticsCache() {
         return new AnalyticsStorage();
-    }
-
-    @Bean
-    public IndicatorFactory indicatorFactory() {
-        return new IndicatorFactory();
     }
 
     @Bean

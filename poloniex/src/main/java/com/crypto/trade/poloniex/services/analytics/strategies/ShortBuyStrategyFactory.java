@@ -61,31 +61,7 @@ public class ShortBuyStrategyFactory {
         return strategy;
     }
 
-    public Strategy createShortBuyEma90Strategy1(CurrencyPair currencyPair, TimeFrame timeFrame) {
-        return createShortBuyEma90(currencyPair, timeFrame, StrategyRules.of(Decimal.ONE, Decimal.valueOf(5)));
-    }
-
-    public Strategy createShortBuyEma90Strategy2(CurrencyPair currencyPair, TimeFrame timeFrame) {
-        return createShortBuyEma90(currencyPair, timeFrame, StrategyRules.of(Decimal.ONE, Decimal.valueOf(10)));
-    }
-
-    public Strategy createShortBuyEma90Strategy3(CurrencyPair currencyPair, TimeFrame timeFrame) {
-        return createShortBuyEma90(currencyPair, timeFrame, StrategyRules.of(Decimal.ONE, Decimal.valueOf(25)));
-    }
-
-    public Strategy createShortBuyEma90Strategy4(CurrencyPair currencyPair, TimeFrame timeFrame) {
-        return createShortBuyEma90(currencyPair, timeFrame, StrategyRules.of(Decimal.ONE, Decimal.valueOf(50)));
-    }
-
-    public Strategy createShortBuyEma90Strategy5(CurrencyPair currencyPair, TimeFrame timeFrame) {
-        return createShortBuyEma90(currencyPair, timeFrame, StrategyRules.of(Decimal.ONE, Decimal.valueOf(100)));
-    }
-
-    public Strategy createShortBuyEma90Strategy(CurrencyPair currencyPair, TimeFrame timeFrame) {
-        return createShortBuyEma90(currencyPair, timeFrame, StrategyRules.of(Decimal.ONE, Decimal.ONE));
-    }
-
-    private Strategy createShortBuyEma90(CurrencyPair currencyPair, TimeFrame timeFrame, StrategyRules strategyRules) {
+    public Strategy createShortBuyEma90(CurrencyPair currencyPair, TimeFrame timeFrame, StrategyRules strategyRules) {
         ShortBuyAnalytics analytics = analyticsHelper.getShortBuyAnalytics(currencyPair, timeFrame);
 
         // Entry rule
@@ -107,31 +83,7 @@ public class ShortBuyStrategyFactory {
                 .and(new CrossedUpIndicatorRule(analytics.getStochK(), analytics.getStochD())); // K cross D from the bottom
     }
 
-    public Strategy createShortSellEma90Strategy(CurrencyPair currencyPair, TimeFrame timeFrame) {
-        return createShortSellEma90(currencyPair, timeFrame, StrategyRules.of(Decimal.ONE, Decimal.ONE));
-    }
-
-    public Strategy createShortSellEma90Strategy1(CurrencyPair currencyPair, TimeFrame timeFrame) {
-        return createShortSellEma90(currencyPair, timeFrame, StrategyRules.of(Decimal.ONE, Decimal.valueOf(5)));
-    }
-
-    public Strategy createShortSellEma90Strategy2(CurrencyPair currencyPair, TimeFrame timeFrame) {
-        return createShortSellEma90(currencyPair, timeFrame, StrategyRules.of(Decimal.ONE, Decimal.valueOf(10)));
-    }
-
-    public Strategy createShortSellEma90Strategy3(CurrencyPair currencyPair, TimeFrame timeFrame) {
-        return createShortSellEma90(currencyPair, timeFrame, StrategyRules.of(Decimal.ONE, Decimal.valueOf(25)));
-    }
-
-    public Strategy createShortSellEma90Strategy4(CurrencyPair currencyPair, TimeFrame timeFrame) {
-        return createShortSellEma90(currencyPair, timeFrame, StrategyRules.of(Decimal.ONE, Decimal.valueOf(50)));
-    }
-
-    public Strategy createShortSellEma90Strategy5(CurrencyPair currencyPair, TimeFrame timeFrame) {
-        return createShortSellEma90(currencyPair, timeFrame, StrategyRules.of(Decimal.ONE, Decimal.valueOf(100)));
-    }
-
-    private Strategy createShortSellEma90(CurrencyPair currencyPair, TimeFrame timeFrame, StrategyRules strategyRules) {
+    public Strategy createShortSellEma90(CurrencyPair currencyPair, TimeFrame timeFrame, StrategyRules strategyRules) {
         ShortBuyAnalytics analytics = analyticsHelper.getShortBuyAnalytics(currencyPair, timeFrame);
 
         // Entry rule

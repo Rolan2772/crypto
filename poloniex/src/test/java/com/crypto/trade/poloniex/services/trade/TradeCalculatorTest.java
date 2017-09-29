@@ -2,7 +2,7 @@ package com.crypto.trade.poloniex.services.trade;
 
 import com.crypto.trade.poloniex.dto.ResultTrade;
 import com.crypto.trade.poloniex.services.utils.CalculationsUtils;
-import com.crypto.trade.utils.TestOrderFactory;
+import com.crypto.trade.utils.TestOrdersFactory;
 import eu.verdelhan.ta4j.Decimal;
 import eu.verdelhan.ta4j.Order;
 import org.junit.Test;
@@ -24,13 +24,13 @@ public class TradeCalculatorTest {
 
     @Test
     public void orderTotal() {
-        Order order = TestOrderFactory.createEntryOrder(Decimal.valueOf("0.08242652"), Decimal.valueOf("0.12132017"));
+        Order order = TestOrdersFactory.createEntryOrder(Decimal.valueOf("0.08242652"), Decimal.valueOf("0.12132017"));
         assertEquals(BigDecimal.valueOf(0.00999999), TradeCalculator.getTotal(order));
     }
 
     @Test
     public void orderTotalWithFee() {
-        Order order = TestOrderFactory.createEntryOrder(Decimal.valueOf("0.08242652"), Decimal.valueOf("0.12132017"));
+        Order order = TestOrdersFactory.createEntryOrder(Decimal.valueOf("0.08242652"), Decimal.valueOf("0.12132017"));
         assertEquals(new BigDecimal("0.00997500"), TradeCalculator.getTotalWithFee(order));
     }
 
@@ -53,7 +53,7 @@ public class TradeCalculatorTest {
 
     @Test
     public void buyDirectionExitAmount() {
-        Order order = TestOrderFactory.createEntryOrder(Decimal.valueOf("0.08999601"), Decimal.valueOf("0.11237875"));
+        Order order = TestOrdersFactory.createEntryOrder(Decimal.valueOf("0.08999601"), Decimal.valueOf("0.11237875"));
         assertEquals(BigDecimal.valueOf(0.11209781),
                 TradeCalculator.getExitAmount(order, BigDecimal.ONE));
     }
@@ -61,7 +61,7 @@ public class TradeCalculatorTest {
     @Test
     public void sellDirectionExitAmount() {
         BigDecimal entryAmount = BigDecimal.valueOf(0.11237875);
-        Order entryOrder = TestOrderFactory.createEntryOrder(Order.OrderType.SELL,
+        Order entryOrder = TestOrdersFactory.createEntryOrder(Order.OrderType.SELL,
                 Decimal.valueOf("0.08999601"),
                 CalculationsUtils.toDecimal(entryAmount));
 
@@ -72,13 +72,13 @@ public class TradeCalculatorTest {
 
     @Test
     public void buyDirectionSpent() {
-        Order entryOrder = TestOrderFactory.createEntryOrder(Decimal.valueOf("0.08242652"), Decimal.valueOf("0.12132017"));
+        Order entryOrder = TestOrdersFactory.createEntryOrder(Decimal.valueOf("0.08242652"), Decimal.valueOf("0.12132017"));
         assertEquals(BigDecimal.valueOf(0.00999999), TradeCalculator.getEntrySpent(entryOrder));
     }
 
     @Test
     public void sellDirectionSpent() {
-        Order entryOrder = TestOrderFactory.createEntryOrder(Order.OrderType.SELL,
+        Order entryOrder = TestOrdersFactory.createEntryOrder(Order.OrderType.SELL,
                 Decimal.valueOf("0.08242652"),
                 Decimal.valueOf("0.12132017"));
         assertEquals(BigDecimal.valueOf(0.12132017), TradeCalculator.getEntrySpent(entryOrder));
@@ -86,10 +86,10 @@ public class TradeCalculatorTest {
 
     @Test
     public void netBuyDirectionGain() {
-        Order entryOrder = TestOrderFactory.createEntryOrder(Order.OrderType.BUY,
+        Order entryOrder = TestOrdersFactory.createEntryOrder(Order.OrderType.BUY,
                 Decimal.valueOf("0.08199601"),
                 Decimal.valueOf("0.12209781"));
-        Order exitOrder = TestOrderFactory.createEntryOrder(Order.OrderType.SELL,
+        Order exitOrder = TestOrdersFactory.createEntryOrder(Order.OrderType.SELL,
                 Decimal.valueOf("0.09199601"),
                 Decimal.valueOf("0.11209781"));
 
@@ -98,10 +98,10 @@ public class TradeCalculatorTest {
 
     @Test
     public void netSellDirectionGain() {
-        Order entryOrder = TestOrderFactory.createEntryOrder(Order.OrderType.SELL,
+        Order entryOrder = TestOrdersFactory.createEntryOrder(Order.OrderType.SELL,
                 Decimal.valueOf("0.08"),
                 Decimal.valueOf("0.1"));
-        Order exitOrder = TestOrderFactory.createEntryOrder(Order.OrderType.BUY,
+        Order exitOrder = TestOrdersFactory.createEntryOrder(Order.OrderType.BUY,
                 Decimal.valueOf("0.04"),
                 Decimal.valueOf("0.2"));
 
@@ -110,10 +110,10 @@ public class TradeCalculatorTest {
 
     @Test
     public void grossBuyDirectionGain() {
-        Order entryOrder = TestOrderFactory.createEntryOrder(Order.OrderType.BUY,
+        Order entryOrder = TestOrdersFactory.createEntryOrder(Order.OrderType.BUY,
                 Decimal.valueOf("0.08"),
                 Decimal.valueOf("0.1"));
-        Order exitOrder = TestOrderFactory.createEntryOrder(Order.OrderType.SELL,
+        Order exitOrder = TestOrdersFactory.createEntryOrder(Order.OrderType.SELL,
                 Decimal.valueOf("0.16"),
                 Decimal.valueOf("0.1"));
 
@@ -122,7 +122,7 @@ public class TradeCalculatorTest {
 
     @Test
     public void grossLastPriceBuyDirectionGain() {
-        Order entryOrder = TestOrderFactory.createEntryOrder(Order.OrderType.BUY,
+        Order entryOrder = TestOrdersFactory.createEntryOrder(Order.OrderType.BUY,
                 Decimal.valueOf("0.08"),
                 Decimal.valueOf("0.1"));
 
@@ -131,10 +131,10 @@ public class TradeCalculatorTest {
 
     @Test
     public void grossSellDirectionGain() {
-        Order entryOrder = TestOrderFactory.createEntryOrder(Order.OrderType.SELL,
+        Order entryOrder = TestOrdersFactory.createEntryOrder(Order.OrderType.SELL,
                 Decimal.valueOf("0.08"),
                 Decimal.valueOf("0.1"));
-        Order exitOrder = TestOrderFactory.createEntryOrder(Order.OrderType.BUY,
+        Order exitOrder = TestOrdersFactory.createEntryOrder(Order.OrderType.BUY,
                 Decimal.valueOf("0.04"),
                 Decimal.valueOf("0.2"));
 
@@ -143,7 +143,7 @@ public class TradeCalculatorTest {
 
     @Test
     public void grossLastPriceSellDirectionGain() {
-        Order entryOrder = TestOrderFactory.createEntryOrder(Order.OrderType.SELL,
+        Order entryOrder = TestOrdersFactory.createEntryOrder(Order.OrderType.SELL,
                 Decimal.valueOf("0.08"),
                 Decimal.valueOf("0.1"));
 
@@ -152,7 +152,7 @@ public class TradeCalculatorTest {
 
     @Test
     public void expectedBuyDirectionProfit() {
-        Order entryOrder = TestOrderFactory.createEntryOrder(Order.OrderType.BUY,
+        Order entryOrder = TestOrdersFactory.createEntryOrder(Order.OrderType.BUY,
                 Decimal.valueOf("0.02"),
                 Decimal.valueOf("0.1"));
 
@@ -162,7 +162,7 @@ public class TradeCalculatorTest {
 
     @Test
     public void expectedSellDirectionProfit() {
-        Order entryOrder = TestOrderFactory.createEntryOrder(Order.OrderType.SELL,
+        Order entryOrder = TestOrdersFactory.createEntryOrder(Order.OrderType.SELL,
                 Decimal.valueOf("0.08"),
                 Decimal.valueOf("0.1"));
 
@@ -172,7 +172,7 @@ public class TradeCalculatorTest {
 
     @Test
     public void canExitSellDirection() {
-        Order entryOrder = TestOrderFactory.createEntryOrder(Order.OrderType.SELL,
+        Order entryOrder = TestOrdersFactory.createEntryOrder(Order.OrderType.SELL,
                 Decimal.valueOf("0.08"),
                 Decimal.valueOf("0.1"));
         assertFalse(TradeCalculator.canExit(entryOrder, BigDecimal.valueOf(0.09)));
@@ -183,7 +183,7 @@ public class TradeCalculatorTest {
 
     @Test
     public void canExitBuyDirection() {
-        Order entryOrder = TestOrderFactory.createEntryOrder(Order.OrderType.BUY,
+        Order entryOrder = TestOrdersFactory.createEntryOrder(Order.OrderType.BUY,
                 Decimal.valueOf("0.08"),
                 Decimal.valueOf("0.1"));
         assertFalse(TradeCalculator.canExit(entryOrder, BigDecimal.valueOf(0.07)));

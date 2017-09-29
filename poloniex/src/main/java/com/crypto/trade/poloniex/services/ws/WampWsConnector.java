@@ -56,22 +56,20 @@ public class WampWsConnector implements WsConnector {
                         .subscribe(s -> {
                             ZonedDateTime time = ZonedDateTime.now(ZoneOffset.UTC);
                             if (s.arguments().get(0).asText().equals(CurrencyPair.BTC_ETH.name())) {
-                                //tradesExecutor.submit(() -> {
-                                    try {
-                                        String pair = s.arguments().get(0).asText();
-                                        if (pair.equals(CurrencyPair.BTC_ETH.name())) {
-                                            log.debug("BTC_ETH ({}): {} args {}", counter.addAndGet(1), time.toLocalTime(), s.arguments().toString());
-                                        }
-                                        PoloniexTrade trade = new PoloniexTrade(0L,
-                                                time,
-                                                pair,
-                                                s.arguments().get(1).asText(),
-                                                "", "");
-                                        tradesStorage.addTrade(CurrencyPair.BTC_ETH, trade);
-                                    } catch (RuntimeException ex) {
-                                        log.error("fsdfs", ex);
+                                try {
+                                    String pair = s.arguments().get(0).asText();
+                                    if (pair.equals(CurrencyPair.BTC_ETH.name())) {
+                                        log.debug("BTC_ETH ({}): {} args {}", counter.addAndGet(1), time.toLocalTime(), s.arguments().toString());
                                     }
-                                //});
+                                    PoloniexTrade trade = new PoloniexTrade(0L,
+                                            time,
+                                            pair,
+                                            s.arguments().get(1).asText(),
+                                            "", "");
+                                    tradesStorage.addTrade(CurrencyPair.BTC_ETH, trade);
+                                } catch (RuntimeException ex) {
+                                    log.error("fsdfs", ex);
+                                }
                             }
                         }, th -> log.error("Failed to subscribe on 'ticker' ", th));
 

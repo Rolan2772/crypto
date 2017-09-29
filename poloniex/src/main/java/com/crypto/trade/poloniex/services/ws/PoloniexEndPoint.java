@@ -37,26 +37,24 @@ public class PoloniexEndPoint {
     public void onMessage(String message) {
         if (message.startsWith("[148") && message.contains("[\"t\"")) {
 
-            //tradesExecutor.submit(() -> {
-                log.info(message);
-                try {
-                    String[] split = message.split("\"t\"");
-                    for (int i = 1; i < split.length; i++) {
-                        String[] trade = split[i].split(",");
-                        BigDecimal rate = parseRate(trade);
-                        LocalDateTime timestamp = parseTimeStamp(trade);
+            log.info(message);
+            try {
+                String[] split = message.split("\"t\"");
+                for (int i = 1; i < split.length; i++) {
+                    String[] trade = split[i].split(",");
+                    BigDecimal rate = parseRate(trade);
+                    LocalDateTime timestamp = parseTimeStamp(trade);
 
 
-                        Long tradeId = Long.valueOf(trade[1].replace("\"", ""));
-                        String type = "1".equals(trade[2]) ? "buy" : "sell";
-                        PoloniexTrade pTrade = new PoloniexTrade(tradeId, ZonedDateTime.of(timestamp, ZoneOffset.UTC), trade[4].replace("\"", ""), trade[3].replace("\"", ""), "0", type);
-                        tradesStorage.addTrade(CurrencyPair.BTC_ETH, pTrade);
+                    Long tradeId = Long.valueOf(trade[1].replace("\"", ""));
+                    String type = "1".equals(trade[2]) ? "buy" : "sell";
+                    PoloniexTrade pTrade = new PoloniexTrade(tradeId, ZonedDateTime.of(timestamp, ZoneOffset.UTC), trade[4].replace("\"", ""), trade[3].replace("\"", ""), "0", type);
+                    tradesStorage.addTrade(CurrencyPair.BTC_ETH, pTrade);
 
-                    }
-                } catch (Exception ex) {
-                    log.error("Failed to process message: " + message, ex);
                 }
-            //});
+            } catch (Exception ex) {
+                log.error("Failed to process message: " + message, ex);
+            }
         }
     }
 

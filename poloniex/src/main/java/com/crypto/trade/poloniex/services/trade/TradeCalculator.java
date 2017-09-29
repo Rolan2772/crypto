@@ -10,7 +10,7 @@ import java.util.List;
 
 @Slf4j
 public class TradeCalculator {
-
+    
     public static boolean canExit(Order entryOrder, BigDecimal exitPrice) {
         BigDecimal expectedProfit = getExpectedProfit(entryOrder, exitPrice);
         log.info("Expected profit: {}, minimum profit: {}", expectedProfit, CalculationsUtils.MIN_PROFIT_PERCENT);

@@ -15,6 +15,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class AnalyticsStorage {
 
@@ -44,7 +45,7 @@ public class AnalyticsStorage {
                                                          IndicatorType type) {
         IndicatorsStorage storage = cache.get(currencyPair).get(timeFrame);
         List<Tick> candles = candlesStorage.getData1(currencyPair).get(timeFrame).getCandles();
-        IndicatorSupplier<T> factory = new IndicatorSupplier<>(type, candles);
+        Supplier<T> factory = () -> IndicatorFactory.createIndicator(type, candles, storage);
         return storage.getIndicator(type, factory);
     }
 

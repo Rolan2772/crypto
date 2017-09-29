@@ -64,7 +64,6 @@ public class TyrusWsConnector implements WsConnector {
                         log.error("Reconnection attempt was interrupted.", e);
                     }
                 },
-                //new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1)),
                 TimeUnit.MINUTES.toMillis(5));
     }
 
@@ -76,5 +75,6 @@ public class TyrusWsConnector implements WsConnector {
 
     @Override
     public void closeConnection() {
+        log.debug("Closing connection");
     }
 }

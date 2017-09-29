@@ -2,16 +2,16 @@ package com.crypto.trade.poloniex.storage.analytics;
 
 public enum IndicatorType {
 
-    EMA5,
-    EMA90,
-    EMA540,
-    EMA_EMA90,
-    EMA_EMA_EMA90,
-    EMA100,
-    DMA90,
-    TMA90,
+    CLOSED_PRICE,
     RSI14,
     STOCHK14,
     STOCHD3,
-    CLOSED_PRICE
+    EMA5,
+    EMA90,
+    EMA100,
+    EMA540,
+    EMA_EMA90,
+    DMA90,
+    EMA_EMA_EMA90,
+    TMA90
 }

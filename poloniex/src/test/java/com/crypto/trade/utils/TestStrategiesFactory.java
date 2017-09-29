@@ -5,7 +5,7 @@ import eu.verdelhan.ta4j.Rule;
 import eu.verdelhan.ta4j.Strategy;
 import eu.verdelhan.ta4j.trading.rules.BooleanRule;
 
-public class TestStrategyFactory {
+public class TestStrategiesFactory {
 
     public static Strategy createEntryStrategy() {
         return createBooleanStrategy(true, false);

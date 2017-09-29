@@ -5,7 +5,6 @@ import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import com.crypto.trade.poloniex.storage.TradesStorage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.socket.*;
 
@@ -21,8 +20,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class WsConnectionHandler implements WebSocketHandler {
 
-    @Autowired
-    private ThreadPoolTaskExecutor tradesExecutor;
     @Autowired
     private TradesStorage tradesStorage;
     @Autowired
@@ -52,25 +49,23 @@ public class WsConnectionHandler implements WebSocketHandler {
         String message = webSocketMessage.getPayload().toString();
         if (message.startsWith("[148") && message.contains("[\"t\"")) {
 
-            //tradesExecutor.submit(() -> {
-                log.info(message);
-                try {
-                    String[] split = message.split("\"t\"");
-                    for (int i = 1; i < split.length; i++) {
-                        String[] trade = split[i].split(",");
-                        BigDecimal rate = parseRate(trade);
-                        LocalDateTime timestamp = parseTimeStamp(trade);
+            log.info(message);
+            try {
+                String[] split = message.split("\"t\"");
+                for (int i = 1; i < split.length; i++) {
+                    String[] trade = split[i].split(",");
+                    BigDecimal rate = parseRate(trade);
+                    LocalDateTime timestamp = parseTimeStamp(trade);
 
 
-                        Long tradeId = Long.valueOf(trade[1].replace("\"", ""));
-                        String type = "1".equals(trade[2]) ? "buy" : "sell";
-                        PoloniexTrade pTrade = new PoloniexTrade(tradeId, ZonedDateTime.of(timestamp, ZoneOffset.UTC), trade[4].replace("\"", ""), trade[3].replace("\"", ""), "0", type);
-                        tradesStorage.addTrade(CurrencyPair.BTC_ETH, pTrade);
-                    }
-                } catch (Exception ex) {
-                    log.error("dfgsd", ex);
+                    Long tradeId = Long.valueOf(trade[1].replace("\"", ""));
+                    String type = "1".equals(trade[2]) ? "buy" : "sell";
+                    PoloniexTrade pTrade = new PoloniexTrade(tradeId, ZonedDateTime.of(timestamp, ZoneOffset.UTC), trade[4].replace("\"", ""), trade[3].replace("\"", ""), "0", type);
+                    tradesStorage.addTrade(CurrencyPair.BTC_ETH, pTrade);
                 }
-            //});
+            } catch (Exception ex) {
+                log.error("dfgsd", ex);
+            }
         }
     }
 

@@ -15,7 +15,7 @@ import eu.verdelhan.ta4j.trading.rules.CrossedDownIndicatorRule;
 import eu.verdelhan.ta4j.trading.rules.CrossedUpIndicatorRule;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class TripleEmaStrategyFactory {
+public class TmaStrategyFactory {
 
     @Autowired
     private AnalyticsHelper analyticsHelper;
@@ -37,7 +37,7 @@ public class TripleEmaStrategyFactory {
         return strategy;
     }
 
-    public Strategy createFallingTripleEmaStrategy(CurrencyPair currencyPair, TimeFrame timeFrame) {
+    public Strategy createFallingTmaStrategy(CurrencyPair currencyPair, TimeFrame timeFrame) {
         TripleEmaAnalytics analytics = analyticsHelper.getTripleEmaAnalytics(currencyPair, timeFrame);
 
         Rule entryRule = new LowerRule(analytics.getTma90(), analytics.getDma90())
@@ -54,7 +54,7 @@ public class TripleEmaStrategyFactory {
         return strategy;
     }
 
-    public Strategy createRisingTripleEmaStrategy2(CurrencyPair currencyPair, TimeFrame timeFrame) {
+    public Strategy createRisingTmaStrategy2(CurrencyPair currencyPair, TimeFrame timeFrame) {
         TripleEmaAnalytics analytics = analyticsHelper.getTripleEmaAnalytics(currencyPair, timeFrame);
 
         Rule entryRule = new UpperRule(analytics.getTma90(), analytics.getEma90())

@@ -39,8 +39,8 @@ public enum TimeFrame {
 
     private String displayName;
     private Long duration;
-    private TemporalUnit timeUnit;
-    private ChronoField timeField;
+    private transient TemporalUnit timeUnit;
+    private transient ChronoField timeField;
 
     TimeFrame(String displayName, Long duration, TemporalUnit timeUnit, ChronoField timeField) {
         this.displayName = displayName;

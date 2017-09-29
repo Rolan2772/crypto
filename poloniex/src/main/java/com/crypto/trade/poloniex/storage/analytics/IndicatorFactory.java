@@ -2,58 +2,64 @@ package com.crypto.trade.poloniex.storage.analytics;
 
 import com.crypto.trade.poloniex.services.analytics.indicators.CachedDoubleEMAIndicator;
 import com.crypto.trade.poloniex.services.analytics.indicators.CachedTripleEMAIndicator;
-import eu.verdelhan.ta4j.Decimal;
-import eu.verdelhan.ta4j.Indicator;
-import eu.verdelhan.ta4j.TimeSeries;
+import eu.verdelhan.ta4j.*;
 import eu.verdelhan.ta4j.indicators.EMAIndicator;
 import eu.verdelhan.ta4j.indicators.RSIIndicator;
 import eu.verdelhan.ta4j.indicators.StochasticOscillatorDIndicator;
 import eu.verdelhan.ta4j.indicators.StochasticOscillatorKIndicator;
 import eu.verdelhan.ta4j.indicators.helpers.ClosePriceIndicator;
 
+import java.util.List;
+import java.util.function.Supplier;
+
+import static com.crypto.trade.poloniex.storage.analytics.IndicatorType.*;
+
 public class IndicatorFactory {
 
-    public RSIIndicator createRsi14Indicator(ClosePriceIndicator closePrice) {
-        return new RSIIndicator(closePrice, 14);
+    @SuppressWarnings("unchecked")
+    public static <T extends Indicator<Decimal>> T createIndicator(IndicatorType indicatorType, List<Tick> candles, IndicatorsStorage storage) {
+        TimeSeries timeSeries = new BaseTimeSeries(candles);
+        switch (indicatorType) {
+            case CLOSED_PRICE:
+                return (T) new ClosePriceIndicator(timeSeries);
+            case RSI14:
+                return (T) new RSIIndicator(getClosePriceIndicator(candles, storage), 14);
+            case STOCHK14:
+                return (T) new StochasticOscillatorKIndicator(timeSeries, 14);
+            case STOCHD3:
+                return (T) new StochasticOscillatorDIndicator(storage.getIndicator(STOCHK14, createSupplier(STOCHK14, candles, storage)));
+            case EMA5:
+                return (T) new EMAIndicator(getClosePriceIndicator(candles, storage), 5);
+            case EMA90:
+                return (T) new EMAIndicator(getClosePriceIndicator(candles, storage), 90);
+            case EMA100:
+                return (T) new EMAIndicator(getClosePriceIndicator(candles, storage), 100);
+            case EMA540:
+                return (T) new EMAIndicator(getClosePriceIndicator(candles, storage), 540);
+            case EMA_EMA90:
+                return (T) new EMAIndicator(storage.getIndicator(EMA90, createSupplier(EMA90, candles, storage)), 90);
+            case DMA90:
+                return (T) new CachedDoubleEMAIndicator(getClosePriceIndicator(candles, storage),
+                        storage.getIndicator(EMA90, createSupplier(EMA90, candles, storage)),
+                        storage.getIndicator(EMA_EMA90, createSupplier(EMA_EMA90, candles, storage)));
+            case EMA_EMA_EMA90:
+                return (T) new EMAIndicator(storage.getIndicator(EMA_EMA90, createSupplier(EMA_EMA90, candles, storage)), 90);
+            case TMA90:
+                return (T) new CachedTripleEMAIndicator(getClosePriceIndicator(candles, storage),
+                        storage.getIndicator(EMA90, createSupplier(EMA90, candles, storage)),
+                        storage.getIndicator(EMA_EMA90, createSupplier(EMA_EMA90, candles, storage)),
+                        storage.getIndicator(EMA_EMA_EMA90, createSupplier(EMA_EMA_EMA90, candles, storage)));
+            default:
+                throw new IllegalArgumentException("Wrong indicator type: " + indicatorType);
+        }
     }
 
-    public StochasticOscillatorKIndicator createStochK14(TimeSeries timeSeries) {
-        return new StochasticOscillatorKIndicator(timeSeries, 14);
+    public static <T> Supplier<T> createSupplier(IndicatorType type, List<Tick> candles, IndicatorsStorage storage) {
+        return () -> IndicatorFactory.createIndicator(type, candles, storage);
     }
 
-    public StochasticOscillatorDIndicator createStochD3(StochasticOscillatorKIndicator stochK14) {
-        return new StochasticOscillatorDIndicator(stochK14);
-    }
-
-    public EMAIndicator createEma5Indicator(ClosePriceIndicator closePrice) {
-        return new EMAIndicator(closePrice, 5);
-    }
-
-    public EMAIndicator createEma90Indicator(ClosePriceIndicator closePrice) {
-        return new EMAIndicator(closePrice, 90);
-    }
-
-    public EMAIndicator createEma540Indicator(ClosePriceIndicator closePrice) {
-        return new EMAIndicator(closePrice, 540);
-    }
-
-    public EMAIndicator createEma100Indicator(ClosePriceIndicator closePrice) {
-        return new EMAIndicator(closePrice, 100);
-    }
-
-    public EMAIndicator createEmaEma90Indicator(EMAIndicator ema) {
-        return new EMAIndicator(ema, 90);
-    }
-
-    public Indicator<Decimal> createEmaEmaEma90Indicator(EMAIndicator emaEma) {
-        return new EMAIndicator(emaEma, 90);
-    }
-
-    public CachedDoubleEMAIndicator createDma90Indicator(ClosePriceIndicator closePrice, EMAIndicator ema, EMAIndicator emaEma) {
-        return new CachedDoubleEMAIndicator(closePrice, ema, emaEma);
-    }
-
-    public CachedTripleEMAIndicator createTma90Indicator(ClosePriceIndicator closePrice, EMAIndicator ema, EMAIndicator emaEma, EMAIndicator emaEmaEma) {
-        return new CachedTripleEMAIndicator(closePrice, ema, emaEma, emaEmaEma);
+    private static ClosePriceIndicator getClosePriceIndicator(List<Tick> candles, IndicatorsStorage storage) {
+        return storage.getIndicator(IndicatorType.CLOSED_PRICE,
+                () -> IndicatorFactory.createIndicator(IndicatorType.CLOSED_PRICE, candles, storage));
     }
 }

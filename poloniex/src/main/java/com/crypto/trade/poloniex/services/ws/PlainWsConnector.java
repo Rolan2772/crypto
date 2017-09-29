@@ -33,6 +33,7 @@ public class PlainWsConnector implements WsConnector {
                     try {
                         reconnect();
                     } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
                         log.error("Reconnection attempt was interrupted.", e);
                     }
                 }, new Date(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1)),

@@ -11,7 +11,6 @@ public class ExecutorsConfig {
     @Bean
     public ThreadPoolTaskExecutor strategyExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        // @TODO: pool should be smaller, how ever core pull size of 10 threads leads to race conditions
         executor.setCorePoolSize(25);
         executor.setMaxPoolSize(25);
         return executor;

@@ -100,7 +100,6 @@ public class CandlesStorage {
                 timeFrameStorage.getUpdateLock().lock();
                 try {
                     TimeFrame timeFrame = timeFrameStorage.getTimeFrame();
-                    // @TODO: add history without candles recreation
                     log.info("Clearing {} candles with history for {}", timeFrame, currency);
                     timeFrameStorage.getCandles().clear();
                     log.info("Updating candles with history for {}", currency);

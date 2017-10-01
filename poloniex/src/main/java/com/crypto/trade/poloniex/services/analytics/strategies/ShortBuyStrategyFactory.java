@@ -15,10 +15,6 @@ import eu.verdelhan.ta4j.trading.rules.OverIndicatorRule;
 import eu.verdelhan.ta4j.trading.rules.UnderIndicatorRule;
 import org.springframework.beans.factory.annotation.Autowired;
 
-// TODO: add ema 90 up on 1hour candles
-// EMA90 angle should be as big as possible || em60 should be distant from ema 90 1hour
-// One more Gaussian waves
-// one more Pivot indicator
 public class ShortBuyStrategyFactory {
 
     @Autowired

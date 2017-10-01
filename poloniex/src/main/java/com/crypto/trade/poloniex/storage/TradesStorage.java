@@ -55,7 +55,6 @@ public class TradesStorage {
     }
 
     public BigDecimal getLastTrade(CurrencyPair currencyPair) {
-        // @TODO: NoSuchElementException
         String lastTrade = trades.getOrDefault(currencyPair, new TreeSet<>()).last().getRate();
         return new BigDecimal(lastTrade);
     }

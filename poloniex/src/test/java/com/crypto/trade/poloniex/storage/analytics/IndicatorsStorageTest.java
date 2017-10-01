@@ -10,7 +10,6 @@ import java.util.stream.IntStream;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
-import static junit.framework.TestCase.assertTrue;
 
 public class IndicatorsStorageTest {
 
@@ -23,7 +22,7 @@ public class IndicatorsStorageTest {
         EMAIndicator created = storage.getIndicator(type, IndicatorFactory.createSupplier(type, candles, storage));
         EMAIndicator cached = storage.getIndicator(type, IndicatorFactory.createSupplier(type, candles, storage));
 
-        assertTrue(created == cached);
+        assertEquals(created, cached);
     }
 
     @Test

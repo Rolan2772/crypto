@@ -59,7 +59,7 @@ public class IndicatorFactory {
     }
 
     private static ClosePriceIndicator getClosePriceIndicator(List<Tick> candles, IndicatorsStorage storage) {
-        return storage.getIndicator(IndicatorType.CLOSED_PRICE,
-                () -> IndicatorFactory.createIndicator(IndicatorType.CLOSED_PRICE, candles, storage));
+        return storage.getIndicator(CLOSED_PRICE,
+                () -> IndicatorFactory.createIndicator(CLOSED_PRICE, candles, storage));
     }
 }

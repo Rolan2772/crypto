@@ -1,5 +1,24 @@
-- reload orders on startup
+
+
 - clear candles
-- sell strategy
+- reload orders on startup
 - multiple currencies
-- use stochD as on trading view
+
+ExecutorsConfig
+ - pool should be smaller, how ever core pull size of 10 threads leads to race conditions
+Strategies
+ - add ema 90 up on 1hour candles
+ - EMA90 angle should be as big as possible || em60 should be distant from ema 90 1hour
+ - Gaussian waves
+ - Pivot indicator
+CalculationsUtils
+ - Both BUY/SELL can have 0.15% - 0.25% fee
+CandlesStorage
+ - add history without candles recreation
+NewCandleSupplier
+ - check missed candles and indicators when no ticks
+ - {"error":"Unable to fill order completely."} with 20 trading records cause big delay (a lot of new candles olready been created)
+ - try lock can be used instead of set processing
+TradesStorage
+ - getLastTrade NoSuchElementException
+

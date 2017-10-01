@@ -42,7 +42,7 @@ public class ExperimentalTradeConfigFactory {
     @Autowired
     private TmaStrategyFactory tmaFactory;
 
-    private PoloniexTradingRecord createTradingRecordWithOrders(int id, String shortBuyName, List<ExportedPoloniexOrder> exportedOrders) {
+    public PoloniexTradingRecord createTradingRecordWithOrders(int id, String shortBuyName, List<ExportedPoloniexOrder> exportedOrders) {
         PoloniexTradingRecord poloniexTradingRecord = new PoloniexTradingRecord(id, shortBuyName, BUY);
         TradingRecord tradingRecord = poloniexTradingRecord.getTradingRecord();
         exportedOrders.forEach(exportedOrder -> {

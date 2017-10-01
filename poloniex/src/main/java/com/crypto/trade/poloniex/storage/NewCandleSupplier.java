@@ -48,7 +48,6 @@ public class NewCandleSupplier implements Supplier<Tick> {
             trade(timeFrameStorage, lastIndex);
         }
 
-        // @TODO: check missed candles and indicators when no ticks
         Tick newCandle = new BaseTick(timeFrame.getFrameDuration(), timeFrame.calculateEndTime(tradeTime));
         candles.add(newCandle);
         log.info("New {} {} candle {} - {} with index {} has been created.", currency, timeFrame, newCandle.getBeginTime().toLocalDateTime(), newCandle.getEndTime().toLocalDateTime(), candles.size() - 1);
@@ -79,7 +78,6 @@ public class NewCandleSupplier implements Supplier<Tick> {
             log.debug("Executing strategy '{}' on time series {}", poloniexStrategy.getName(), timeFrame);
             List<PoloniexTradingRecord> tradingRecords = poloniexStrategy.getTradingRecords();
             boolean onceEntered = false;
-            // @TODO: {"error":"Unable to fill order completely."} with 20 trading records cause big delay (a lot of new candles olready been created)
             for (int trIndex = 0; trIndex < tradingRecords.size(); trIndex++) {
                 PoloniexTradingRecord poloniexTradingRecord = tradingRecords.get(trIndex);
                 TradingRecord tradingRecord = poloniexTradingRecord.getTradingRecord();
@@ -93,7 +91,6 @@ public class NewCandleSupplier implements Supplier<Tick> {
                 log.debug("Strategy {}/{} trading record {} analytics result {}, processing: {}.", timeFrame, poloniexStrategy.getName(), trIndex, action, poloniexTradingRecord.getProcessing().get());
                 if (TradingAction.shouldPlaceOrder(action)) {
                     try {
-                        // @TODO: try lock can be used instead of set processing
                         boolean canTrade = (TradingAction.SHOULD_ENTER != action || !onceEntered) && poloniexTradingRecord.getProcessing().compareAndSet(false, true);
                         log.debug("Strategy '{}' canTrade: {}, onceEntered: {}, processing: {}", poloniexStrategy.getName(), canTrade, onceEntered, poloniexTradingRecord.getProcessing().get());
                         Optional<PoloniexOrder> resultOrder = Optional.empty();

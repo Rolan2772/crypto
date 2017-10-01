@@ -6,9 +6,8 @@ import java.math.BigDecimal;
 
 public class CalculationsUtils {
 
-    // @TODO: Both BUY/SELL can have 0.25% fee
     public static final BigDecimal FEE_PERCENT = new BigDecimal("0.0025");
-    // Value shouldn't be less than maximum fee buy 0,0025 + sell 0,0025
+    // Value shouldn't be less than maximum fee: buy 0,0025 + sell 0,0025
     public static final BigDecimal MIN_PROFIT_PERCENT = new BigDecimal("1.01");
 
     private static final int CRYPTO_SCALE = 8;

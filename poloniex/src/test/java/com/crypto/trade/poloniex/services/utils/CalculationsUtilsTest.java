@@ -6,6 +6,7 @@ import org.junit.Test;
 import java.math.BigDecimal;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 public class CalculationsUtilsTest {
 
@@ -23,9 +24,12 @@ public class CalculationsUtilsTest {
 
     @Test
     public void toBigDecimal() {
-        // @TODO: Decimal uses new BigDecimal(double, mathContext)
-        //assertEquals(BigDecimal.valueOf(0.5555),CalculationsUtils.toBigDecimal(Decimal.valueOf(0.5555)));
         assertEquals(new BigDecimal("0.3333"), CalculationsUtils.toBigDecimal(Decimal.valueOf("0.3333")));
+    }
+
+    @Test
+    public void wrongDecimalConstruction() {
+        assertNotEquals(BigDecimal.valueOf(0.5555), CalculationsUtils.toBigDecimal(Decimal.valueOf(0.5555)));
     }
 
     public void toDecimal() {

@@ -26,9 +26,4 @@ public class TradeApiController {
                         ordersExportService.convert(timeFrameStorage).toString())
                 .collect(Collectors.joining("\n\n"));
     }
-
-    @GetMapping("/loadOrders")
-    public void loadOrders(@RequestParam String fileName) {
-        // @TODO: load previous execution orders
-    }
 }

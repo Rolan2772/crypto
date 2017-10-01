@@ -21,6 +21,8 @@ import java.time.*;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import static com.crypto.trade.poloniex.services.trade.PoloniexRequestConstants.CURRENCY_PAIR;
+
 @Slf4j
 @Service
 public class CopyTradesHistoryService implements HistoryService {
@@ -52,7 +54,7 @@ public class CopyTradesHistoryService implements HistoryService {
         log.info("Loading trades history from {} to {}", ZonedDateTime.ofInstant(from, ZoneOffset.UTC).toLocalDateTime(), ZonedDateTime.ofInstant(now, ZoneOffset.UTC).toLocalDateTime());
         while (from.compareTo(now) < 0) {
             Map<String, Object> parameters = new HashMap<>();
-            parameters.put("currencyPair", currencyPair);
+            parameters.put(CURRENCY_PAIR, currencyPair);
             parameters.put("startTime", from.getEpochSecond());
             Instant to = from.plus(MAXIMUM_PER_REQUEST).minusSeconds(1);
             parameters.put("endTime", to.getEpochSecond());

@@ -11,6 +11,8 @@ import org.springframework.web.client.RestTemplate;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.crypto.trade.poloniex.services.trade.PoloniexRequestConstants.COMMAND;
+
 @Slf4j
 @Service
 public class AccountService {
@@ -24,7 +26,7 @@ public class AccountService {
 
     public AccountBalance requestBalance() {
         Map<String, Object> params = new HashMap<>();
-        params.put("command", "returnBalances");
+        params.put(COMMAND, "returnBalances");
         HttpEntity<String> requestEntity = requestHelper.createRequest(params);
 
         ResponseEntity<AccountBalance> response = restTemplate.postForEntity(poloniex.getApi().getTradingApi(), requestEntity, AccountBalance.class);

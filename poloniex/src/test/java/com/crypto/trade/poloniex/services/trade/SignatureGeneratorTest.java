@@ -16,7 +16,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(MockitoJUnitRunner.class)
 public class SignatureGeneratorTest {
 
-    private static final String SIGNATURE = "8662e56994002c90b60e98e1e8e5" +
+    public static final String SIGNATURE = "8662e56994002c90b60e98e1e8e5" +
             "5ec1acbcf049a330ab0b01080f52f6b16c4bd83eda3b7d" +
             "d50918a266ed3322e0191db4dcd288ecf3eac8d8692d73" +
             "e28824f5";

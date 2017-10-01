@@ -10,6 +10,8 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.crypto.trade.poloniex.services.trade.PoloniexRequestConstants.*;
+
 public class PoloniexRequestHelper {
 
     @Autowired
@@ -19,8 +21,8 @@ public class PoloniexRequestHelper {
 
     public String createRequestBody(Map<String, Object> params) {
         StringBuilder body = new StringBuilder();
-        params.computeIfAbsent("nonce", key -> Instant.now().toEpochMilli());
-        params.computeIfAbsent("method", key -> "GET");
+        params.computeIfAbsent(NONCE, key -> Instant.now().toEpochMilli());
+        params.computeIfAbsent(METHOD, key -> "GET");
         String paramsStr = params.entrySet()
                 .stream()
                 .map(e -> e.getKey() + "=" + e.getValue())
@@ -34,8 +36,8 @@ public class PoloniexRequestHelper {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        headers.set("Key", properties.getSecret().getKey());
-        headers.set("Sign", sign);
+        headers.set(KEY, properties.getSecret().getKey());
+        headers.set(SIGN, sign);
         return headers;
     }
 

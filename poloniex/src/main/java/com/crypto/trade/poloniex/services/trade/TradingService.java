@@ -5,8 +5,8 @@ import com.crypto.trade.poloniex.dto.PoloniexOrderResponse;
 import com.crypto.trade.poloniex.services.analytics.CurrencyPair;
 import com.crypto.trade.poloniex.services.analytics.TradingAction;
 import com.crypto.trade.poloniex.services.utils.CalculationsUtils;
-import com.crypto.trade.poloniex.storage.model.PoloniexOrder;
 import com.crypto.trade.poloniex.storage.TradesStorage;
+import com.crypto.trade.poloniex.storage.model.PoloniexOrder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.verdelhan.ta4j.Order;
 import eu.verdelhan.ta4j.TradingRecord;
@@ -22,6 +22,8 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import static com.crypto.trade.poloniex.services.trade.PoloniexRequestConstants.*;
 
 @Slf4j
 @Service
@@ -61,10 +63,10 @@ public class TradingService {
         String command = direction == Order.OrderType.BUY ? "buy" : "sell";
 
         Map<String, Object> params = new HashMap<>();
-        params.put("command", command);
-        params.put("currencyPair", CurrencyPair.BTC_ETH);
-        params.put("rate", rate);
-        params.put("amount", entryAmount);
+        params.put(COMMAND, command);
+        params.put(CURRENCY_PAIR, CurrencyPair.BTC_ETH);
+        params.put(RATE, rate);
+        params.put(AMOUNT, entryAmount);
         if (real) {
             params.put("fillOrKill", 1);
         }
@@ -112,10 +114,10 @@ public class TradingService {
             String command = entryOrder.getType() == Order.OrderType.BUY ? "sell" : "buy";
 
             Map<String, Object> params = new HashMap<>();
-            params.put("command", command);
-            params.put("currencyPair", CurrencyPair.BTC_ETH);
-            params.put("rate", rate);
-            params.put("amount", exitAmount);
+            params.put(COMMAND, command);
+            params.put(CURRENCY_PAIR, CurrencyPair.BTC_ETH);
+            params.put(RATE, rate);
+            params.put(AMOUNT, exitAmount);
             if (real) {
                 params.put("fillOrKill", 1);
             }
@@ -155,7 +157,7 @@ public class TradingService {
         String result = "empty";
 
         Map<String, Object> params = new HashMap<>();
-        params.put("command", "cancelOrder");
+        params.put(COMMAND, "cancelOrder");
         params.put("orderNumber", poloniexOrder.getOrderId());
         HttpEntity<String> requestEntity = requestHelper.createRequest(params);
 
